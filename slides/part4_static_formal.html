@@ -1,0 +1,1373 @@
+<title>Static and Formal — Lecture Deck, Part IV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Part IV -- Static and Formal (Chapters 13-16).
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid -- table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+  pre.mini  { font-size: 10.5px; line-height: 1.36; padding: 7px 9px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  /* table-layout:fixed is load-bearing here, and Part IV needs it where the
+     earlier decks did not. Several slides nest a full width:100% table inside a
+     column cell; without fixed layout that nested table's natural minimum width
+     inflates its parent column, squeezes the sibling to a ribbon and pushes the
+     slide onto a second page. Fixed layout pins the columns to the declared
+     widths and lets the nested table resolve 100% against a known cell. */
+  table.cols, table.cols3 { width: 100%; table-layout: fixed; }
+  /* border-box is required once the layout is fixed: with content-box the
+     gutter is ADDED outside the declared percentage, so the columns together
+     ask for more than the table has. */
+  table.cols td { border: none; padding: 0 16px 0 0; box-sizing: border-box; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; font-size: 13.5px; box-sizing: border-box; }
+  /* Set the default width on the FIRST cell only, never on every cell. Most slides here
+     override the first column inline (40%-57%); under fixed layout a per-cell default of
+     50% would then be ADDED to a 57% first column, running the second column 7% past the
+     slide edge and clipping its text. Fixed layout divides whatever is left among the
+     unsized columns, which is exactly the wanted behaviour. */
+  table.cols td:first-child { width: 50%; }
+  table.cols3 td:first-child { width: 33.3%; }
+  /* the last column has no neighbour to be separated from, and under border-box its
+     right gutter is subtracted from usable width rather than added outside it. Give
+     that width back -- the slide's own padding already holds the text off the edge. */
+  table.cols td:last-child, table.cols3 td:last-child { padding-right: 0; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* One density step beyond .dense, for the slides that carry a source line
+     on top of an already-full frame. Anchoring a claim to a named company costs
+     vertical space the layout had none of, and the alternative to a further step
+     is deleting the anchor — which is the one thing that must not happen, since
+     the source line is what makes the number checkable. Must follow .dense:
+     equal specificity, so source order decides. */
+  .denser h2  { margin-bottom: 6px; }
+  .denser h3  { margin: 5px 0 3px; font-size: 14px; }
+  .denser p   { margin-bottom: 4px; }
+  .denser li  { margin-bottom: 2px; font-size: 12.5px; line-height: 1.28; }
+  .denser td  { padding: 2px 7px 2px 0; font-size: 12px; }
+  .denser .ex { padding: 5px 9px; margin: 4px 0; font-size: 12px; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .pill.mid { background: #f6efdc; color: #8a6516; }
+  /* fourth verdict: the tool gave up. Deliberately colourless -- the whole
+     teaching point is that it is neither a pass nor a fail. */
+  .pill.und { background: #eceef1; color: #6b7686; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex.good { background: #eef7f1; border-left-color: #256b46; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .ex.good .tag { color: #256b46; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- block-diagram boxes (Part I / Part III lineage) ---- */
+  table.diag { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  table.diag td { padding: 0 3px; border: none; vertical-align: middle; }
+  .db {
+    text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.22;
+    border: 1.5px solid #2c4f8c; border-radius: 4px; padding: 7px 5px; background: #eef2f9;
+  }
+  .db .s { display: block; font-weight: 400; font-size: 10.5px; color: #566174; font-style: italic; margin-top: 2px; }
+  .db.bus { background: #2c4f8c; color: #ffffff; font-size: 13px; padding: 9px 6px; }
+  .db.bus .s { color: #c6d5ec; font-style: normal; }
+  .db.obs { background: #f7f9fc; border-style: dashed; border-color: #98a3b3; color: #566174; }
+  .db.chk { background: #e2f2e9; border-color: #256b46; }
+  tr.stem td { padding: 0; }
+  tr.stem i { display: block; width: 0; height: 11px; border-left: 2px solid #2c4f8c; margin: 0 auto; }
+  tr.stem i.dash { border-left-style: dashed; border-left-color: #98a3b3; }
+
+  /* ---- chain: question -> engine -> answer ---- */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; font-style: italic; }
+  .cbox.out { background: #e2f2e9; border-color: #256b46; }
+  .cbox.no  { background: #fbf3f1; border-color: #9c3a2a; }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+
+  /* ---- layered stack: one artifact, three directives ---- */
+  table.stack { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 3px; }
+  table.stack td { border: none; padding: 0; }
+  .layer {
+    border: 1.5px solid #2c4f8c; background: #eef2f9; margin-bottom: 4px;
+    padding: 7px 13px; font-size: 14px; font-weight: 600; border-radius: 3px;
+  }
+  .layer .d { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; }
+  .layer.top { background: #2c4f8c; color: #ffffff; }
+  .layer.top .d { color: #c6d5ec; }
+
+  /* ---- nested regions: all traces / real environment / constrained model ---- */
+  .nest {
+    border: 1.5px solid #98a3b3; background: #f7f9fc; padding: 10px 12px 12px;
+    border-radius: 4px; font-size: 12.5px; color: #566174;
+  }
+  .nest .lab {
+    font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; display: block; margin-bottom: 5px; font-weight: 600;
+  }
+  .nest.n2 { border-color: #2c4f8c; background: #eef2f9; color: #2c4f8c; }
+  .nest.n3 { border-color: #9c3a2a; background: #fbf3f1; color: #9c3a2a; margin-bottom: 0; }
+
+  /* ---- the convergence ladder (Part I .rung lineage, generalised to N steps:
+     the indent is set inline per rung so one class serves eight steps) ---- */
+  .rung {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 4px 11px; margin: 0 0 4px; font-size: 12.5px; line-height: 1.28;
+  }
+  .rung .rl { font-weight: 700; color: #2c4f8c; font-family: "IBM Plex Mono", monospace; margin-right: 6px; }
+  .rung.q  { background: #ffffff; }
+  .rung.mod { background: #f6efdc; border-color: #8a6516; }
+  .rung.mod .rl { color: #8a6516; }
+  .rung.end { background: #e2f2e9; border-color: #256b46; }
+  .rung.end .rl { color: #256b46; }
+
+  /* ---- two-path reconvergence (Part I lineage): one text, two engines ---- */
+  .pbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #ffffff;
+    padding: 5px 8px; font-size: 12px; text-align: center; line-height: 1.2;
+  }
+  .pbox.spec { background: #2c4f8c; color: #ffffff; font-weight: 600; }
+  .pbox.interp { background: #f6efdc; border-color: #8a6516; }
+  .pbox.cmp { background: #e7edf7; font-weight: 600; border-radius: 999px; }
+  table.path { table-layout: fixed; border-collapse: collapse; margin: 0; width: 100%; }
+  table.path td { border: none; padding: 0 3px; vertical-align: middle; }
+  table.path td.ar { text-align: center; color: #2c4f8c; font-size: 13px; line-height: 1; padding: 3px; }
+
+  /* ---- funnel bars: what a gate admits ---- */
+  .bar {
+    border: 1px solid #2c4f8c; border-radius: 3px; padding: 5px 11px;
+    font-size: 12.5px; margin: 0 0 5px; background: #e7edf7; line-height: 1.25;
+  }
+  .bar .bl { font-weight: 600; }
+  .bar.s2 { background: #edf0f5; }
+  .bar.s3 { background: #f7ece8; border-color: #b9705f; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification &middot; A Holistic Guide &middot; Part IV</p>
+  <h1>Static and Formal</h1>
+  <p class="sub">Analysis that needs no stimulus and proof that needs no test &mdash; what each one establishes, where it is a product rather than a craft, and how it joins simulation into one campaign instead of two.</p>
+  <p class="src">Lecture companion to Chapters 13&ndash;16.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part IV &middot; The arc</p>
+  <h2>Four chapters, one change of question</h2>
+  <p class="lead">A simulator asks <em>did any run I performed break this rule?</em> A proof engine asks <em>can anything break this rule?</em></p>
+  <ul>
+    <li><strong>What a static gate buys</strong> before a testbench exists &mdash; total coverage of a structural question, total silence on functional ones.</li>
+    <li><strong>What &ldquo;proven&rdquo; means and what it never means.</strong> A proof is a statement about a model, under assumptions, sometimes to a depth. Drop the three qualifiers and you have a mood, not a claim.</li>
+    <li><strong>Why green is the dangerous colour.</strong> An over-constrained proof passes vacuously and looks exactly like a real one &mdash; and it leaves no artifact anywhere except the assumption text.</li>
+    <li><strong>Where formal is industrialised</strong>: apps that ship the properties, and equivalence checking, which has run on every project since long before property checking worked.</li>
+    <li><strong>How to assign a plan row to an engine</strong>, and report the result without inventing a denominator.</li>
+  </ul>
+  <p class="note"><b>Say</b>Part III built the instruments that run the design. Part IV is the half that never runs it at all.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- ============ 3. THE MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part IV &middot; The map</p>
+  <h2>Three engines that need no stimulus &mdash; and one chapter that spends them</h2>
+  <table class="diag">
+    <tr><td colspan="3"><div class="db bus">RTL that compiles<span class="s">no testbench, no seeds, no reference model &mdash; the expectations are built into the checker</span></div></td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db">Ch 13 &mdash; STRUCTURAL<span class="s">lint, CDC, RDC, X sources: is the <em>shape</em> right?</span></div></td>
+      <td><div class="db">Ch 14 &mdash; PROOF<span class="s">model checking: can <em>anything</em> break this rule?</span></div></td>
+      <td><div class="db">Ch 15 &mdash; PACKAGED<span class="s">apps ship the properties; equivalence compares two designs</span></div></td>
+    </tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr><td colspan="3"><div class="db chk">Ch 16 &mdash; ONE CAMPAIGN<span class="s">engines assigned per plan row, one notion of legal traffic, one report that claims exactly what was established</span></div></td></tr>
+  </table>
+  <table class="compact" style="margin-top:8px">
+    <tr><th style="width:17%">Engine</th><th style="width:29%">What it decides</th><th style="width:27%">What it is silent about</th><th>Where the engineering actually is</th></tr>
+    <tr><td><strong>Structural</strong></td><td>Whether a recognised structure stands where one is required</td><td>Everything the design computes</td><td>The setup file: clocks, resets, constants, gray codes</td></tr>
+    <tr><td><strong>Proof</strong></td><td>Whether any legal trace violates a stated rule</td><td>Anything outside the model, the assumptions or the bound</td><td>Assumptions, abstraction, convergence</td></tr>
+    <tr><td><strong>Packaged</strong></td><td>Design against a machine-readable intent &mdash; or against a second design</td><td>Whether the intent, or the reference, was right</td><td>Curating the intent source</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Notice what moves down the table: the effort never disappears, it relocates. That sentence is most of Chapter 15.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. DIVIDER CH13 ============ -->
+<section class="slide divider">
+  <p class="chno">13</p>
+  <h1>Static Verification</h1>
+  <p class="sub">Exhaustive over structure, silent about function &mdash; and a setup file where all the engineering actually lives.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- ============ 5. CH13 OPENING SCENARIO ============ -->
+<!-- src: ch13:3-9 (opening scenario); canonical bug: example_bank.md "Wake-cause CDC" -->
+<section class="slide">
+  <p class="kicker">Chapter 13 &middot; The opening scenario</p>
+  <h2>One board in forty hangs on wake-up. The regression is green.</h2>
+  <p class="small muted" style="margin-bottom:9px">The event unit encodes the wake reason in a <strong>three-bit cause code</strong>, produced on the <strong>32&nbsp;kHz</strong> always-on clock and consumed at <strong>200&nbsp;MHz</strong>. Sparse encoding &mdash; four legal codes across eight code points &mdash; each bit crossing through its own two-flop synchronizer. Three textbook synchronizers, and the linter has nothing to say about any of them.</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">What the board does</span>The code changes from <code>3'b010</code> (GPIO wake) to <code>3'b100</code> (comparator wake), so <strong>two bits change at once</strong> and each destination flop resolves independently. For one system cycle the destination observes <code>3'b110</code> &mdash; a reserved code the source never produced. The decoder has a branch for each legal cause and <em>none for the rest</em>, so it holds its previous decode; the wake sequencer latches the stale value and the handshake never completes.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Why simulation could not have shown it</span>The source flops change at one instant of simulated time, the destination samples one instant later, and what it samples is exactly what the source drove. <strong>Metastability is a behaviour of a flip-flop with real timing, not of RTL.</strong> Eleven thousand seeds, every wake path the plan enumerated, the scoreboard silent throughout &mdash; the design is correct at the level the simulation can see.</div>
+      <p class="small"><strong>The lab is no better:</strong> demonstrating this class needs a gate-level model with timing that does not exist yet at RTL sign-off, and the bugs are hard to reproduce once silicon arrives.</p>
+    </td>
+  </tr></table>
+  <p class="ex"><span class="tag">What would have found it, in seconds, before a testbench existed</span>A structural analysis that walks the elaborated design, finds every path leaving one clock domain and entering another, and asks whether a multi-bit crossing is protected against its bits resolving independently. <strong>No stimulus, no reference model, no seed.</strong></p>
+  <p class="note"><b>Say</b>Ask the room how many of their CDC reports were last read by someone still on the project.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- ============ 6. THE ENTRY GATE ============ -->
+<!-- src: ch13:21-27 (no stimulus/no expected output, spell checker), ch13:46-50 (setup, timing constraints, three clocks != three domains), ch13:52-54 + ch13:293 (gate contents / honest ordering), ch13:287-289 (decay, ownership) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 13 &middot; The entry gate</p>
+  <h2>No stimulus, no expected output &mdash; and no opinion about function</h2>
+  <table class="cols"><tr>
+    <td style="width:47%">
+      <p class="small">It analyses the <strong>design description itself</strong>. Chapter 3's two limits do not apply, because it has neither power: it drives nothing, so nothing is unreachable and no coverage question arises; it observes nothing, so nothing it reports is about what the design computes.</p>
+      <div class="ex"><span class="tag">Which is what earns it the front of the flow</span>It runs the first day RTL compiles, and it is <strong>deterministic</strong> &mdash; no seed, an identical report on unchanged source. That is what makes it usable as a per-commit gate, and as a sign-off row with its own audited waiver file.</div>
+      <div class="ex warn"><span class="tag">And the boundary, stated exactly</span>It finds problems deducible from code structure, never problems in the algorithm. <strong>A spell checker finds a misspelled word and will never notice you wrote <em>with</em> where you meant <em>width</em>.</strong></div>
+    </td>
+    <td>
+      <h3>The setup is the hard part</h3>
+      <p class="small">A structural CDC check is a <em>setup</em> followed by a button. Somebody must declare which clocks are asynchronous to which, which inputs are constant in this mode, which signals are pseudo-static, which buses are gray-coded.</p>
+      <div class="ex warn"><span class="tag">Do not point it at the timing constraints</span>A false path in <em>timing</em> means <em>do not schedule this</em>. A false path in <em>CDC</em> means <strong>there is no crossing here at all</strong> &mdash; a much stronger claim, and usually a wrong one.</div>
+      <p class="small"><strong>&ldquo;Three clocks&rdquo; is not &ldquo;three clock domains&rdquo;.</strong> Had the 50&nbsp;MHz peripheral clock been the system clock divided by four, the APB boundary would carry no crossing at all. It has its own source, so it does. <em>Nothing in the RTL distinguishes the two cases.</em></p>
+    </td>
+  </tr></table>
+  <table class="compact" style="margin-top:0">
+    <tr><td style="width:21%"><span class="pill ok">PER-COMMIT GATE</span></td><td>Elaboration with the production parameters &middot; lint at must-fix severity only &middot; structural CDC and RDC against a checked-in setup file &middot; nothing else</td></tr>
+    <tr><td><span class="pill mid">OUTSIDE IT</span></td><td>Protocol assertions and metastability injection nightly &middot; the formal X-propagation proof as a scoped campaign &mdash; never a gate</td></tr>
+  </table>
+  <p class="src">It decays through the setup, not the checks: six months on, &ldquo;the CDC report is clean&rdquo; means clean under assumptions last examined by someone who has left the project.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- ============ 7. LINT ============ -->
+<!-- src: ch13:58-62 (four families, casex), ch13:66-82 (wake_decode fragment, verbatim), ch13:86-90 (drowning, scale, inherited code), ch13:94-104 (three disciplines, GPU 11,000 delta gate) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 13 &middot; Lint</p>
+  <h2>From noise to policy &mdash; and a report several levels below the bug</h2>
+  <table class="cols"><tr>
+    <td style="width:46%">
+<pre class="mini">module wake_decode (
+  input  logic [2:0] cause,
+  output logic [1:0] branch
+);
+  always_comb begin
+    case (cause)          // sparse, no default
+      3'd0 : branch = 2'd0;  // no wake pending
+      3'd1 : branch = 2'd1;  // timer
+      3'd2 : branch = 2'd2;  // GPIO
+      3'd4 : branch = 2'd3;  // comparator
+    endcase
+  end
+endmodule</pre>
+      <div class="ex warn"><span class="tag">What the linter sees &mdash; and what it does not</span>Four of eight values are decoded; for the rest no assignment executes, so <code>branch</code> keeps what it held. The report reads <em>synthesis-intent mismatch, missing <code>default</code></em>. It does not know that <code>cause</code> crosses a clock boundary, or that <code>3'd6</code> is the transient the lab is hitting. <strong>Structural, correct, and several levels of abstraction below the bug.</strong></div>
+    </td>
+    <td>
+      <p class="small"><strong>Four families:</strong> synthesis-intent mismatches &mdash; the language itself asks tools to flag an <code>always_comb</code> that can infer a latch; width and type errors; connectivity; and <strong>constructs whose semantics differ from what the author meant</strong>. <code>casex</code> treats <code>x</code> and <code>z</code> as don't-care in the items <em>or</em> the expression, so a runtime unknown on the selector takes a branch nobody chose.</p>
+      <div class="ex warn"><span class="tag">Why teams drown &mdash; and it is not a tool defect</span>Lint errs on the side of caution, so engineers who chase non-existent problems for a week stop reading the output. <strong>Two multipliers:</strong> replication &mdash; four shader clusters report one shared construct once per instance, so <em>11,000 findings may be forty distinct constructs</em> &mdash; and inherited code, which is somebody else's signal, not noise.</div>
+      <div class="ex good"><span class="tag">Three disciplines, and only the first is about the tool</span><strong>Classify by severity before the first run</strong> &mdash; block / waivable by a named owner / informational. <strong>Filter the output; never disable the check</strong>, and let naming conventions carry the filter so it is mechanical. <strong>Lint as the code is written</strong>, while its author still holds the context.</div>
+      <p class="small">On an inherited block, do not attempt closure: baseline the report and gate on the <em>delta</em>. Retire rule <em>classes</em> with a failure mode behind them &mdash; never instance counts, which measure elaboration depth.</p>
+    </td>
+  </tr></table>
+  <p class="src">The one thing this book's corpus lets a lint section cite &mdash; and it is a warning, not a result. On a Broadcom power-management controller, lint had been run and its errors and warnings <em>waived by the designer</em>; the bug that mattered was found afterwards, by formal. No source reports a lint deployment, a rule-set decision or a measured lint result, so the disciplines above are method, not evidence. (DVCon, p.6.)</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- ============ 8. CDC STRUCTURES ============ -->
+<!-- src: ch13:108-120 (metastability, MTBF relation and its shape), ch13:124-134 (four structures), ch13:130 (coins), ch13:138-142 (SoC ratios: 6,250:1, 31.25us, 5ns, 62.5us = 12,500 cycles; 4:1) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 13 &middot; Clock-domain crossing</p>
+  <h2>Metastability cannot be removed &mdash; only given time to decay</h2>
+  <table class="cols"><tr>
+    <td style="width:45%">
+      <div class="ex"><span class="tag">Mean time between failures &mdash; read the shape, not the numbers</span>
+        <p class="mono" style="font-size:15px;background:none;padding:0;margin:4px 0 5px;text-align:center">MTBF = e<sup>(Ts/Tc)</sup> / (Tw &middot; Fc &middot; Fd)</p>
+        <strong>Two terms sit in the exponent</strong> &mdash; the settling window <code>Ts</code>, and the flop's time constant <code>Tc</code> as its divisor. Only <code>Tw</code>, <code>Fc</code> and <code>Fd</code> are linear.</div>
+      <p class="small">So the first exponential lever is the gap between the first flop settling and the second sampling it &mdash; <em>why two flops work at all</em>, and why anything eroding it (a slow route, a scan multiplexer, clock skew) hurts out of all proportion to its size.</p>
+      <div class="ex warn"><span class="tag">What it does not say</span>Nothing about how often a metastable condition <em>occurs</em> &mdash; those are frequent. A design does not fail because metastability happened. It fails because <strong>settling did not finish in the window available</strong>, or because there was no synchronizer at all.</div>
+    </td>
+    <td>
+      <table class="compact">
+        <tr><th style="width:28%">Structure</th><th>Its precondition</th></tr>
+        <tr><td><strong>Two-flop</strong><br><span class="small muted">one async bit</span></td><td>No combinational logic on the path; no pulse too narrow to sample; data stable across more than two destination edges</td></tr>
+        <tr><td><strong>Gray parallel</strong><br><span class="small muted">one sync per bit</span></td><td><strong>Exactly one bit changes at a time</strong> &mdash; so at most one bit goes metastable, resolving to the old code or the new one</td></tr>
+        <tr><td><strong>Handshake</strong><br><span class="small muted">multi-bit, any code</span></td><td>Data is not synchronized at all: only request and acknowledge are, and the bus is held stable until the acknowledge returns</td></tr>
+        <tr><td><strong>Async FIFO</strong><br><span class="small muted">streaming</span></td><td>Gray pointers both ways, payload through dual-ported memory. Buys bandwidth, and throttling</td></tr>
+      </table>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:2px 0 0"><span class="tag">The opening scenario, stated as a rule</span>Fixing metastability and fixing data coherency are <strong>independent problems</strong>. For one bit the coin can land either way and both faces are legal; for several bits you need all the coins to land the same way &mdash; so the answer is a gray code, a handshake or a FIFO, <em>never three correct synchronizers</em>. Had anyone declared that cause bus gray-coded, the structural check would have accepted one synchronizer per bit and <strong>reported nothing</strong>.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- ============ 9. STRUCTURAL vs PROTOCOL: the pulse-width property twice ============ -->
+<!-- src: ch13:150-154 (structural decides structure; the standard requires formal or dynamic discharge), ch13:158-191 (both properties verbatim, the vacuity flaw, N=12,500 derivation from ch13:140/189), ch13:197-199 (reconvergence: coherency and glitching) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 13 &middot; Structural checks and protocol checks</p>
+  <h2>A clean structural report is half of CDC verification</h2>
+  <p class="small">The structural check asks whether a recognised synchronizer stands where one is required. <strong>It does not analyse functionality</strong>, so a valid structure passes. The other half &mdash; that structure's <em>preconditions</em> &mdash; is an assertion problem.</p>
+  <table class="cols"><tr>
+    <td style="width:49%">
+<pre class="mini">// Wrong: samples the crossing signal on the
+// clock that cannot see the problem.
+property p_min_pulse_wrong;
+  @(posedge dst_clk) $changed(src_sig)
+    |=&gt; $stable(src_sig)[*2];
+endproperty</pre>
+      <div class="ex warn"><span class="tag">The flaw is in the noticing</span>A source pulse narrower than a destination period falls entirely between two destination edges. <code>$changed</code> is then never true, <strong>the antecedent never fires, and the property passes having checked nothing</strong> &mdash; a clean run reported for exactly the crossing it was written to protect. Only a cover on its antecedent would have exposed it.</div>
+    </td>
+    <td>
+<pre class="mini">// Right: sampled fast enough to see a pulse
+// the destination could miss.
+//   N = ceil( 2 * dst period / fast period )
+module cdc_pulse_chk #(parameter int N = 2) (
+  input logic fast_clk, rst_n, src_sig
+);
+  property p_min_pulse;
+    @(posedge fast_clk) disable iff (!rst_n)
+    $changed(src_sig) |=&gt; $stable(src_sig)[*N];
+  endproperty
+  a_min_pulse : assert property (p_min_pulse);
+endmodule</pre>
+      <div class="ex"><span class="tag">Compute N, and the property prices the design</span>For the downward crossing &mdash; 200&nbsp;MHz fast clock, 32&nbsp;kHz destination &mdash; <strong>N is 12,500</strong>. The number states in one figure the cost the level-pulse design was hiding, which is why the answer in that direction is <strong>a handshake</strong>.</div>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin-top:0"><span class="tag">And the shape that survives review, because each crossing is individually correct</span><strong>Reconvergence.</strong> Two peripheral-domain flags, each properly synchronized, feeding <code>fifo_empty &amp;&amp; xfer_done</code> in the system domain. The synchronizers resolve independently, so the conjunction can assert for a cycle when the source never had both true &mdash; or be missed when it did. <strong>The cure is architectural</strong>: qualify one signal with the other, or carry both across a single handshake.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- ============ 10. RDC ============ -->
+<!-- src: ch13:209-215 (recovery time, de-assertion vs assertion, "domains are reset domains", nine months later), ch13:217-219 (sensor hub scenario), ch13:221-227 (three fixes), ch13:249 (interchange format v1.0 March 2026) -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 13 &middot; Reset-domain crossing</p>
+  <h2>Same clock, different reset: a discipline of its own</h2>
+  <p class="small">An asynchronously reset flop has a third timing requirement beside setup and hold: <strong>recovery time</strong>, between reset release and the next clock edge. It splits in two, and only the second is what the industry means by RDC.</p>
+  <table class="cols"><tr>
+    <td style="width:47%">
+      <p class="small"><span class="pill">DE-ASSERTION</span> &nbsp;Release lands inside some flop's recovery window sooner or later. Cure: the reset synchronizer &mdash; <strong>assert asynchronously, release synchronously</strong>. Purely structural, so static analysis is sufficient.</p>
+      <p class="small"><span class="pill no">ASSERTION &mdash; RDC</span> &nbsp;A register cleared asynchronously changes at a moment unrelated to any clock edge, and a register <em>in a different reset domain, and so not being reset</em>, samples it.</p>
+      <div class="ex warn"><span class="tag">Why this is not a footnote to CDC</span><strong>The domains in question are reset domains.</strong> Both registers can share a clock, so a design with exactly one clock &mdash; and not one clock-domain crossing in it &mdash; can be full of reset-domain crossings, and <em>a clean CDC report says nothing about them</em>.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Scenario &mdash; the sensor hub's always-on island</span>Entirely on the 32&nbsp;kHz clock, with two resets: a power-on reset, and a soft reset firmware pulses to restart the fusion pipeline. <strong>Its CDC report is empty</strong> &mdash; one clock, no crossings. In the lab, reconfiguring a sensor occasionally produces a spurious wake interrupt.</div>
+      <p class="small">Declare the two resets as separate domains and every path into the wake decision is reported. <code>sample_valid</code> clears at an instant unrelated to the clock edge; the wake-decision register, in the <em>other</em> reset domain and still clocking, samples exactly then. <strong>Neither register is wrong; both resets are correct.</strong></p>
+    </td>
+  </tr></table>
+  <table class="cols3" style="margin-top:2px"><tr>
+    <td><div class="ex"><span class="tag">Fix 1 &middot; order the assertions</span>If the destination reset is already asserted it samples nothing &mdash; which is why the standard carries a <em>reset assertion sequence</em> and a <em>reset group</em>.</div></td>
+    <td><div class="ex"><span class="tag">Fix 2 &middot; qualify the path</span>Block the crossing while the source reset is active. Load-bearing: the qualifier must itself be <strong>synchronous with the destination</strong>.</div></td>
+    <td><div class="ex"><span class="tag">Fix 3 &middot; synchronize the reset</span>The crossing becomes an ordinary synchronous path. Cheapest of the three here: the island's clock never stops.</div></td>
+  </tr></table>
+  <p class="src">Accellera's CDC Working Group &mdash; 154 members from 24 companies, Arm, AMD, Apple, Google, IBM, Infineon, Intel, NVIDIA, Qualcomm, Samsung and ST among them &mdash; released v0.1 covering <em>CDC alone</em> in October 2023; RDC entered scope at the very next release, v0.3, nine months later. A participation fact, not a results fact: it says the industry found this hard enough to standardise, not that the tools work. (Accellera CDC/RDC IP Abstraction Standard v1.0; DVCon US 2026 tutorial, slide 58.)</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- ============ 11. X-PROPAGATION ============ -->
+<!-- src: ch13:253-261 (four values, the two lies), ch13:257 (if semantics, case/posedge/negedge), ch13:259 (a&~a, 3'b000 + 3'b01x), ch13:265 (four sources), ch13:267-269 (video codec + 2014 audio case study), ch13:271-273 (crypto key_valid), ch13:277-283 (three answers and costs) -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 13 &middot; X-propagation</p>
+  <h2>RTL simulation lies optimistically and pessimistically at once</h2>
+  <p class="small">A four-valued model driving a two-valued device is lossy in both directions, so a simulation can <strong>pass a test silicon fails <em>and</em> fail a test silicon passes</strong>. Which is why the answer is never &ldquo;make the simulator pessimistic everywhere&rdquo; &mdash; asynchronous reset works <em>because</em> of X-optimism.</p>
+  <table class="cols"><tr>
+    <td style="width:46%">
+      <div class="ex warn"><span class="tag">X-optimism &mdash; the language's semantics, not a simulator defect</span>An <code>if</code> takes the true branch only for a nonzero <em>known</em> value; the false branch is taken for <code>0</code>, <code>x</code> and <code>z</code> alike. So <strong>a condition nobody can predict produces a decision nobody chose</strong>, and the run continues as though it were deliberate. <code>case</code> and the edge constructs behave the same way.</div>
+      <div class="ex"><span class="tag">X-pessimism &mdash; the opposite error, and the visible one</span>With <code>a</code> unknown, both <code>a &amp; ~a</code> and <code>a | ~a</code> evaluate to <code>x</code> where silicon gives a definite 0 and 1. Arithmetic is all-or-nothing: <code>3'b000 + 3'b01x</code> is <code>3'bxxx</code>.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Scenario &mdash; the crypto engine's unreset key-valid flag</span>The negative test that matters most, <em>&ldquo;no ciphertext before a key is loaded&rdquo;</em>, passes on every seed. The flag powers up unknown, so <code>if (key_valid)</code> takes the else branch and the engine refuses to encrypt: <strong>the test passes because of X-optimism, not because of the design.</strong> In silicon the flop powers up definite, and on some corners it is one.</div>
+      <p class="small"><strong>The cure is not a better test but a reset &mdash; and in general, attack the sources rather than the propagation.</strong> A 2014 case study is the shape: an audio block taken from sixteen channels to seventeen, an index one past the end, and a state machine that X-optimism sent back to idle under a fully passing regression.</p>
+    </td>
+  </tr></table>
+  <table class="cols3" style="margin-top:2px"><tr>
+    <td><div class="ex"><span class="tag">Answer 1 &middot; gate level</span>Optimism largely goes &mdash; but pessimism becomes <em>more</em> prevalent, and the unknowns are cleared by depositing known values, iteration after iteration. Arrives late, covers little.</div></td>
+    <td><div class="ex"><span class="tag">Answer 2 &middot; a simulator's X-mode</span>Merges the 0 and 1 results at each decision, converting optimism into an honest unknown. Costs performance, so in practice a named regression variant rather than a default.</div></td>
+    <td><div class="ex warn"><span class="tag">Answer 3 &middot; formal X-propagation</span>Run blindly it hits the capacity wall: a whole IP on a two-hour budget returned <em>bounded proofs and no violations</em> on a design known to contain an X-optimism bug. <strong>Not a wrong answer &mdash; an empty one.</strong></div></td>
+  </tr></table>
+  <p class="src">Broadcom quad-core application processor: a power-management controller that had passed <em>extensive</em> block-level UVM constrained-random simulation, SoC-level directed tests and a waived lint run still held an unreset flip-flop whose first-cycle X was masked by RTL X-optimism. Formal reset analysis found four such flip-flops; the X-prop app traced every assertion failure to one &mdash; pre-tape-out (DVCon, pp.6-7).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- ============ 12. DIVIDER CH14 ============ -->
+<section class="slide divider">
+  <p class="chno">14</p>
+  <h1>Formal Property Verification</h1>
+  <p class="sub">Four outcomes, three qualifiers &mdash; and one green tick that is not one.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- ============ 13. CH14 OPENING ============ -->
+<!-- src: ch14:3-9 (six weeks green, c_w_overlap zero, 11-cycle CEX, four results);
+     canonical bug + c_w_overlap precondition: example_bank.md "Crossbar" -->
+<section class="slide">
+  <p class="kicker">Chapter 14 &middot; The opening scenario</p>
+  <h2>Six weeks of green nights. One number should have stopped the review.</h2>
+  <p class="small muted" style="margin-bottom:9px">The bound protocol checker from Chapter 11 sits on all nine crossbar ports; its assertions have never fired; the block is a week from sign-off. On the four subordinate-side instances the cover <code>c_w_overlap</code> &mdash; a second write address accepted at a subordinate while an earlier burst is still unfinished on the write-data channel &mdash; reads <strong>zero</strong>. Chapter 11 named that cover as the precondition of exactly one hazard, and in six weeks no test produced it.</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">Same file, same properties, different engine</span>An engineer points a proof engine at one subordinate port instead of a simulator. Overnight it returns <strong>a counterexample eleven cycles long</strong>: two managers have writes in flight to the same subordinate, the subordinate back-pressures the write-data channel, and the crossbar interleaves their beats into one stream. Beats from two bursts are counted as one, and the count no longer matches the length the address at the head of the queue promised.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Nothing about the property changed. The question did.</span>A simulator asks <em>did any run I performed break this rule?</em> A proof engine asks <em>can anything break this rule?</em> &mdash; and on blocks of the right size the second question is answerable in a night.</div>
+      <p class="small">The same run returned three other things: <strong>two properties proven</strong>, <strong>one undetermined</strong>, and one proven only because an assumption nobody had reviewed forbade the very traffic that would have broken it. Those four results are the chapter. <em>The last is the one that will hurt you.</em></p>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>Six weeks of green is not evidence of anything until you know which covers were empty while it ran.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- ============ 14. FOUR OUTCOMES, THREE QUALIFIERS ============ -->
+<!-- src: ch14:21 (transition system, reachability, terminates), ch14:25-32 (four outcomes,
+     CEX with don't-cares, cover witness / unreachable / out of memory), ch14:36-44 (three qualifiers,
+     "formally verified" is not a claim, the useful longer form) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; What a proof is, and what it is over</p>
+  <h2>Four outcomes, not two &mdash; and three qualifiers on every one of them</h2>
+  <p class="small">Strip the tool away and a synchronous design is a finite transition system. Model checking computes the reachable states by fixed-point analysis and checks the property against that set &mdash; an exhaustive search which, <strong>because the state space is finite, is guaranteed to terminate</strong>.</p>
+  <table class="cols"><tr>
+    <td style="width:52%">
+      <table class="compact">
+        <tr><td style="width:26%"><span class="pill ok">PROVEN</span></td><td>No reachable state and no legal input sequence violates it &mdash; subject to the three qualifiers opposite</td></tr>
+        <tr><td><span class="pill no">FALSIFIED</span></td><td>A <strong>counterexample</strong>: the input sequence leading to the failure, with <em>no irrelevant history attached</em></td></tr>
+        <tr><td><span class="pill mid">BOUNDED</span></td><td>No violation up to <em>n</em> cycles &mdash; a statement about the near future only</td></tr>
+        <tr><td><span class="pill und">UNDETERMINED</span></td><td>The tool gave up: timeout, memory, or an incomplete algorithm</td></tr>
+      </table>
+      <p class="small"><strong>A <code>cover</code> behaves symmetrically.</strong> Hit: a <em>witness</em>. Not hit: <em>unreachable under the specified assumptions</em> &mdash; or it ran out of memory, <em>a third answer wearing the second one's clothes</em>.</p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">The model</span>The RTL as elaborated, not silicon. Nothing about the netlist, timing or firmware &mdash; and <strong>nothing about what you did not model</strong>: blackbox a submodule and the proof is over the replacement.</div>
+      <div class="ex"><span class="tag">The assumptions</span>If the real environment violates them the device may fail despite successful verification. The redeeming feature, and it is real: <strong>formal forces them to be written down</strong>.</div>
+      <div class="ex"><span class="tag">The depth</span>If the result is bounded, the property is guaranteed only within the bound.</div>
+      <p class="small">An empty cover in simulation means &ldquo;no test did this&rdquo;. Unreachable in formal means &ldquo;nothing can do this&rdquo;. <strong>Only the second is a statement about the design.</strong></p>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:2px 0 0"><span class="tag">Which is why &ldquo;the crossbar has been formally verified&rdquo; is not a claim at all</span>The useful form is longer and duller: <em>these five properties, on this RTL revision, under these five assumptions, proven unbounded except one which holds to depth&nbsp;78.</em> <strong>That sentence is auditable. The short one is a mood.</strong></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- ============ 15. SAME TEXT, TWO ENGINES ============ -->
+<!-- src: ch14:48-61 (the property unchanged from ch11, sampled vs searched, the three
+     qualifiers applied: midend legalizer + AXI backend, positive-stride assumption deletes
+     the bug, depth must reach the first accepted address).
+     Property text: example_bank.md canonical artifact, copied verbatim (wrapping only). -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; The property Chapter 11 handed over</p>
+  <h2>One text, unchanged. Two engines, two different questions.</h2>
+  <table class="cols"><tr>
+    <td style="width:49%">
+<pre class="mini">property p_no_4kb_crossing;
+  @(posedge clk) disable iff (!rst_n)
+  (awvalid &amp;&amp; awready &amp;&amp; (awburst == 2'b01)) |-&gt;
+    (16'(awaddr[11:0]) +
+     ((16'(awlen) + 16'd1) &lt;&lt; awsize)) &lt;= 16'd4096;
+endproperty
+a_no_4kb_crossing : assert property (p_no_4kb_crossing);</pre>
+      <table class="chain"><tr>
+        <td style="width:38%"><div class="cbox">SIMULATOR<span class="q">did any run I performed break this rule?</span></div></td>
+        <td class="arrowr" style="width:8%">&rarr;</td>
+        <td><div class="cbox">evaluated on the bursts the tests happened to emit<span class="q">silent about the ones they did not</span></div></td>
+      </tr><tr>
+        <td><div class="cbox out">PROOF ENGINE<span class="q">can anything break this rule?</span></div></td>
+        <td class="arrowr">&rarr;</td>
+        <td><div class="cbox out">is there <em>any legal way</em> to program this engine that emits a crossing burst?<span class="q">answered by searching, not by sampling</span></div></td>
+      </tr></table>
+    </td>
+    <td>
+      <p class="small">Now apply the three qualifiers, because they turn a green tick into a sentence you can defend at a review.</p>
+      <div class="ex"><span class="tag">Model</span>The midend legalizer and the AXI backend <em>as elaborated</em>. It contains the splitting arithmetic where the canonical bug lives &mdash; and it does not contain the register frontend, if you blackboxed it.</div>
+      <div class="ex warn"><span class="tag">Assumptions</span>Whatever you said about how descriptors arrive. <strong>Assume a positive stride and you have deleted the negative-stride bug from the model rather than proved it absent.</strong></div>
+      <div class="ex"><span class="tag">Depth</span>If bounded, long enough for a descriptor to be programmed, legalized, split and emitted. A bound that never reaches the first accepted address <em>proves the property over a stretch of silence</em>.</div>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- ============ 16. WHY GREEN IS THE DANGEROUS COLOUR ============ -->
+<!-- src: ch14:65-67 (one artifact three hats; assume checked in sim, never checked in formal),
+     ch14:71-73 (vacuous, the missing/extra asymmetry), ch14:77 (empty model, support rule),
+     ch14:79 (satisfiable narrowing; no coverage to measure, so no trace anywhere) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Properties and assumptions</p>
+  <h2>Green is the dangerous colour</h2>
+  <p class="small">Assertions and constraints are one artifact with three hats &mdash; a generator in Chapter 9, an assertion in Chapter 11, an assumption here. The hats are not interchangeable. <strong>In simulation an <code>assume</code> is checked exactly like an assertion. In formal it is never checked: it deletes traces, and the assertions are proved over what survives.</strong></p>
+  <table class="cols"><tr>
+    <td style="width:46%">
+      <div class="ex"><span class="tag">A missing assumption announces itself</span>The model does things the real environment never would, so the engine finds a violation that cannot happen &mdash; a <strong>spurious counterexample</strong>. Irritating, costs you an afternoon, <em>and it arrives in red</em>.</div>
+      <div class="ex warn"><span class="tag">An extra assumption announces nothing</span>There is nothing to look at. The report is simply greener than before. <strong>That asymmetry is why a sign-off review reads the assume list, not the checkmark list.</strong></div>
+    </td>
+    <td>
+      <p class="small"><strong>The loud grade &mdash; the empty model.</strong> Two assumptions that contradict each other, or one that contradicts the design's own behaviour. Intuition says every assertion should fail; the opposite happens and <em>all of them pass vacuously</em>, because the proof's hypothesis is that all assumptions hold, and that hypothesis is itself false. Cheap prophylactic, applicable by eye: <strong>every assumption should have a design input or a free variable in its support.</strong></p>
+      <p class="small"><strong>The quiet grade &mdash; the satisfiable narrowing.</strong> This is the one that reaches sign-off. Assumptions consistent, model far from empty, most properties still proving for the right reasons &mdash; and one clause has removed the exact traffic the interesting property was written for.</p>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:2px 0 0"><span class="tag">And formal makes it worse in one specific way</span>In simulation, deleting a scenario shows up as a <strong>coverage hole</strong>, because coverage is measured on what ran. <strong>In formal there is no stimulus to measure, so the deletion leaves no trace anywhere but in the assumption text.</strong> Over-constraining is usually not obvious and cannot always be found by automatic tools &mdash; which is why validating the assumptions is a task in its own right.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- ============ 17. WORKED: THE ASSUMPTION THAT DID THE PROVING ============ -->
+<!-- src: ch14:81-88 (crypto engine scenario verbatim shape: two ch11 properties, neither
+     converges, the assume, both prove in minutes, delete-and-rerun, the adversary argument,
+     the obligation belonged on the boot ROM's proof) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Worked example &mdash; the crypto engine</p>
+  <h2>The property was not so much proved as evacuated</h2>
+  <table class="cols"><tr>
+    <td style="width:52%">
+      <p class="small">The inline AES-GCM engine on the memory path carries Chapter 11's two properties: <strong>a key may not be loaded while an operation is in flight</strong>, and <strong>ciphertext may not be presented under an unauthenticated key</strong>. Neither proof converges &mdash; the key ladder plus the GCM datapath is too much state &mdash; so an engineer encodes what the specification's boot sequence says.</p>
+<pre class="mini">m_auth_before_load : assume property (
+  @(posedge clk) disable iff (!rst_n)
+  $rose(key_load) |-&gt; auth_done);</pre>
+      <p class="small"><strong>Both properties now prove in minutes.</strong></p>
+      <div class="ex warn"><span class="tag">The discipline: delete the assumption and re-run before believing either result</span>This one does not merely shrink the model. It deletes the entire class of traces in which key material enters the engine <em>unauthenticated</em> &mdash; the class <code>a_no_ct_unauth</code> exists to catch.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">In a functional proof</span>An assumption is a promise about a cooperative neighbour, and the worst case is a <em>buggy</em> neighbour.</div>
+      <div class="ex warn"><span class="tag">In a security proof</span>The environment is <strong>an adversary who has read your assumption list</strong>. Every assumption is a concession, and each one owes an answer to <em>why can the attacker not do this?</em> Here there is none: an attacker able to drive <code>key_load</code> <em>is</em> the threat.</div>
+      <div class="ex good"><span class="tag">Where the obligation actually belonged</span>On the boot ROM's proof, <strong>to be discharged</strong> &mdash; not on the engine's, to be enjoyed. Chapter 16 moves it there in three steps, all of them bookkeeping.</div>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>The tell is in the timing: a property that would not converge for days proves in seconds shortly after an assumption is added.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- ============ 18. DISCHARGING ASSUMPTIONS ============ -->
+<!-- src: ch14:92-95 (assume-guarantee, assertion-in-one-is-constraint-in-another, deduce
+     system properties from components), ch14:96-127 (the ASSUME_MODE file, verbatim shape),
+     ch14:129 (the unbounded [$] queue, cap, lemma), ch14:131 (when you cannot discharge:
+     check in simulation, and in the larger model), ch14:133 (the assumption register) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Discharging assumptions instead of trusting them</p>
+  <h2>One file, two directives, and a record of which side you stood on</h2>
+  <table class="cols"><tr>
+    <td style="width:52%">
+<pre class="mini">module xbar_port_checker #(
+  parameter bit ASSUME_MODE = 1'b0,  // 1 = constrain, 0 = check
+  parameter int unsigned IDW = 4, AW = 32
+) (
+  input logic           clk, rst_n, awvalid, awready,
+  input logic [IDW-1:0] awid,
+  input logic [AW-1:0]  awaddr,
+  input logic [7:0]     awlen,
+  input logic [2:0]     awsize,
+  input logic [1:0]     awburst
+);
+  property p_aw_stable;
+    @(posedge clk) disable iff (!rst_n)
+    (awvalid &amp;&amp; !awready) |=&gt; awvalid &amp;&amp;
+      $stable({awid, awaddr, awlen, awsize, awburst});
+  endproperty
+
+  if (ASSUME_MODE) begin : g_env
+    m_aw_stable : assume property (p_aw_stable);
+  end else begin : g_dut
+    a_aw_stable : assert property (p_aw_stable);
+  end
+endmodule</pre>
+    </td>
+    <td>
+      <p class="small">Because an assertion in one verification is a constraint in another, <strong>an assumption on a block's inputs should be proven as an assertion on whatever drives them</strong>. That is assume-guarantee: properties of a system deduced from properties of its components, <em>without ever model-checking the complete model</em> &mdash; the thing that will not converge.</p>
+      <div class="ex"><span class="tag">The parameter is not decoration</span>It records which side of the boundary you were standing on, and makes <em>&ldquo;who guarantees this?&rdquo;</em> a question with a location rather than an opinion.</div>
+      <div class="ex warn"><span class="tag">One thing has to change first, and it is not a property</span>Chapter 11's interface model holds each accepted address in an <strong>unbounded queue</strong> &mdash; which a simulator is happy with and a proof engine cannot encode, because termination was guaranteed <em>by the state space being finite</em>. Cap it at the port's outstanding-write capacity: a fact about the crossbar, proven on its own and handed back as a <strong>lemma</strong>.</div>
+      <p class="small">Cannot discharge it? Then check it in simulation &mdash; and again in simulation of the larger model the block integrates into. <strong>An assumption that is nowhere checked, in any engine, is a comment.</strong></p>
+    </td>
+  </tr></table>
+  <p class="src">Which gives the artifact this section argues for: an assumption register, reviewed like a waiver list. One row per assumption, four columns &mdash; the text, who owns the behaviour it describes, how it is discharged, and what breaks if it is wrong.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- ============ 19. BOUNDED AND UNBOUNDED ============ -->
+<!-- src: ch14:139-141 (BMC unrolling, SAT, equivalent to exhaustive simulation with the same
+     bound, bug-hunting, "not violated up to bound 50 clock cycles"), ch14:143 (sequential depth),
+     ch14:145 (induction from arbitrary state, P, the reset condition, P=false), ch14:147-149
+     (spurious CEX, strengthened invariant, read cycle zero first + the three examples) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Bounded and unbounded proof</p>
+  <h2>Two engines behind almost every green line you will read</h2>
+  <table class="cols"><tr>
+    <td style="width:50%">
+      <h3>Bounded model checking &mdash; unrolling</h3>
+      <p class="small">For each cycle of an interval of length <em>k</em> it makes a fresh copy of the combinational logic, each copy feeding the next, until the whole finite-time behaviour is <em>one combinational circuit</em>. That circuit and the negation of the property go to a satisfiability solver. The one-line intuition: <strong>equivalent to an exhaustive simulation with the same bound on the number of cycles</strong>.</p>
+      <div class="ex warn"><span class="tag">So a bounded run's success is not a proof</span>It says the property cannot be violated <em>too soon</em> &mdash; and the initial state need not be the reset state. Good tools report <em>&ldquo;the assertion has not been violated up to bound 50 clock cycles&rdquo;</em> rather than <em>&ldquo;the assertion passed&rdquo;</em>. <strong>Do not paraphrase that into your own report.</strong></div>
+      <p class="small">Push past the <strong>sequential depth</strong> &mdash; the longest shortest-path from an initial state to any reachable state &mdash; and a bounded result <em>is</em> a proof of a safety property. That is usually not available: the solver's cost grows, and computing the sequential depth is itself hard.</p>
+    </td>
+    <td>
+      <h3>Induction &mdash; unrolling from an arbitrary state</h3>
+      <p class="small">Stop fixing the starting state: unroll from any state characterised by a predicate <em>P</em>. If every reset state satisfies <em>P</em>, and every interval starting in <em>P</em> both upholds the property and ends in <em>P</em>, the property holds for arbitrarily long time frames &mdash; <strong>good forever, from a computation no longer than a bounded one</strong>. The first condition is the one left out of the telling, and it is what keeps the argument from being empty: <em>P</em>&nbsp;=&nbsp;<code>false</code> is closed under transitions too.</p>
+      <div class="ex warn"><span class="tag">The price is a new failure mode, and it eats weeks</span>If <em>P</em> over-approximates the reachable state space, the engine starts intervals in states the design can <strong>never occupy</strong> and produces <strong>spurious counterexamples</strong> from them. The remedy is a <em>strengthened invariant</em>: additional assertions that rule those starting states out.</div>
+      <div class="ex good"><span class="tag">In practice this is a readable skill, not a theoretical one</span>When a counterexample arrives, <strong>look at cycle zero first</strong> and ask whether the design could be there at all. A FIFO whose occupancy reads 7 while its two pointers are equal. A one-hot state vector with two bits set. An outstanding count of 3 on a port that holds at most 2. Each observation becomes a helper assertion &mdash; proven on its own, then supplied to the engine as an invariant.</div>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- ============ 20. READING A DEPTH NUMBER ============ -->
+<!-- src: ch14:153 (pipeline rule of thumb), ch14:157-158 (the 40-cycle run; a_no_overflow on a
+     16-entry FIFO with c_full; a_w_burst_len, 256-beat max burst, ~forty beats inside 40 cycles),
+     ch14:160 (11-cycle CEX vs a run stopped at 10), ch14:162 (cover the antecedent under the
+     same bound) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Reading a depth number</p>
+  <h2>Same block, same run, same number &mdash; two different amounts of evidence</h2>
+  <p class="small">The rule of thumb &mdash; a bound a little larger than the pipeline depth &mdash; misleads, because most interesting properties are not pipeline-shaped. <strong>Do the count.</strong> One run on the DMA backend, bounded at <strong>40 cycles</strong>, two of Chapter 11's properties on it:</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex good"><span class="tag">a_no_overflow &mdash; 40 is a generous bound</span>It guards a datapath FIFO of <strong>16 entries</strong>. Filling it takes at least sixteen pushes with no intervening pop, so the interesting state is reachable well inside forty cycles &mdash; and the paired <code>c_full</code> cover confirms it with a witness.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">a_w_burst_len &mdash; 40 is a stretch of silence</span>It reconciles a burst's beat count against the length its address promised, and can only do so at <code>WLAST</code>. Maximum burst is <strong>256 beats</strong>, so that <code>WLAST</code> cannot arrive until the 256th data beat has been handshaken. Inside forty cycles no burst longer than about forty beats completes at all: <strong>proven for short bursts, completely silent about long ones.</strong></div>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:2px 0 0"><span class="tag">And one cycle either side of a bound can be the whole result</span>This chapter's opening counterexample is <strong>eleven cycles long</strong>. A run stopped at ten would have reported <em>not violated up to 10 cycles</em> &mdash; <strong>green, filed, and wrong.</strong></p>
+  <p class="ex good" style="margin:6px 0 0"><span class="tag">Hence a discipline that costs one extra directive per property</span><strong>Before trusting a bounded pass, run the property's antecedent &mdash; or the interesting state it guards &mdash; as a <code>cover</code> under the same bound.</strong> A cover landing below the bound validates it; a cover with no witness inside means the proof is a statement about a stretch of silence.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- ============ 21. ABSTRACTION: WHICH WAY EACH LEVER CUTS ============ -->
+<!-- src: ch14:168 (abstraction is the technique, not an advanced topic), ch14:172-173 (over- and
+     under-approximation, sound vs safe), ch14:175 (the human hazard: the twenty-first is real),
+     ch14:179-183 (cone of influence pruned automatically; the three manual levers and their
+     directions; ch14:181 the counter-intuition), ch14:185 (uninterpreted memory/arithmetic) -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 14 &middot; Abstraction: what you throw away</p>
+  <h2>Not an advanced topic. The technique &mdash; with a knife edge.</h2>
+  <p class="small">For a proof to complete, the model must be small enough to finish in the CPU and memory available. Every reduction changes the set of behaviours the model can exhibit, and <strong>the direction of that change decides which results you may still believe.</strong></p>
+  <table class="cols"><tr>
+    <td style="width:46%">
+      <div class="ex"><span class="tag">Over-approximation &mdash; adds behaviours</span>The abstract model allows <em>more</em> traces, so a proof on it holds on the original: over-approximation is <strong>sound</strong>, and a success is always accurate. A failure may be <em>spurious</em>.</div>
+      <div class="ex warn"><span class="tag">Under-approximation &mdash; removes behaviours</span>A failure is always real, so it is <strong>safe</strong>. But a pass means nothing &mdash; exactly why such tools say <em>&ldquo;not violated up to bound 50&rdquo;</em>.</div>
+      <p class="small"><strong>The practical hazard is human, not logical.</strong> Someone who has waded through twenty impossible traces starts skimming. <em>The twenty-first is real</em> &mdash; the capacity a reduction buys is paid for in the analysis of spurious failures.</p>
+    </td>
+    <td>
+      <table class="compact">
+        <tr><th style="width:36%">Manual lever</th><th>Direction</th></tr>
+        <tr><td><strong>Free a signal</strong><br><span class="small muted">a cutpoint; blackboxing is the same lever on every output at once</span></td><td>Over-approximation: <strong>sound, not safe</strong>. The cut makes the result <em>stronger</em>, not weaker &mdash; proven for every value includes the correct ones</td></tr>
+        <tr><td><strong>Set an <em>input</em> constant</strong></td><td>Under-approximation: <strong>safe, not sound</strong></td></tr>
+        <tr><td><strong>Set an <em>internal</em> signal</strong></td><td><strong>Neither safe nor sound.</strong> Every use owes a sentence in the record</td></tr>
+        <tr><td><strong>Uninterpret</strong><br><span class="small muted">memory, wide arithmetic</span></td><td>A box whose only property is that equal inputs give equal outputs</td></tr>
+      </table>
+      <p class="src">Tools prune the logic outside a property's cone of influence on their own; manual reduction is for signals that affect it indirectly, which is why it takes detailed knowledge of the design. Done for real: on an NXP SECDED ECC block the full design with its 8K memory would not converge formally in 12 hours, so the memory was blackboxed with its input ports promoted to observation points &mdash; an abstraction the authors show can produce false negatives but <em>not</em> false positives on the safe classification (DVCon, p.6).</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- ============ 22. TWO CACHES, ONE ADDRESS ============ -->
+<!-- src: ch14:191-198 (a_single_writer verbatim; what survives the cut), ch14:200-204 (the three
+     deletions), ch14:206 (reducing requesters is NOT sound; the symmetry argument is a claim about
+     the RTL, not a theorem; fixed-priority arbitration makes it false; record it in the assumption
+     register), ch14:208 (name the bug classes, give each somewhere else to be caught) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; The canonical proof abstraction</p>
+  <h2>Two caches, one address &mdash; and the list you write at the moment of the cut</h2>
+  <table class="cols"><tr>
+    <td style="width:47%">
+      <p class="small">The coherent hub is the standard teaching case because its state space is a product of things you cannot bound: the state of every line, in every cache, for every address. Chapter 11 left one invariant with an explicit promise &mdash; <strong>at most one cache may hold a line Modified</strong>:</p>
+<pre class="mini">a_single_writer : assert property (
+  @(posedge clk) disable iff (!rst_n)
+  $onehot0(modified_vec));</pre>
+      <div class="ex good"><span class="tag">What survives a cut to two caches and one address</span>The directory's transition rules for a line, <strong>every race between two requesters</strong> for it, the ordering of invalidations against data responses, and &mdash; since livelock lives on a single contended line &mdash; <strong>starvation of one requester by the other</strong>. None of it is reachable by simulation at any run length you can afford.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">What does not survive &mdash; write it down now, nobody reconstructs it in three months</span><strong>A second address:</strong> the classic coherence deadlock &mdash; two agents acquiring two lines in opposite orders &mdash; is invisible by construction. <strong>Capacity:</strong> with one address there are no conflict evictions. <strong>A third sharer</strong>, including the sharer-vector encoding and its overflow.</div>
+      <div class="ex warn"><span class="tag">And a warning about the cut itself</span>Cutting many caches down to two is <strong>not a sound abstraction</strong> in the sense opposite: freeing and setting have a defined direction of error, and <em>deleting requesters has none</em>. It rests on a <strong>symmetry argument</strong> &mdash; that the hub treats its requesters interchangeably &mdash; which is a claim about the RTL, not a theorem. If the directory arbitrates fixed-priority by requester index it is simply false.</div>
+    </td>
+  </tr></table>
+  <p class="ex" style="margin:2px 0 0"><span class="tag">The general answer to &ldquo;how do I avoid throwing away the bug&rdquo;</span>You cannot, entirely &mdash; an abstraction that kept everything would not converge. What you can do is <strong>name the bug classes it deletes, at the time you delete them, and give each one somewhere else to be caught</strong>: the two-line deadlock to a separate proof, the eviction path to system-level simulation with a cache-thrashing profile, the sharer-vector overflow to a directed test. Each becomes a plan row reading <em>not covered by proof P-COH-2 &mdash; covered by&hellip;</em> <strong>A proof whose deletions are enumerated is evidence; a proof whose deletions are implicit is a slogan.</strong></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- ============ 23. THE CONVERGENCE LADDER ============ -->
+<!-- src: ch14:212 (the menu: abstraction, smaller model, lemmas, tool options), ch14:216-224
+     (the eight steps in the order a practitioner works them, and the closing observation that
+     four of them change the problem); ch14:218 (formal-efficient form wins where one text
+     serves both engines); ch14:224 (stop is a legitimate outcome) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Convergence: the undetermined property</p>
+  <h2>A cheapest-first order &mdash; not the order the menu is written in</h2>
+  <p class="small">Sooner or later a run comes back neither green nor red. Getting a conclusive answer means refining the verification model, and <strong>the order you work through the options is what separates an afternoon from a fortnight.</strong></p>
+  <div class="rung q" style="margin-left:0"><span class="rl">1</span><strong>Ask whether the property is even true.</strong> Run bounded, run deep. An undetermined property is sometimes a <em>false</em> one whose counterexample sits further out than the last bound you tried &mdash; one overnight job instead of a week of strengthening.</div>
+  <div class="rung mod" style="margin-left:14px"><span class="rl">2</span><strong>Ask whether it was written for this engine.</strong> In simulation an inefficient assertion costs runtime; in formal it can be fatal. Where one text must serve both engines, <em>the formal-efficient form should win</em>.</div>
+  <div class="rung mod" style="margin-left:28px"><span class="rl">3</span><strong>Split it.</strong> A property asserting five things at once is five proofs sharing one worst case. Separated, the report names the one that did not close instead of hiding four successes behind it.</div>
+  <div class="rung mod" style="margin-left:42px"><span class="rl">4</span><strong>Prove lemmas and feed them back.</strong> A queue's occupancy matches its pointers; a state vector is one-hot; an outstanding counter never exceeds capacity. <em>The only kind of assumption that costs nothing, because you have discharged it.</em></div>
+  <div class="rung mod" style="margin-left:56px"><span class="rl">5</span><strong>Case-split</strong>, once you have shown those configuration values partition the space &mdash; <em>N</em> results, and the plan row must say so.</div>
+  <div class="rung mod" style="margin-left:70px"><span class="rl">6</span><strong>Abstract</strong> &mdash; last of the model-changing moves, because the deletion list comes with it.</div>
+  <div class="rung" style="margin-left:84px"><span class="rl">7</span><strong>Accept a bounded result</strong>, with the depth recorded and its antecedent covered under the same bound.</div>
+  <div class="rung end" style="margin-left:98px"><span class="rl">8</span><strong>Stop.</strong> Hand the plan row to simulation and close it there.</div>
+  <p class="src">Four of them &mdash; rewrite, lemmas, case-split, abstract &mdash; change the problem instead of answering it, and return you to the top with a smaller one. Step 8 is a legitimate outcome, not a defeat: a team that cannot reach it will spend a whole schedule on one property.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- ============ 24. FORMAL COVERAGE + MUTATION ============ -->
+<!-- src: ch14:265-273 (the four coverage models and each one's caveat; the bound-10-to-11
+     stopping rule; proof core vs cone), ch14:277-279 (mutation; DAC 2015, 73 bugs, all caught;
+     the two non-bugs and why they are classified so), ch14:283-285 (the completeness criterion
+     and its cost) -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 14 &middot; Formal sign-off</p>
+  <h2>Coverage when there is no stimulus &mdash; and the one measure that is not structural</h2>
+  <table class="cols"><tr>
+    <td style="width:53%">
+      <table class="compact">
+        <tr><th style="width:30%">Model</th><th>The question it answers</th></tr>
+        <tr><td><strong>Cone of influence</strong></td><td><em>Did anybody write a check about this logic at all?</em> Cheap, and purely structural</td></tr>
+        <tr><td><strong>Input stimuli</strong></td><td>Ignores the assertions; measures what the <em>constraints</em> let the engine reach &mdash; <strong>the silent over-constraint hazard as a number</strong></td></tr>
+        <tr><td><strong>Bounded proof</strong></td><td>How much of a cone the bound reaches. Bound 10 to 11 adding nothing new: <strong>stop buying depth, start abstracting</strong></td></tr>
+        <tr><td><strong>Proof core</strong></td><td>The logic actually used can be far smaller than the cone; <strong>a bug inside the cone but outside the core goes uncaught by a fully proven assertion</strong></td></tr>
+      </table>
+    </td>
+    <td>
+      <p class="small"><strong>All four are structural</strong> &mdash; which logic was involved, not whether a check would have <em>noticed a change</em> to it. The empirical complement is <strong>mutation</strong>: break the design deliberately, and some assertion should fail.</p>
+      <div class="ex good"><span class="tag">The most convincing published run &mdash; Oski Technology, DAC 2015</span>Attendees inserted <strong>73 functional bugs</strong> into a crossbar that already had a formal testbench. <strong>Every one triggered a failure</strong> of one or more checkers.</div>
+      <div class="ex warn"><span class="tag">Read the footnote as carefully as the headline</span>Two classes of change <em>should</em> fail nothing: one with no functional impact, and one written <em>specifically to evade the property set</em> &mdash; a non-bug, because a determined adversary always can. <strong>Mutation grades a property set against the bugs designers make, not against an attacker.</strong></div>
+    </td>
+  </tr></table>
+  <p class="src">And a termination criterion that is not a percentage at all: complete formal verification with an <em>automatic completeness check</em>, in productive use at Siemens and Infineon from 1999 on a list including the Infineon TriCore2, at a reported 2,000-4,000 lines of RTL per person-month. <em>Almost</em> all those circuits worked after fabrication &mdash; the author attributes the escapes to his own method being misapplied (Bormann, pp.14, 16-17, 52).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- ============ 25. THE SIGN-OFF ROW ============ -->
+<!-- src: ch14:300-306 (the property table verbatim), ch14:308-314 (the assumption register rows
+     A1-A5), ch14:316 (the depth derivation: window 4x16=64, antecedent cover at 12, shortest CEX
+     76, +2 margin = 78), ch14:318-320 (A1 does real work only where the wait is finite; A5 was
+     doing the proving), ch14:261 (the three sign-off questions) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 14 &middot; Worked example &mdash; the crossbar's formal row</p>
+  <h2>The review reads the assume list, not the checkmarks</h2>
+  <table class="cols"><tr>
+    <td style="width:52%">
+      <table class="compact">
+        <tr><th style="width:34%">Property (binding)</th><th style="width:27%">Result</th><th style="width:16%">Depth</th><th>Assm</th></tr>
+        <tr><td><code>a_aw_stable</code> <span class="small muted">4 sub-side</span></td><td>proven</td><td>unbounded</td><td>A2</td></tr>
+        <tr><td><code>a_b_id_outstanding</code></td><td>proven</td><td>unbounded</td><td>A2, A4</td></tr>
+        <tr><td><code>a_w_burst_len</code></td><td>falsified &rarr; fixed &rarr; proven <span class="small muted">CEX 11 cycles</span></td><td>unbounded</td><td>A2, A4</td></tr>
+        <tr><td><code>a_grant_within_64</code> <span class="small muted">per manager port</span></td><td><strong>bounded pass</strong></td><td><strong>78</strong></td><td>A1, A2, A3</td></tr>
+        <tr><td><code>a_b_order</code></td><td>proven under A5; <em>undetermined without it</em></td><td>&mdash;</td><td>A2, A5</td></tr>
+      </table>
+      <p class="src">An assume column is derived per row. One filled by copying is the same defect as an undeserved checkmark, a table to its left.</p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">A3 &middot; discharge: simulation only</span>No manager stalls its own responses indefinitely. A known concession, accepted with a written argument &mdash; <em>the discipline working</em>.</div>
+      <div class="ex good"><span class="tag">A4 &middot; discharge: proven on the crossbar itself</span>Handed back as a <strong>lemma</strong> bounding the checker's address queue. Two managers with one write each still overlap, <em>so the opening's bug stays in the model</em>.</div>
+      <div class="ex warn"><span class="tag">A5 &middot; discharge: none</span>Added mid-debug to make <code>a_b_order</code> converge, never reviewed &mdash; and <strong>doing the proving</strong>: with one response per ID in flight there is no pair left to order. <em>Withdrawn at sign-off.</em></div>
+    </td>
+  </tr></table>
+  <p class="ex" style="margin:2px 0 0"><span class="tag">Row four is the only bounded result, so it owes a derivation a reviewer can recompute</span>Round-robin serves each of the other four managers at most once ahead of this one, and each holds the target's address port for <strong>at most sixteen cycles</strong> (by A1), so the grant cannot fall later than <strong>4 &times; 16 = 64</strong>. Its antecedent &mdash; five requests pending at one subordinate &mdash; is first witnessed by a cover at <strong>cycle 12</strong>, so the shortest counterexample it admits is <strong>76</strong> cycles; two cycles of margin put the run at <strong>78</strong>.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- ============ 26. DIVIDER CH15 ============ -->
+<section class="slide divider">
+  <p class="chno">15</p>
+  <h1>Formal Apps and Equivalence</h1>
+  <p class="sub">Formal packaged as a product rather than practised as a craft &mdash; and the checking flows that have run quietly on every project for decades.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- ============ 27. CH15 OPENING ============ -->
+<!-- src: ch15:3-8 (input 5 vs header 6; why both block environments and the system regression
+     pass; the lab hang; the intent is a table and the implementation is wiring; the specialist
+     is busy and not needed) -->
+<section class="slide">
+  <p class="kicker">Chapter 15 &middot; The opening scenario</p>
+  <h2>The interrupt arrives on input&nbsp;5. The header says input&nbsp;6.</h2>
+  <p class="small muted" style="margin-bottom:9px">Two thousand lines of instantiation and wiring at the top level, containing one mistake. <strong>Both blocks are correct</strong>, so every block-level environment passes. The system regression passes too, because no test both provokes an accelerator error <em>and</em> enables that particular interrupt: the error path is exercised by the accelerator's own tests, which read the status register, and the interrupt map by the event unit's tests, which inject events directly.</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">It surfaces in the lab, as a hang</span>Nothing here is subtle. The intent is <strong>a table with a few hundred rows</strong> &mdash; this source, that destination, under this condition &mdash; and the implementation is structural wiring. Comparing the two is mechanical, and answering it by simulation is absurd: one directed test per row, each proving a single wire, none exhaustive over the conditions.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Meanwhile the team's one formal specialist is unavailable</span>She is three weeks into the crossbar's ordering proof, choosing abstractions and defending assumptions. <strong>She is also not needed.</strong> This question requires nobody to write a property. It requires a tool that already knows which property to write, and <em>a table to write it from</em>.</div>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>Every integration bug of this shape survives block-level verification <em>by construction</em>, because every block is correct.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- ============ 28. THE APP: FORMAL AS A PRODUCT ============ -->
+<!-- src: ch15:21-23 (only one step is the engine's; the X-prop app anatomy), ch15:25 (62% growth
+     2012-2014; 5.8% vs 8.7% CAGR IC/ASIC 2016-2024; 7.5% FPGA), ch15:27-38 (the catalogue table),
+     ch15:40 (intent is relocated, not removed), ch15:42 (convergence does not transfer; the
+     two-hour whole-IP run) -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 15 &middot; The app</p>
+  <h2>The tool brings the properties. You bring the design and a configuration.</h2>
+  <p class="small">Chapter 14's flow is mostly specification work &mdash; read the spec, decide what is worth proving, write properties, state and defend assumptions, fight convergence. <strong>Only one of those steps is the engine's.</strong> An app inverts the economics by <em>shipping the properties</em>: an X-propagation app reads the RTL and implements the assertions itself. <strong>Nobody writes a property or states an assumption.</strong></p>
+  <table class="compact">
+    <tr><th style="width:19%">App</th><th style="width:44%">What it proves</th><th>Where its intent comes from</th></tr>
+    <tr><td><strong>Connectivity</strong></td><td>Every declared connection exists, and no undeclared one does</td><td>An integration table</td></tr>
+    <tr><td><strong>Register access</strong></td><td>Reset values, access policies, decode</td><td>A register description</td></tr>
+    <tr><td><strong>Unreachability</strong></td><td>A coverage target admits no legal trace</td><td>The coverage database</td></tr>
+    <tr><td><strong>Auto-generated</strong></td><td>Interface and structural invariants extracted from the RTL</td><td><em>The RTL itself</em></td></tr>
+    <tr><td><strong>X propagation</strong></td><td>No unknown reaches a control point</td><td>Reset and initialisation structure &nbsp;<span class="small muted">(Ch 13)</span></td></tr>
+    <tr><td><strong>Clock-domain crossing</strong></td><td>Synchroniser structure and protocol correctness</td><td>Clock and reset declarations &nbsp;<span class="small muted">(Ch 13)</span></td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr>
+    <td><div class="ex warn"><span class="tag">An app relocates the specification &mdash; it does not remove it</span>Properties come free only where the intent is already machine-readable. <strong>Every hour saved on property writing reappears as intent curation.</strong></div></td>
+    <td><div class="ex warn"><span class="tag">And convergence does not transfer</span>Whole IP, two-hour limit: no violations, and only <em>bounded</em> proofs. <strong>An app makes property writing free. It does not make the design smaller.</strong></div></td>
+  </tr></table>
+  <p class="src">Done for real: on an NXP SECDED ECC block guarding an 8K memory, a four-phase formal fault campaign reduced 3,606 injected faults to 2,489 prime faults, proved 763 structurally and a further 232 then 16 formally unobservable, and identified <strong>512 faults that corrupt data without raising the ECC error signal</strong> &mdash; the dangerous class a simulation campaign would have left in the &ldquo;not observed, argue by hand&rdquo; pile. (DVCon, pp.6-7.)</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- ============ 29. CONNECTIVITY ============ -->
+<!-- src: ch15:46-48 (integration error profile; why formal fits by shape), ch15:52-62 (the
+     generated property verbatim; how to read the antecedent/$past/enable), ch15:64 (the row that
+     does not prove), ch15:66 (the dual claim; the debug-fabric negative rows), ch15:68-70 (crypto
+     key-ladder scenario; structural non-adjacency is not non-leakage), ch15:72 (symbolic port
+     indices: 162 s vs 65 s), ch15:205 (the closure column must say "none bounded") -->
+<section class="slide dense">
+  <p class="kicker">Chapter 15 &middot; Connectivity checking</p>
+  <h2>Proving the wiring &mdash; the highest-value, lowest-effort app on most projects</h2>
+  <table class="cols"><tr>
+    <td style="width:49%">
+<pre class="mini">// Intent row: src = nn_err_irq, dst = evt_in[6],
+//             enable = cfg_irq_en[6], latency = 1 cycle.
+property p_conn_nn_err;
+  @(posedge clk) disable iff (!rst_n)
+    cfg_irq_en[6] |=&gt; (evt_in[6] == $past(nn_err_irq));
+endproperty
+a_conn_nn_err : assert property (p_conn_nn_err);</pre>
+      <p class="small">The antecedent is the enabling condition sampled now; the consequent fires one tick later and compares the destination against the source <em>as it was when the enable was true</em>. It says nothing about cycles where the enable is low &mdash; an unconditional claim would be wrong. <strong>Two hundred rows of this, generated and discharged in one run, is the entire flow.</strong></p>
+      <div class="ex warn"><span class="tag">One of the two hundred is the row above</span>It does not prove: the wiring reaches input&nbsp;5. <strong>No test had to provoke an accelerator error while that interrupt was enabled</strong> &mdash; the proof does not care whether one ever would.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">The dual claim, and the part teams forget</span>A table listing what must be connected says nothing about what must <strong>not</strong> be. On the crypto engine: no path from any key-ladder output to a bus-readable address, the debug data register, or a scan-observable point. Cheaper still &mdash; a structural question a tool answers without a proof engine getting involved.</div>
+      <div class="ex warn"><span class="tag">But be exact about what a negative row proves</span>A no-connection result is <em>structural</em>: no path exists. It does not say the key never influences an observable value along a path that <em>does</em> exist &mdash; that is an information-flow question. <strong>Confusing the two is how a team believes it has proved non-leakage when it has proved non-adjacency.</strong></div>
+      <p class="small"><strong>Scaling.</strong> Make the port indices <em>symbolic</em> &mdash; an arbitrary manager and subordinate, constrained only to be stable &mdash; and one property covers every value they could take. Not always faster: <strong>162 seconds symbolic against 65</strong> for the exhaustive per-path proofs together.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- ============ 30. REGISTER CHECKS ============ -->
+<!-- src: ch15:76-80 (one description, every view; what the app enumerates per register; why a
+     front-door walk is measured in hours), ch15:82-100 (uart_status_reg: W1C over all values,
+     volatile and the check it forces, "any hardware-writable field is inherently volatile", the
+     switched-off failing check), ch15:102 (the common-mode limit), ch15:104-106 (GPU cluster 3,
+     four thousand fields).
+     Field facts quoted from example_bank.md "Canonical numbers": oe at lsb 3, width 1, W1C,
+     volatile 1, reset 0, has_reset 1, is_rand 0, not individually accessible. -->
+<section class="slide dense">
+  <p class="kicker">Chapter 15 &middot; Register checks</p>
+  <h2>The map against its description &mdash; and the gap it does not close</h2>
+  <table class="cols"><tr>
+    <td style="width:47%">
+      <p class="small">One register description generates every view a project already has and already lets drift: RTL decode and field logic, verification model, firmware header, documentation. <strong>The app closes the remaining edge</strong> &mdash; it proves the RTL implements the description, per register and per field.</p>
+      <table class="compact">
+        <tr><th style="width:47%">Field <code>oe</code>, the UART RX overrun flag</th><th>Value</th></tr>
+        <tr><td>width &middot; lsb</td><td><strong>1</strong> &middot; <strong>3</strong></td></tr>
+        <tr><td>access policy</td><td><strong><code>"W1C"</code></strong> &mdash; write one to clear</td></tr>
+        <tr><td>volatile &middot; reset &middot; has_reset</td><td><strong>1</strong> &middot; <code>1'b0</code> &middot; 1</td></tr>
+      </table>
+      <p class="small">A conventional register test walks the map front-door, pattern by pattern &mdash; which is why a large map's register test is measured in hours. The app proves the same statements <strong>over all values and orderings</strong>, at RTL rather than through the bus.</p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Two of those arguments are exactly what the app is for</span><code>"W1C"</code> is a statement about <strong>every possible write value and both possible current values</strong>, of which a random register test exercises a handful. And <code>volatile</code> records that hardware can change the field without software's involvement &mdash; so the check must read <em>a software write of 1 clears the field unless hardware sets it in the same cycle</em>, not <em>the field is 0 after the write</em>. <strong>An app that ignores the flag generates a check that fails on correct hardware</strong>, and the first thing a team does with a failing generated check is switch it off.</div>
+      <div class="ex warn"><span class="tag">Now the honest limit</span>The app proves <em>RTL against description</em>, and the register model and the RTL check come from the same file: <strong>a common-mode error, encoded once and read twice.</strong> Nothing here reviews whether bit&nbsp;3 was the right bit. That review is a human reading the description against the architecture document &mdash; and the app's value is that it removes everything else.</div>
+    </td>
+  </tr></table>
+  <p class="src">Scenario &mdash; the GPU's four shader clusters carry identical register banks; cluster 3 is hand-edited during a late change and one counter's reset value is left at the previous revision's. The app enumerates from the description, so it checks cluster 3 whether or not anyone thought about cluster 3.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- ============ 31. UNREACHABILITY ============ -->
+<!-- src: ch15:110-112 (the waiver's argument becomes a result; dead RTL exclusion is a
+     precondition for an honest percentage), ch15:114 (the one word "legal"; the enable_cnt == 0
+     setup-script case), ch15:116 (the app works on the design, not on a monitor-side model; the
+     72 / 6 / 66 figures), ch15:120-131 (the design-level restatement c_split_max_len, and that it
+     comes back REACHABLE), ch15:133-135 (the exclusion's TYPE is refuted, not the exclusion; the
+     expiry is an edit to the constraint file), ch15:137 (configuration-dependent unreachability).
+     Cell counts and the solver-budget premise quoted from example_bank.md "Canonical numbers" --
+     6 cells are excluded by the generator's c_solver_budget, a chosen policy, NOT by geometry. -->
+<section class="slide dense">
+  <p class="kicker">Chapter 15 &middot; Unreachability</p>
+  <h2>A proof instead of a waiver &mdash; and what the verdict inherits</h2>
+  <p class="small">A coverage exclusion's reason is almost always an engineer's claim that a state is unreachable. That is a reachability question about the design, and reachability is what a model checker computes: <strong>what was an opinion in a waiver becomes a result in a database.</strong></p>
+  <table class="cols"><tr>
+    <td style="width:46%">
+      <div class="ex warn"><span class="tag">Catch one &mdash; the word <em>legal</em></span>Reachability is computed relative to the constraints, and a wrong constraint makes reachable behaviour look impossible. One case is worth memorising because it is so ordinary: an input constraint hiding in a tool setup script, <code>enable_cnt == 0</code>, made a counter's increment line uncoverable. <strong>It was reported unreachable, and it was</strong> &mdash; under an assumption nobody had reviewed.</div>
+      <div class="ex warn"><span class="tag">Catch two &mdash; it works on the <em>design</em></span>RTL lines, branches, FSM states, cover properties bound into design scopes. <strong>A functional coverage model computed by the testbench is invisible to it.</strong></div>
+    </td>
+    <td>
+<pre class="mini">// Can the midend ever emit a full-length burst out of a
+// transaction it had to split at a 4 KB frontier?
+c_split_max_len : cover property (
+  @(posedge clk) disable iff (!rst_n)
+  midend_txn_done &amp;&amp; midend_did_split
+  &amp;&amp; (midend_burst_len == 9'd256));</pre>
+      <p class="small">The canonical DMA cross <code>x_worst</code> has <strong>72</strong> combinations. <strong>Six</strong> &mdash; the whole <code>straddle</code>&nbsp;&times;&nbsp;<code>max</code> column, 3 stride signs &times; 2 other-channel states &mdash; are excluded by the generator's <code>c_solver_budget</code>, a budget the team <em>chose</em>. That leaves <strong>66</strong> cells to close.</p>
+      <div class="ex"><span class="tag">The engine answers in seconds &mdash; and the cover is REACHABLE</span>Nothing in the design bounds a descriptor row at one maximum burst. <strong>The bound that empties the column lives in the constrained-random generator, and a design-level cover does not inherit it.</strong></div>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:0"><span class="tag">Be precise about what that does and does not overturn</span><strong>The exclusion is not refuted. What is refuted is its <em>type</em>.</strong> It looked like a statement about the design and it is a statement about the stimulus &mdash; true while the generator stays as it is, false the morning someone widens it. So the disposition stays a waiver, and <em>this is what its expiry field is for</em>: the expiry is an edit to the constraint file, which nobody counts as verification evidence until the morning it is.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- ============ 32. AUTO-GENERATED PROPERTIES ============ -->
+<!-- src: ch15:141-143 (extraction from the RTL; cheapest by the intent column; mining has no
+     golden reference, so flawed RTL yields flawed properties), ch15:145 (a mined property cannot
+     fail on the RTL it was mined from; bug-finding power zero; worth what a regression is worth),
+     ch15:147 (the review question is "is it intended", and that is the project), ch15:149-151
+     (the inherited UART scenario and the canonical overrun escape encoded as an obligation) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 15 &middot; Auto-generated properties</p>
+  <h2>A draft, not a specification</h2>
+  <p class="small">Point this app at the RTL and it extracts implementation-detail properties &mdash; interface handshakes, one-hot encodings, occupancy bounds, the structural invariants a designer would state if anyone asked. No table, no description, no configuration beyond a module name. <strong>Judged by the intent column it is the cheapest row in the catalogue: the intent source already exists, and it is the design.</strong></p>
+  <table class="cols"><tr>
+    <td style="width:48%">
+      <div class="ex warn"><span class="tag">Which is exactly what is wrong with it</span>Every other app reads intent from something that is <em>not</em> the design &mdash; a wiring table, a register description, a coverage model &mdash; and <strong>the gap between the two is where the app finds bugs</strong>. This one closes the gap by construction.</div>
+      <p class="small">The limitation is structural rather than a matter of tool maturity: mining generates and evaluates its properties on the same RTL <em>with no golden reference to appeal to</em>, so flaws in the RTL yield flawed properties and the method has nothing with which to notice.</p>
+      <div class="ex warn"><span class="tag">Follow that through</span>A mined property <strong>cannot fail on the RTL it was mined from</strong>. It proves &mdash; and it would have proved on a design with the opposite behaviour, because the behaviour is where it came from. <em>Its bug-finding power against today's RTL is zero, and no amount of proof depth changes that.</em></div>
+    </td>
+    <td>
+      <div class="ex good"><span class="tag">What it <em>is</em> worth is what a regression is worth</span>It converts the design's present behaviour into an obligation, so the next edit that changes that behaviour has to <strong>argue with something</strong> instead of sliding through.</div>
+      <p class="small">The review question for each of three hundred generated properties is not <em>is it true</em> &mdash; it is, by construction &mdash; but <strong><em>is it intended</em></strong>, and answering that is specification work, property by property, done by the specialist the app was supposed to make unnecessary. <em>An app that emits verdicts removes that work. An app that emits drafts relocates it.</em> <strong>Budget the review, or do not run the app.</strong></p>
+      <div class="ex warn"><span class="tag">Scenario &mdash; the inherited UART, four years old, specification lost</span>Its RX overrun flag is never cleared when software reads the status register in the same cycle a stop-bit error arrives. The RTL exhibits it, so a mined property states it <strong>as an obligation</strong> &mdash; and the day someone fixes the bug, the property fires as a regression. <em>A generated set encodes the design's defects with exactly the fidelity it encodes its features.</em></div>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<!-- ============ 33. EQUIVALENCE ============ -->
+<!-- src: ch15:155-157 (compares a design against another design; the reconvergence framing),
+     ch15:159-161 (LEC: combinational, runs everywhere, won acceptance first; the matched-state-
+     point assumption and everything that follows from it), ch15:163 (the 48-bit synthetic operator
+     anecdote), ch15:165-169 (SEC drops the assumption and becomes model checking; clock gating and
+     retiming), ch15:171-178 (the three-column table and the closing "relative argument") -->
+<section class="slide dense">
+  <p class="kicker">Chapter 15 &middot; Equivalence checking</p>
+  <h2>The flow's quiet workhorse: a design against another design</h2>
+  <p class="small">Every technique so far compares a design against a <em>specification</em>. This compares a design against another design &mdash; weaker-sounding, worth more, because the flow's most frequent transformations are ones nobody verifies any other way. Chapter 2's reconvergence model: synthesis turns RTL into a netlist, equivalence checking is <strong>an independent second path from the same origin</strong>, and the two reconverge at a proof that the transformation preserved functionality. <em>No stimulus, no coverage, no oracle problem.</em></p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex"><span class="tag">LEC &mdash; and its assumption is the whole story</span><strong>It does not reason about sequences.</strong> It matches <em>state points</em> &mdash; the registers of both models &mdash; one-to-one, then proves the combinational logic computing each is Boolean-equivalent. Everything follows: fast, exhaustive because it never enumerates a trace, and it <strong>degenerates into a mapping problem</strong> when the state points do not match.</div>
+      <p class="small"><strong>It keeps the synthesis tool honest.</strong> The canonical illustration: a design synthesised incorrectly from a synthetic arithmetic operator whose documentation said correctness was not guaranteed above <strong>48 bits</strong> &mdash; documentation the synthesis tool could not read. Equivalence checking found it quickly; gate-level simulation with great difficulty, if at all.</p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">SEC &mdash; drops that assumption and pays for it</span>Equivalence now means <em>every input sequence produces the same output sequence</em>, decided on a product machine running both designs in lock-step. <strong>That is a model-checking problem, with model checking's costs</strong> &mdash; so it is aimed at bounded, well-chosen transformations rather than sprayed across a design.</div>
+      <p class="small"><strong>Clock gating.</strong> Gates inserted on the accelerator's 16-lane MAC datapath: if the condition is wrong by one cycle the datapath holds a stale value that surfaces only on a weight-stream boundary. <strong>Retiming.</strong> The radar front-end's FFT pipeline misses timing, a stage boundary moves &mdash; same arithmetic, different register mapping, so LEC will not map the state points at all.</p>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:0"><span class="tag">And one row holds across LEC, SEC and the datapath flow alike: what each is blind to</span>Whether the <em>reference itself</em> is right. <strong>Equivalence is a relative argument: it transfers your confidence in one model onto another exactly and without loss, and it transfers your errors with the same fidelity.</strong> Nothing here says the RTL is correct. It says the netlist is as correct as the RTL &mdash; a smaller claim, and the one the flow actually needs.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">33</span>
+</section>
+
+<!-- ============ 34. DATAPATH ============ -->
+<!-- src: ch15:182 (8x8 residual block, 64 coefficients, 16 bits, 2^1024; the scatter failure mode;
+     exact integer arithmetic makes a one-bit mismatch a conformance failure), ch15:184 (word level
+     not bit level; decompose; over 120 properties on one industrial FPU), ch15:186-188 (the
+     industrial flow is practitioner judgment; why it must be separate from Sec 15.6's checkers),
+     ch15:190-192 (radar CFAR: bit-exact against the fixed-point model, then the comparison nobody
+     asked for) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 15 &middot; Datapath</p>
+  <h2>Where simulation's coverage argument does not degrade &mdash; it collapses</h2>
+  <table class="cols"><tr>
+    <td style="width:47%">
+      <div class="ex warn"><span class="tag">The clean case: a codec's inverse transform</span>An 8&times;8 residual block is <strong>64 coefficients</strong>; at 16 bits each, the input space of a <em>single invocation</em> is <strong>2<sup>1024</sup></strong> values. No coverage model samples that meaningfully, and no argument from &ldquo;we ran a billion random blocks&rdquo; survives contact with the arithmetic.</div>
+      <p class="small"><strong>Worse, the failure mode is not a region of the space but a scatter</strong> &mdash; a rounding term applied at the wrong stage, a saturation clipping one bit late, an intermediate width one bit short. Each is wrong for a sparse, structured subset of operands that random stimulus meets with probability near zero. And the standard specifies the transform as <em>exact integer arithmetic</em>, so a one-bit mismatch in one coefficient is a conformance failure, not a quality issue.</p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">What makes it tractable: the specification is not prose</span>It is a <strong>mathematical relation between operands and result</strong>, and it can be written as one. The pattern established after the floating-point division episode: state a multiplier's top-level specification as a formalisation of the arithmetic standard, with significand and exponent read as <em>integer values rather than bit vectors</em>.</div>
+      <p class="small">And <strong>decompose</strong>: over <strong>120 properties</strong> covered all arithmetic operations of one industrial floating-point unit, each a property about a subunit, with the irrelevant parts extracted away per property. Two lessons carry: <em>reason at word level, not bit level</em>, and <em>the monolithic claim does not converge</em>.</p>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:0"><span class="tag">Scenario &mdash; the radar front-end's CFAR detector, and the comparison nobody asks for</span>Datapath verification proves the RTL bit-exact against the algorithm team's fixed-point C model, on every operand. <strong>Ship it &mdash; and then run the other comparison</strong>: the fixed-point model against the floating-point one, over the operating envelope, with a declared error bound. Bit-exactness against the fixed-point reference is a complete answer to <em>did we build the model correctly</em> and <strong>no answer at all to <em>is the model adequate</em></strong>. A detector that saturates on a strong near-target loses a weak far one, and every stage of the equivalence argument passes while it happens.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">34</span>
+</section>
+
+<!-- ============ 35. DIVIDER CH16 ============ -->
+<section class="slide divider">
+  <p class="chno">16</p>
+  <h1>Hybrid Flows</h1>
+  <p class="sub">One design, one plan, one sign-off &mdash; and two engines that must stop being run as two projects.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">35</span>
+</section>
+
+<!-- ============ 36. CH16 OPENING ============ -->
+<!-- src: ch16:3-11 (the two reports; nine properties on two caches and one address; the five-row
+     assumption register with four discharged; four hundred runs, cross at 71%, holes in the
+     eviction column; the merged number with no nameable denominator; two opposite answers) -->
+<section class="slide">
+  <p class="kicker">Chapter 16 &middot; The opening scenario</p>
+  <h2>One dashboard number. Ask what its denominator is.</h2>
+  <p class="small muted" style="margin-bottom:9px">The flagship's host cluster has been in verification for a quarter, and two engineers have been working on it without reading each other's reports.</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex"><span class="tag">The formal report says</span><strong>Nine properties</strong> on the directory's transition rules, proven unbounded on a model cut down to <strong>two caches and one address</strong>. An assumption register of <strong>five rows, four of them discharged</strong> on a neighbouring block. Among the nine is the invariant that at most one cache may hold a line Modified.</div>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">The simulation report says</span><strong>Four hundred runs</strong> of random traffic across four application cores. A functional cross of MESI state against requester against concurrent-snoop standing at <strong>71%</strong>. A scoreboard silent for three weeks &mdash; and the note that the remaining holes are all in the <em>eviction column</em>.</div>
+    </td>
+  </tr></table>
+  <p class="ex warn"><span class="tag">The lead's dashboard merges both databases and prints one number</span>That number is not wrong about anything, and <strong>it is not a claim about anything either</strong>. Ask the sharper question &mdash; <em>does the proof of the single-writer invariant fill the cross bins that ask the same question?</em> &mdash; and you get two confident, opposite answers from two competent engineers. <strong>Neither of them is doing anything wrong. The flow is.</strong></p>
+  <p class="note"><b>Say</b>There is one design, one plan and one sign-off. The two engines have been run as two projects that meet for the first time at a dashboard.</p>
+  <p class="src">Done for real, and it is exactly a denominator question: when Oracle Labs measured assertion cone-of-influence coverage across all the registers of one of its designs, <strong>18% of them &mdash; 1,375 registers &mdash; were not in the cone of influence of any assertion at all.</strong> A formal testbench can look healthy and still leave a fifth of the design untouched. Oracle Labs names no product; the paper calls the DUT only &ldquo;the design&rdquo;. (DVCon, p.4.)</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">36</span>
+</section>
+
+<!-- ============ 37. DIVIDING THE WORK ============ -->
+<!-- src: ch16:25 (how the criterion quantifies: "for every" vs "for this traffic"), ch16:27 (corner
+     vs volume; formal has nothing to say about how often), ch16:29 (the GPU contrast pair, both
+     rows on one interface), ch16:31 (witness cost both directions; the predictability asymmetry),
+     ch16:33 (where the criterion is observable) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; Dividing the work</p>
+  <h2>Assign engines to plan rows, on properties of the problem</h2>
+  <table class="compact">
+    <tr><th style="width:24%">Property of the row</th><th>How to read it</th></tr>
+    <tr><td><strong>How the criterion quantifies</strong></td><td><em>For every</em> burst, grant or line &mdash; a claim over all traces, which a sampling engine can only corroborate. <em>For this traffic</em> &mdash; a claim about a transformation, whose oracle is another executable</td></tr>
+    <tr><td><strong>Corner or volume</strong></td><td>A <em>corner</em> is a conjunction of rare conditions: a product of probabilities in simulation, a search that ignores rarity in formal. A <em>volume</em> &mdash; throughput, occupancy, fairness &mdash; is statistical, and there is nothing there to prove</td></tr>
+    <tr><td><strong>What a witness costs</strong></td><td>A counterexample is near-minimal with no history attached; a simulation failure arrives with everything that preceded it. Criteria over internal state are cheap in <em>both</em> engines &mdash; which is why Chapter 11's invariants have a second career as formal lemmas</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr>
+    <td>
+      <div class="ex"><span class="tag">Scenario &mdash; two GPU rows on one interface</span><strong>Row one:</strong> <em>no shader cluster may observe a write reordered past a barrier it issued</em> &rarr; <strong>formal</strong>, on the one-symbolic-address memory model. A corner: one specific interleaving of barrier, write and cross-cluster read, whose probability under random stimulus is a product of three small numbers.<br><br><strong>Row two:</strong> <em>at 90% memory-bus utilisation the 99th-percentile shader stall stays under N cycles</em> &rarr; <strong>simulation</strong>, with a real-frame traffic profile and a distribution for a closure metric. Ask a proof engine <em>&ldquo;can this stall exceed N?&rdquo;</em> and it returns a worst case that exists, occurs once in a billion frames, and was never what the row was about.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">And the asymmetry that belongs in the plan, not in week nine</span>When the answer is <em>no violation</em>, <strong>simulation's cost is predictable and formal's is not.</strong> A few minutes of simulation gives a good estimate of clock cycles per second for the rest of the run; if an assertion is slow to prove, it is almost impossible to predict how much longer it will take.</div>
+      <p class="small">So a lead may put a simulation row on the critical path and estimate it. A formal row there is an <strong>unbounded commitment</strong> unless the plan says in advance what happens when it does not converge &mdash; which is why the convergence ladder ends with <em>stop, and hand the row to simulation</em> as a <strong>planned outcome</strong>.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">37</span>
+</section>
+
+<!-- ============ 38. ONE RULE, THREE LIVES ============ -->
+<!-- src: ch16:39 (the operational problem: a constraint block vs temporal properties; not one
+     statement in two syntaxes, so no tool diffs them), ch16:45-47 (the two drift directions, and
+     that only one announces itself) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; Assumption and constraint duality, as a flow</p>
+  <h2>One interface rule lives three lives &mdash; and the dangerous drift is silent</h2>
+  <table class="cols"><tr>
+    <td style="width:40%">
+      <table class="stack"><tr><td>
+        <div class="layer top">GENERATOR CONSTRAINT<span class="d">a predicate over a randomized object &mdash; produces legal traffic on the block's input</span></div>
+        <div class="layer">ASSERTION<span class="d">a predicate over a signal history &mdash; checks legality on the neighbour's output</span></div>
+        <div class="layer">ASSUMPTION<span class="d">the same text, deleting traces from a formal model</span></div>
+      </td></tr></table>
+      <p class="small">These are <strong>not one statement in two syntaxes</strong>. So no tool diffs them, and no compiler complains when they diverge. Teams discover the divergence at sign-off, or never.</p>
+    </td>
+    <td>
+      <div class="ex good"><span class="tag">Drift one &mdash; the generator is narrower than the assumption</span>The formal environment permits traffic the tests never send. <strong>This is sound:</strong> the proof covers a superset of what simulation exercised, so nothing is claimed that is not established. And it shows up honestly, <em>as a coverage hole on the simulation side</em>.</div>
+      <div class="ex warn"><span class="tag">Drift two &mdash; the assumption is stronger than the generator's legal set</span>The proof holds over a <em>subset</em> of the traffic the tests actually send &mdash; so simulation is exercising behaviour the proof never covered, <strong>while both reports are green</strong>. Nothing on either side is empty. There is no hole, no failure, and <strong>no artifact anywhere that records the gap.</strong></div>
+      <p class="small">This is Chapter 14's quiet over-constraint arriving through a second door: not an assumption written too strong for the design's environment, but one written accurately for an <em>older</em> environment that the stimulus has since outgrown.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">38</span>
+</section>
+
+<!-- ============ 39. TWO DETECTORS ============ -->
+<!-- src: ch16:51-53 (take the assumption as source of truth; instantiating constraints in
+     simulation is a named over-constraint technique), ch16:57-88 (wake_handshake_checker verbatim
+     and the bind), ch16:81 (read the property before believing anything about it), ch16:90-92
+     (detector one catches going outside; detector two catches never approaching; every assumption
+     ships with a cover on the condition it restricts), ch16:94 (the register gains two columns) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; Two detectors</p>
+  <h2>Make the assumption the source of truth &mdash; it is the one whose failure is silent</h2>
+  <table class="cols"><tr>
+    <td style="width:57%">
+<pre class="mini">module wake_handshake_checker #(parameter bit ASSUME_MODE = 1'b0) (
+  input logic clk_slow, rst_n, wake_req, wake_ack
+);
+  // The requester may not withdraw an unacknowledged request.
+  property p_req_holds_until_ack;
+    @(posedge clk_slow) disable iff (!rst_n)
+    (wake_req &amp;&amp; !wake_ack) |=&gt; wake_req;
+  endproperty
+  c_req_waited : cover property (@(posedge clk_slow)
+                   disable iff (!rst_n) wake_req &amp;&amp; !wake_ack);
+  if (ASSUME_MODE) begin : g_env
+    m_req_holds_until_ack : assume property (p_req_holds_until_ack);
+  end else begin : g_chk
+    a_req_holds_until_ack : assert property (p_req_holds_until_ack);
+  end
+endmodule</pre>
+      <p class="small">Read the property before believing anything about it. It says only that an <em>unacknowledged</em> request survives into the next cycle &mdash; nothing about life after <code>wake_ack</code> rises, and <strong>it never constrains <code>wake_ack</code>.</strong></p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Detector one &mdash; compile the assumption set into simulation as assertions</span>When the DSP's wake controller is proved, <code>wake_req</code> is an input and the instance is built with <code>ASSUME_MODE&nbsp;=&nbsp;1</code>. When the island is proved, the same text is <em>asserted</em>. And bound into the DSP's own block-level simulation, where <code>wake_req</code> comes from the testbench, <strong>that instance is checking your generator, not the design.</strong> If a sequence ever drops an unacknowledged request it fires, naming the assumption that would have been <em>silently violated</em> in formal &mdash; on a nightly run rather than at sign-off.</div>
+      <div class="ex warn"><span class="tag">Detector two &mdash; cover the assumption's boundary</span>Detector one catches the generator going <em>outside</em> the assumption. It says nothing about the commoner case: staying so far inside that the assumption <strong>was never tested</strong>. If <code>c_req_waited</code> reads zero, the assertion has never evaluated non-vacuously. <strong>Every assumption ships with a cover on the condition it restricts.</strong></div>
+    </td>
+  </tr></table>
+  <p class="src">Together the two turn Chapter 14's assumption register from a reviewed document into a monitored one &mdash; each row gaining a column for its assertion's last pass and its cover's last hit.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">39</span>
+</section>
+
+<!-- ============ 40. COVERAGE UNIFICATION ============ -->
+<!-- src: ch16:102 (a bin holds a count, a proof holds a claim; averaging gives a denominator of
+     two incompatible units), ch16:106-108 (the single repository; the result enumeration and the
+     radius travelling with its clock; assumptions, restrictions, init sequence, initial-value
+     abstractions, cutpoints -- Sec 14.6's package carried in the schema), ch16:110 (temporal /
+     spatial / heterogeneous, and the caution on the third), ch16:112 (17 and 96: 2/256 vs 2/8),
+     ch16:116-124 (the three-column table; the bin failure) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; Coverage unification</p>
+  <h2>What a unified report may claim, and what it may never</h2>
+  <p class="small">A simulation bin holds a count: <em>this situation occurred, n times, in the runs I performed.</em> A proof holds a claim: <em>no legal trace violates this rule.</em> They are not two measurements of one quantity &mdash; one is a statement about your testbench and the other about your design. <strong>Average them and the percentage has a denominator made of two incompatible units.</strong></p>
+  <table class="compact">
+    <tr><th style="width:33%">Merges in one unit</th><th style="width:33%">Travels as a tagged item, with its qualifiers</th><th>Must never be summed</th></tr>
+    <tr><td>Code coverage &mdash; lines, branches, conditions: formal reachability and simulation report hits against <strong>the same structural denominator</strong></td><td>An assertion's result plus its <strong>radius</strong> &mdash; a bounded proof's depth or a counterexample's length &mdash; with the assumptions, abstractions and cutpoints</td><td><strong>Functional bins against proofs.</strong> A hit count and a proof answer different questions</td></tr>
+    <tr><td>Assertion coverage: the same property's pass and vacuity counts across simulation runs</td><td>An unreachability verdict on a coverage target, <em>with the constraint set that produced it</em></td><td>Two percentages whose metrics partition the space differently</td></tr>
+    <tr><td>Plan-row status: each row closed by <em>its</em> declared metric, whichever engine produced it</td><td>A merged view &mdash; provided it is recorded as a <em>derived</em> item and labelled as one</td><td>A proof's &ldquo;100%&rdquo; into a functional bin the tests never filled</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr>
+    <td><div class="ex"><span class="tag">The standard's own caution on heterogeneous merges</span>Such items are <em>more often semantically different than equivalent</em>, so they should not be merged automatically; a tool that does must record the result as a <strong>new item carrying a semantic tag saying it is merged data</strong>. The merging algorithm itself is left unspecified. <em>A licence with a condition attached.</em></div></td>
+    <td><div class="ex warn"><span class="tag">And a percentage is a property of a model, not of a design</span>An eight-bit variable that took the values 17 and 96 scores <strong>2/256</strong> under a metric with one bin per value and <strong>2/8</strong> under eight-bin auto-binning. <em>Collection loses information that cannot be recovered afterwards</em> &mdash; and it compounds when the denominators come from two engines that never agreed on a partition.</div></td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">40</span>
+</section>
+
+<!-- ============ 41. UNIFY AT THE PLAN ============ -->
+<!-- src: ch16:128 (the unification layer is the plan, not the database; one row one metric; the
+     honest form of "proven, so no coverage needed"; rows closed out of rows planned), ch16:122
+     (the 8x8 multicast crossbar: 288 lines, 88 conditions, deepest cover at depth 5; a second
+     deployment mandating structural coverage from formal), ch16:130 (the predicted-unreachable
+     classification and its warning), ch16:124 (writing a proof into a functional bin) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; The reconciliation</p>
+  <h2>Unify at the verification plan, not at the coverage database</h2>
+  <p class="small">The honest answer is not a better merge algorithm. Chapter 5's <strong>one-row-one-metric</strong> rule was written for exactly this: a row discharged by a proof closes on the proof &mdash; with its depth, its assumption list and its own formal coverage evidence &mdash; while a row discharged by a covergroup closes on the covergroup. <em>Nothing has to be averaged, because nothing was ever a fraction of the same whole.</em></p>
+  <table class="cols"><tr>
+    <td style="width:46%">
+      <div class="ex good"><span class="tag">What the dashboard reports</span><strong>Rows closed out of rows planned</strong>, per engine and in total &mdash; a number with a denominator anyone at the review can name.</div>
+      <p class="small">That is also the honest form of <em>&ldquo;proven, so no coverage needed&rdquo;</em>: the row needs no functional <strong>bin</strong>, because the proof discharges what the bin was sampling towards &mdash; and it <em>still</em> owes the formal coverage models, which is why a proof never closes a row on its own.</p>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">Job one &mdash; structural coverage, in one unit</span>Formal reachability produces line, branch and condition coverage in precisely the units simulation uses, so those genuinely add. On a published multicast crossbar of eight clients and eight targets, the <em>completed formal testbench alone</em> covered <strong>all 288 lines and all 88 conditions, deepest cover point at depth 5</strong> &mdash; inside that project's derived required proof depth, which the authors take as evidence the depth is not optimistic.</div>
+      <div class="ex"><span class="tag">Job two &mdash; the tripwire teams leave switched off</span>An item can be flagged <strong>formally unreachable</strong>, and the classification separates a don't-care from a <em>predicted-unreachable</em> point precisely so <strong>a warning is raised if it is later covered</strong>. Chapter 15 turned a waiver's argument into a proof; this makes the proof a live tripwire.</div>
+    </td>
+  </tr></table>
+  <p class="ex warn" style="margin:0"><span class="tag">And the failure worth naming, because it looks like progress</span>Writing a proof's verdict into a functional bin destroys two instruments at once. The bin's job is to record <em>what the stimulus did</em>: overwrite it and the fresh-seed yield no longer discriminates a converged suite from a saturated one, while the coverage differential can no longer fail a commit that quietly made the suite ask less. <strong>You have not gained coverage. You have blinded two metrics to buy a number.</strong></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">41</span>
+</section>
+
+<!-- ============ 42. CHOOSING AN ENGINE, ROW BY ROW ============ -->
+<!-- src: ch16:138-143 (the six questions in the order they break ties), ch16:147 (the USB scenario:
+     good formal target, but the compliance suite's item list is the closure metric; authority, not
+     method), ch16:153 (the deployment that started after a dynamic milestone and found 82
+     interesting bugs in twelve weeks, with its easy/medium/hard taxonomy), ch16:155 (deliberate
+     double assignment is two rows with two metrics) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; Choosing an engine</p>
+  <h2>A decision procedure a lead can apply in a plan review &mdash; per row, not per block</h2>
+  <table class="compact">
+    <tr><td style="width:5%"><strong>1</strong></td><td>Does the criterion quantify over <strong>all traces</strong>, or over a <strong>traffic profile</strong>? Profile criteria stay simulation rows however elegant the property would look</td></tr>
+    <tr><td><strong>2</strong></td><td>Is the interesting behaviour a <strong>corner or a volume</strong>? A conjunction of rare conditions goes to formal even when the block is large, because the abstraction that makes it converge usually preserves the conjunction</td></tr>
+    <tr><td><strong>3</strong></td><td>Can the block's environment <strong>even construct the witness</strong>? If not, the row is not a stimulus-tuning problem</td></tr>
+    <tr><td><strong>4</strong></td><td>What does the row's model have to <strong>contain</strong>? Price the abstraction bill and the deletion list before committing</td></tr>
+    <tr><td><strong>5</strong></td><td><strong>Who owns sign-off for this row?</strong> Sometimes the answer is nobody on your project</td></tr>
+    <tr><td><strong>6</strong></td><td>What happens <strong>if it does not converge</strong>? Answer this in the plan review, not in week nine</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr>
+    <td><div class="ex warn"><span class="tag">Question five &mdash; the USB controller's link-training rows</span>The U0 through U3 transitions are as good a formal target as exists, and a proof of them is cheap, fast and finds real bugs. <strong>Run it, and do not let it close the rows</strong> &mdash; their closure metric is the compliance suite's item list. <em>Cheaper but not sufficient for sign-off</em> is not a criticism of formal: the proof is <strong>stronger</strong> evidence than the suite for the rules it covers. It is a statement about who holds the authority to declare the row done.</div></td>
+    <td><div class="ex good"><span class="tag">And the outcome that looks like waste and is not: <em>both</em></span>One deployment began its formal effort <em>after</em> a major dynamic-verification milestone had completed, on designs whose simulation environments were already stable &mdash; precisely where a second method should find nothing &mdash; and reported <strong>82 interesting bugs over twelve weeks</strong>. The taxonomy is the useful part: <em>easy</em>, a state machine attempting two arcs at once; <em>medium</em>, counter overflows and arbiter starvation; <em>hard</em>, a deep internal counter value coincident with a specific input sequence. Even the easiest would have been difficult for the running environment to find.</div></td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">42</span>
+</section>
+
+<!-- ============ 43. THE HANDOFF ============ -->
+<!-- src: ch16:171-175 (formal to simulation: CEX to directed test, unreachability proof to waiver
+     justification, assumption to checker -- each with what must travel), ch16:179-183 (simulation
+     to formal: coverage hole to reachability question, long trace to property, invariant to lemma),
+     ch16:189 (staffing: one person who reads both reports is a bottleneck, not a hybrid flow) -->
+<section class="slide dense">
+  <p class="kicker">Chapter 16 &middot; The handoff</p>
+  <h2>Artifacts crossing between two engineers &mdash; and what must travel with each</h2>
+  <table class="cols"><tr>
+    <td>
+      <h3>Formal &rarr; simulation</h3>
+      <div class="ex"><span class="tag">A counterexample becomes a directed test</span>The trace is near-minimal, so the test is short, and it is exactly the stimulus a random generator was demonstrably not producing. <strong>Travels with it:</strong> the property it violated, so the failure condition is the assertion rather than a hand-written expectation &mdash; and a cover on the scenario, so a later constraint change that quietly stops reaching it is visible.</div>
+      <div class="ex"><span class="tag">An unreachability proof becomes a waiver's justification</span><strong>Travels with it:</strong> the constraint set, as evidence, reviewed as seriously as the waiver it replaces &mdash; plus the flag on the coverage item that warns if the point is ever covered later.</div>
+      <div class="ex"><span class="tag">An assumption becomes a checker</span>The most valuable of the three, because it runs every night. <strong>Travels with it:</strong> the assumption register row it discharges, and the boundary cover.</div>
+    </td>
+    <td>
+      <h3>Simulation &rarr; formal</h3>
+      <div class="ex"><span class="tag">A coverage hole becomes a reachability question</span>A hole that has resisted three targeted tests is the classic candidate. Two of the three outcomes are decisive: a <em>witness</em> hands the stimulus engineer a recipe, and <em>unreachable</em> converts the hole into an exclusion with a proof behind it. <strong>Inconclusive leaves the hole exactly where it was</strong> &mdash; worth knowing before spending a week on it.</div>
+      <div class="ex"><span class="tag">A long failing trace becomes a property</span>Formulating the violated rule and running a bounded proof often returns a counterexample an order of magnitude shorter. <strong>Travels with it:</strong> the seed and run manifest of the original failure &mdash; the short trace is a <em>different execution</em>, and someone must confirm it is the same bug.</div>
+      <div class="ex"><span class="tag">A redundant-state invariant becomes a lemma</span>Exactly the facts a proof engine must be told to stop generating impossible starting states &mdash; and they cost nothing to hand over, because they are already written and already believed.</div>
+    </td>
+  </tr></table>
+  <p class="src">Staffing follows from the list: every handoff here needs someone who can read both kinds of report, so a project with exactly one such person has a bottleneck rather than a hybrid flow.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">43</span>
+</section>
+
+<!-- ============ 44. PART IV CLOSING ============ -->
+<section class="slide dense">
+  <p class="kicker">Part IV &middot; Where to go next</p>
+  <h2>Evidence that names its own limits</h2>
+  <table class="cols"><tr>
+    <td style="width:57%">
+      <p class="small"><strong>The through-line.</strong> Chapter 13 buys a structural answer before a testbench exists. Chapter 14 changes the question from <em>did any run break this?</em> to <em>can anything break this?</em>, and pays for it in qualifiers. Chapter 15 packages the parts where the specification already exists. Chapter 16 spends both engines as one campaign.</p>
+      <div class="ex"><span class="tag">What Part IV deliberately left open</span><strong>Chapter 17</strong> takes metastability injection onto the emulator that can afford it. <strong>Chapter 19</strong> asks what survives at gate level, where X-pessimism gets worse before it gets better. And <strong>Chapter 23</strong> answers what Chapter 15's no-connection check cannot: not <em>does a path exist</em>, but <em>does the key influence anything observable along one that does</em>.</div>
+    </td>
+    <td>
+      <h3>The chapters behind these slides</h3>
+      <table class="compact">
+        <tr><td style="width:30%"><strong>Chapter 13</strong></td><td>Static Verification</td></tr>
+        <tr><td><strong>Chapter 14</strong></td><td>Formal Property Verification</td></tr>
+        <tr><td><strong>Chapter 15</strong></td><td>Formal Apps and Equivalence</td></tr>
+        <tr><td><strong>Chapter 16</strong></td><td>Hybrid Flows</td></tr>
+      </table>
+      <p class="small">The checkers, the assumption register and the sign-off tables sketched here appear there in full.</p>
+    </td>
+  </tr></table>
+  <div class="ex good" style="margin-top:2px"><span class="tag">Seven sentences worth leaving with</span>
+  <ul class="small" style="margin-top:4px">
+    <li>A static gate is exhaustive over structure and silent about function: why it goes first, and why it is never the whole story.</li>
+    <li>One bit needs metastability fixed; several bits need metastability <em>and</em> coherency fixed.</li>
+    <li>A proof is a statement about a model, under assumptions, sometimes to a depth. Without those three it is a mood.</li>
+    <li>A missing assumption arrives in red; an extra one announces nothing. Review the assume list, not the checkmarks.</li>
+    <li>A bounded pass says the property cannot be violated <em>too soon</em>: carry the depth, and cover the antecedent under it.</li>
+    <li>An app relocates the specification, it does not remove it &mdash; and one that mines the design proves by construction.</li>
+    <li>Unify at the plan: rows closed out of rows planned has a denominator anyone at the review can name.</li>
+  </ul>
+  </div>
+  <p class="note"><b>Say</b>If the room remembers one sentence: a green tick without its qualifiers is not a result, it is a mood.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">44</span>
+</section>

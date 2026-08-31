@@ -1,0 +1,945 @@
+<title>Planning and Measurement — Lecture Deck, Part II</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid — table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+  pre.mini  { font-size: 10.5px; line-height: 1.36; padding: 7px 9px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  table.cols, table.cols3 { width: 100%; }
+  table.cols td { border: none; padding: 0 16px 0 0; width: 50%; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; width: 33.3%; font-size: 13.5px; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* One density step beyond .dense, for the two slides that carry a source line
+     on top of an already-full frame. Anchoring a claim to a named company costs
+     vertical space the layout had none of, and the alternative to a further step
+     is deleting the anchor — which is the one thing that must not happen, since
+     the source line is what makes the number checkable. Must follow .dense:
+     equal specificity, so source order decides. */
+  .denser h2  { margin-bottom: 6px; }
+  .denser h3  { margin: 5px 0 3px; font-size: 14px; }
+  .denser p   { margin-bottom: 4px; }
+  .denser li  { margin-bottom: 2px; font-size: 12.5px; line-height: 1.28; }
+  .denser td  { padding: 2px 7px 2px 0; font-size: 12px; }
+  .denser .ex { padding: 5px 9px; margin: 4px 0; font-size: 12px; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .pill.mid { background: #f6efdc; color: #8a6516; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex.good { background: #eef7f1; border-left-color: #256b46; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .ex.good .tag { color: #256b46; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- diagram primitives (CSS boxes: no external assets) ---- */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  table.chain td.annot { padding: 5px 7px 0; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; font-style: italic; }
+  .cbox.out { background: #e2f2e9; border-color: #256b46; }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+  .annot {
+    font-size: 11px; color: #6b7686; line-height: 1.3; padding: 5px 4px 0;
+    border-top: 1px dashed #c6cedd; margin-top: 5px;
+  }
+
+  /* ---- the coverage cross grid ---- */
+  table.cross { border-collapse: collapse; width: auto; margin: 5px 0 3px; }
+  table.cross td {
+    border: 1px solid #b9c6dc; padding: 0; width: 27px;
+    background: #dfe7f3; font-size: 9px; line-height: 1.7; text-align: center;
+  }
+  table.cross td.bug { background: #9c3a2a; border-color: #7d2e21; }
+  /* Already excluded under the generator's solver budget: with num_bytes capped,
+     every straddle row is split into bursts shorter than cp_len's {256} bin.
+     ch09 is explicit that this is policy, not geometry -- lift the budget and
+     the cell is reachable -- so the slide says "solver budget", not "geometry".
+     (Part III slide 21 uses the same framing; the two decks must agree.)
+     Greyed, not empty: an empty cell would read as "not yet covered", which is
+     the opposite of the teaching point. */
+  table.cross td.unr {
+    background: #eceef1; border-color: #d3d8e0; color: #9aa3b0; font-weight: 600;
+  }
+  .lg {
+    display: inline-block; width: 15px; height: 9px; border: 1px solid #b9c6dc;
+    background: #dfe7f3; vertical-align: -1px; margin: 0 1px 0 5px;
+  }
+  .lg.bug { background: #9c3a2a; border-color: #7d2e21; }
+  .lg.unr { background: #eceef1; border-color: #d3d8e0; }
+  table.cross th {
+    font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 500;
+    letter-spacing: 0; text-transform: none; color: #566174; text-align: center;
+    padding: 2px 3px; border: 1px solid #ccd5e4; border-bottom-width: 1px;
+    background: #f7f9fc; vertical-align: middle;
+  }
+  table.cross th.rl {
+    text-align: right; padding: 1px 8px 1px 0; border: none;
+    background: transparent; white-space: nowrap;
+  }
+  table.cross th.rl.hot { color: #9c3a2a; font-weight: 600; }
+
+  /* ---- bug-rate bar charts ----
+     Explicit pixel width, not 100%: a nested auto-width table inside a
+     .cols cell inflates the parent column and the two charts collide. */
+  table.chart { border-collapse: collapse; table-layout: fixed; width: 396px; margin: 6px 0 0; }
+  table.chart td { vertical-align: bottom; padding: 0 1px; border: none; border-bottom: 1.5px solid #98a3b3; width: 6.25%; }
+  table.chart .b { background: #2c4f8c; display: block; }
+  table.chart .b.tail { background: #a9bcda; }
+  .axis { font-size: 10px; color: #98a3b3; font-family: "IBM Plex Mono", monospace; margin: 2px 0 0; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification: A Holistic Guide &middot; Lecture companion</p>
+  <h1>Part II &mdash; Planning and Measurement</h1>
+  <p class="sub">The plan as a contract and the measurement as truth. Without these two things, verification is opinion &mdash; and opinion does not survive a sign-off review.</p>
+  <p class="muted" style="margin-top:34px">Chapters <strong>5&ndash;7</strong> &nbsp;&middot;&nbsp; Continues <strong>Part I &mdash; Foundations</strong> &nbsp;&middot;&nbsp; Every figure carries its year and its source</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">The arc of Part II</p>
+  <h2>Three chapters, and what each settles</h2>
+  <table>
+    <tr><th style="width:18%">Chapter</th><th style="width:28%">Question</th><th>What you leave with</th></tr>
+    <tr><td><strong>5 &middot; Verification Planning</strong></td><td>How does a specification become a contract?</td><td>Adversarial feature extraction, the anatomy of a vplan row, one row one metric, the review rite, risk-set depth</td></tr>
+    <tr><td><strong>6 &middot; Coverage</strong></td><td>What does 100% actually mean?</td><td>The taxonomy, code coverage's structural blindness, model design as engineering, closure, honest exclusions</td></tr>
+    <tr><td><strong>7 &middot; Metrics-Driven Sign-off</strong></td><td>How do we know we are done?</td><td>Five instruments, reading bug curves correctly, the sign-off checklist, blameless escape analysis</td></tr>
+  </table>
+  <p class="ex"><span class="tag">Where Part I left off</span>Completeness is impossible, so "done" is a <strong>risk-acceptance decision made in the open</strong>. Part II builds the two artifacts that decision needs: the <strong>plan</strong> that says what was promised, and the <strong>measurement</strong> that says what was delivered.</p>
+  <p class="note"><b>Say</b>The plan is written before the pressure arrives; the metrics are read while it is at its worst. Both exist to keep the same people honest.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- ============ 3. DIVIDER CH5 ============ -->
+<section class="slide divider">
+  <p class="chno">05</p>
+  <h1>Verification Planning</h1>
+  <p class="sub">Feature extraction, the vplan, traceability &mdash; and the review that turns one engineer's document into the block's contract.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. THE HIGHLIGHTER ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 5 &middot; The opening scenario</p>
+  <h2>Week two: no testbench, a specification, and a highlighter</h2>
+  <p class="ex"><span class="tag">The specification says</span><em>"The midend legalizes each transfer against the AXI address rules, splitting any burst that would cross a 4&nbsp;KB boundary."</em></p>
+  <table class="cols"><tr><td>
+    <h3>She interrogates it</h3>
+    <ul class="small">
+      <li>Split correctly for 1D transfers &mdash; and for 2D?</li>
+      <li>For 2D the check applies per row. Does it still hold when the stride is <strong>negative</strong>, so rows walk <em>down</em> toward the boundary?</li>
+      <li>Does the answer change when the <strong>other channel</strong> is active and the two legalizers share splitter state?</li>
+    </ul>
+    <p class="small"><strong>The specification is silent on all three.</strong></p>
+  </td><td>
+    <div class="ex good"><span class="tag">What she just wrote</span>The plan row that, three months later, corners the worst bug in the block.<br><span class="small">Constrained-random will <em>find</em> it; the scoreboard will <em>catch</em> it &mdash; but the plan is what pointed both instruments at the right corner of the input space.</span></div>
+    <p class="small">Nobody would have written a directed test for it, because until the plan asked the question, <strong>nobody had imagined it.</strong></p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Planning is not a phase that consumes a finished specification. It is the activity that <em>tests</em> the specification, years before silicon tests the design.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- ============ 5. THREE PASSES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 5 &middot; Feature extraction</p>
+  <h2>Reading the specification adversarially: three passes</h2>
+  <p class="small muted" style="margin-bottom:5px">A designer asks <em>"how do I build this?"</em> A verifier must ask <em>"how does this break?"</em> &mdash; systematically, with a question set per pass.</p>
+  <table class="compact">
+    <tr><th style="width:16%">Pass</th><th style="width:42%">The questions</th><th>What it yields on the DMA</th></tr>
+    <tr><td><strong>1 &middot; Interfaces</strong></td><td>What transactions, what value ranges, what sequences and densities, what protocol violations must be survived, what interactions with other interfaces?</td><td>Every register per its access policy; config written mid-transfer rejected, never half-applied; legal AXI under arbitrary back-pressure</td></tr>
+    <tr><td><strong>2 &middot; Functions</strong></td><td>Which configurations, which transformations and their sequences, the <em>sensitive values</em> that trigger each, where data must end up, how ordering is affected, how errors report?</td><td>Lengths 0, 1, one below max burst, exactly 256, one above; alignments that do and do not straddle a 4&nbsp;KB frontier; strides positive, zero, negative</td></tr>
+    <tr><td><strong>3 &middot; Architecture</strong></td><td>Can a buffer over- or underflow, where are the resource bottlenecks, can requests collide on them, can one path block another?</td><td>Two channels contending for one backend port; one channel's error not perturbing the other; <strong>splitter state shared between channels</strong></td></tr>
+  </table>
+  <p class="ex"><span class="tag">Classify what you collect &mdash; four bins</span><strong>Isolated features</strong> (one behaviour at a time) &middot; <strong>mixed features</strong> (the key combinations, where interconnect and multi-channel bugs live) &middot; <strong>legal exceptions</strong> (soft reset mid-transfer, error responses, FIFO-full) &middot; <strong>illegal scenarios</strong> (what "unsupported" means: ignored, or recovered by reset). <em>The last two are chronically under-populated in first drafts.</em></p>
+  <p class="note"><b>Say</b>The killer question &mdash; negative stride, near the boundary, while channel 1 is active &mdash; belongs to pass 3. It could not come from the functional spec, because shared midend state is an implementation fact.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- ============ 6. THE TWO LISTS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 5 &middot; The half of the list nobody writes</p>
+  <h2>What must not happen &mdash; and what is out of scope</h2>
+  <table class="cols"><tr><td>
+    <div class="ex warn"><span class="tag">Must not happen</span>Verification detects only the errors it is looking for. A feature list of affirmative sentences is <strong>half a list</strong>. Enumerate the relevant and probable errors &mdash; there are infinitely many ways to fail, so judgment selects which the environment must be able to see.</div>
+    <p class="small"><strong>Affirmative:</strong> "data is delivered uncorrupted, in order, exactly once."<br><strong>Its negative twin:</strong> <em>no transfer shall ever write a byte outside its legalized destination window, under any channel interleaving.</em></p>
+    <p class="small muted">That negative twin is what the scoreboard's address check implements &mdash; and it, not any directed expectation, is what fired on the negative-stride bug.</p>
+  </td><td>
+    <div class="ex"><span class="tag">Out of scope</span>Conditions the design need not survive, <strong>written down</strong>, so that "we do not verify descriptor chains longer than memory" is a reviewed decision rather than an accident.</div>
+    <h3>Interviewing the designer</h3>
+    <ul class="small">
+      <li><em>"What was the hardest part to get right?"</em> &rarr; instant plan priority</li>
+      <li><em>"What state is shared between the channels?"</em> &rarr; decides whether channel isolation is one feature or ten</li>
+      <li><em>"What did you assume software will never do?"</em> &rarr; each answer is either a signed out-of-scope entry, or a new feature &mdash; never an unexamined hope</li>
+    </ul>
+  </td></tr></table>
+  <p class="ex warn"><span class="tag">One boundary to hold</span>"If it is not specified, do not verify it" applies to <strong>genuine don't-cares</strong>. An <em>incomplete</em> specification is not a don't-care &mdash; it is a defect to be fixed.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- ============ 7. FEATURE LIST ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 5 &middot; Worked example</p>
+  <h2>The DMA feature list, first cut</h2>
+<pre class="tight">DMA-F01  Frontend: register access per access policy (RO/RW/W1C), reset values
+DMA-F02  Frontend: config write during active transfer rejected, error flagged
+DMA-F03  Midend: 1D transfer legalized into AXI bursts, max 256 beats
+DMA-F04  Midend: burst split at 4 KB boundary, all alignments, len 0/1/max+-1
+DMA-F05  Midend: 2D transfer, per-row legalization, stride > 0, = 0, &lt; 0
+DMA-F06  Midend: 4 KB split correct under 2D negative stride  [arch pass + interview]
+DMA-F07  Midend: channel 0/1 legalizer state fully independent  [interview]
+DMA-F08  Backend: AXI protocol compliance under arbitrary back-pressure
+DMA-F09  Backend: SLVERR/DECERR reported in the issuing channel's status only
+DMA-N01  MUST NOT: write outside legalized destination window (any interleaving)
+DMA-N02  MUST NOT: raise done interrupt before last write response accepted
+DMA-N03  MUST NOT: propagate channel A error into channel B stream
+DMA-X01  OUT OF SCOPE: descriptor fetch from uncached device memory (not supported;
+         software constraint documented, reviewed with design in week 3)</pre>
+  <table class="cols"><tr><td>
+    <p class="small"><strong>Note the shape:</strong> affirmative features <code>F</code>, must-not-happen features <code>N</code>, out-of-scope entries <code>X</code> with a review date &mdash; and <strong>provenance tags</strong> where a feature came from the architecture pass or the interview rather than the spec text.</p>
+  </td><td>
+    <div class="ex good"><span class="tag">The audit</span>Count the features tagged <code>[interview]</code> and <code>[arch pass]</code>. <strong>Zero means extraction never happened</strong> &mdash; the plan is the specification's headings with "verify that" prepended.</div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- ============ 8. VPLAN ROW ANATOMY ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 5 &middot; The unit of the contract</p>
+  <h2>Anatomy of a vplan row</h2>
+  <table class="chain" style="width:100%">
+    <tr>
+      <td style="width:17.4%"><div class="cbox">FEATURE<span class="q">what behaviour?</span></div></td>
+      <td style="width:3.25%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:17.4%"><div class="cbox">ATTRIBUTES<span class="q">which dimensions and values matter?</span></div></td>
+      <td style="width:3.25%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:17.4%"><div class="cbox">PASS / FAIL<span class="q">what observable fact decides correct?</span></div></td>
+      <td style="width:3.25%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:17.4%"><div class="cbox">METHOD<span class="q">which engine shows it?</span></div></td>
+      <td style="width:3.25%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:17.4%"><div class="cbox out">CLOSURE<br>METRIC<span class="q">one measurable exit condition</span></div></td>
+    </tr>
+    <tr>
+      <td class="annot">Conditions plus expected result, never an implementation description. Unique ID, cross-referenced to the spec clause &mdash; and retired, never reused, when the requirement dies.</td><td></td>
+      <td class="annot">Control field &rarr; enumerate every value. Data field &rarr; choose by how the design processes it. Pattern: <strong>boundary, both neighbours, the far extreme &mdash; crossed with every configuration that moves the boundary.</strong></td><td></td>
+      <td class="annot">"Transfer completes" is not a criterion. This field is a <strong>checker specification</strong>: it says which errors to look for, so an engineer who is not the block's expert can build a reliable check.</td><td></td>
+      <td class="annot">Match to the failure signature: signal-level &rarr; assertion; per-transaction &rarr; scoreboard; statistical &rarr; offline trace analysis; local invariant &rarr; formal; and some rows close by <em>review</em>.</td><td></td>
+      <td class="annot">A covergroup at 100%, a proven property, a passed directed test, a signed review.</td>
+    </tr>
+  </table>
+  <p class="ex"><span class="tag">Traceability is the same link read backwards</span>Each ID cross-references the spec clause it came from, the tests and properties that discharge it, and the coverage points that measure it. <strong>A feature with no cross-reference is not being verified</strong> &mdash; and the plan is the only place that fact is visible <em>before</em> tape-out.</p>
+  <p class="note"><b>Say</b>Put the row's ID in the checker's error message, so a failure names the requirement it violated.</p>
+  <p class="src">Done for real: on an SoC-level project inside Freescale Semiconductor the plan was made <em>executable</em> &mdash; plan items bound to testcases, checks and coverage objects, with the regression stimulus list carried in the plan itself, which took a Freescale-added field and a custom script on top of the vendor flow.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- ============ 9. ONE ROW ONE METRIC ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 5 &middot; The discipline that keeps closure honest</p>
+  <h2>One row, one metric &mdash; two features become four rows</h2>
+  <table class="compact">
+    <tr><th style="width:11%">ID</th><th style="width:29%">Feature &amp; attributes</th><th style="width:26%">Pass / fail criterion</th><th style="width:16%">Method</th><th>Closure metric</th></tr>
+    <tr><td class="mono">DMA-F06a</td><td>2D legalization at the 4&nbsp;KB boundary. Stride sign {+, 0, &minus;} &times; headroom to the next frontier {&gt; a burst, = a burst, &lt; a burst, straddling} &times; burst length {1, 255, 256} &times; other channel {idle, active}</td><td>Every AXI burst issued lies within one 4&nbsp;KB frame; the union of the bursts equals the transfer's exact byte set</td><td>Random sim, scoreboard address and data check</td><td>Covergroup <code>cg_2d_4kb</code> at 100%</td></tr>
+    <tr><td class="mono">DMA-F06b</td><td>Splitter never emits a boundary-crossing burst, for any input</td><td>The AXI4 4&nbsp;KB rule as a safety property on the backend's write-address channel</td><td>Formal, backend standalone</td><td><code>p_no_4kb_crossing</code> proven unbounded</td></tr>
+    <tr><td class="mono">DMA-N01a</td><td>No write outside the legalized destination window, any channel interleaving</td><td>Scoreboard flags any write beat outside the expected window, with the feature ID in the message</td><td>Random sim (always-on check)</td><td>Check enabled in 100% of regression runs</td></tr>
+    <tr><td class="mono">DMA-N01b</td><td>That check demonstrably fires</td><td>Injection drives one write beat past the window's edge; the failure condition is the <strong>absence</strong> of the error message</td><td>Directed sim, error injection</td><td>Injection test passes</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">Why split, rather than join with a semicolon</span>"Check enabled everywhere <em>and</em> proven to fire" is two kinds of evidence: a tool evaluates each separately and neither together, so a joined row closes by fatigue. The split also houses a second rule &mdash; <strong>never trust a checker you have not seen fail.</strong></p>
+  <p class="note"><b>Say</b>F06b names a <em>binding point</em>, not just a property: bind the same text inside the midend and the row closes while the block is still wrong.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- ============ 10. THE CLOSURE METRIC MADE VISIBLE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 5 &middot; The closure metric, made visible</p>
+  <h2>72 combinations. The bug lives in two of them.</h2>
+  <table class="cols"><tr><td>
+<pre class="mini">covergroup cg_2d_4kb @(posedge clk iff midend_txn_done);
+  cp_stride_sign : coverpoint txn.stride_sign
+    { bins pos = {POS}; bins zero = {ZERO}; bins neg = {NEG}; }
+  // txn.bnd_rel: per-row relation, computed by the monitor from
+  // the row's headroom (bytes to the next 4 KB frontier, in the
+  // stride's direction) and this row's burst bytes. The four
+  // values partition every row once.
+  cp_boundary_dist : coverpoint txn.bnd_rel
+    { bins gt_burst = {GT_BURST};
+      bins eq_burst = {EQ_BURST};
+      bins lt_burst = {LT_BURST};
+      bins straddle = {STRADDLE}; }  // must be split
+  cp_len : coverpoint txn.burst_len
+    { bins one = {1}; bins max_m1 = {255}; bins max = {256}; }
+  cp_other_ch : coverpoint other_channel_active;
+  x_worst : cross cp_stride_sign, cp_boundary_dist,
+                  cp_len, cp_other_ch;
+endgroup</pre>
+    <p class="small">3 &times; 4 &times; 3 &times; 2 = <strong>72</strong> combinations, each nameable in specification vocabulary.</p>
+  </td><td>
+    <table class="cross">
+      <tr><th class="rl"></th><th colspan="2">len 1</th><th colspan="2">len 255</th><th colspan="2">len 256</th></tr>
+      <tr><th class="rl">stride &middot; boundary</th><th>idle</th><th>busy</th><th>idle</th><th>busy</th><th>idle</th><th>busy</th></tr>
+      <tr><th class="rl">pos &middot; gt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">pos &middot; eq_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">pos &middot; lt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">pos &middot; straddle</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="unr">&times;</td><td class="unr">&times;</td></tr>
+      <tr><th class="rl">zero &middot; gt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">zero &middot; eq_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">zero &middot; lt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">zero &middot; straddle</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="unr">&times;</td><td class="unr">&times;</td></tr>
+      <tr><th class="rl">neg &middot; gt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">neg &middot; eq_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl">neg &middot; lt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><th class="rl hot">neg &middot; straddle</th><td>&nbsp;</td><td class="bug">&nbsp;</td><td>&nbsp;</td><td class="bug">&nbsp;</td><td class="unr">&times;</td><td class="unr">&times;</td></tr>
+    </table>
+    <p class="small">The industry's accumulated DMA post-mortems live in <code>neg</code> &times; <code>straddle</code> &times; other-channel-active &mdash; <strong>two cells</strong>. The third is not missing coverage: the solver budget caps a row at 256 beats, so a straddling row is <em>split</em> into pieces none of which can be the 256-beat maximum. The whole <code>straddle</code> &times; <code>len 256</code> column (&times;) is excluded by <strong>that budget, not by geometry</strong> &mdash; a recorded choice: lift it and the column returns.</p>
+    <div class="ex"><span class="tag">And the pairing rule</span>This coverage means something only because the scoreboard check of <code>DMA-N01a</code> runs in the same simulations. Coverage without checking certifies stimulus, not correctness.</div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- ============ 11. THE REVIEW RITE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 5 &middot; The rite</p>
+  <h2>The plan review: three blades, applied row by row</h2>
+  <p class="small muted" style="margin-bottom:5px">A review that walks the feature list nodding is a signing ceremony. The published name for the procedure is <strong>weakness analysis</strong>.</p>
+  <table class="compact">
+    <tr><th style="width:16%">Blade</th><th style="width:46%">The challenge</th><th>Failing rows</th></tr>
+    <tr><td><strong>Correctness</strong></td><td>Is this row real? Does the DUT implement this option, is the behaviour fully specified, do the parameters allow it, is it a valid use case &mdash; do we care?</td><td>Are <strong>deleted</strong>. Deleting rows is a review success: unverifiable and irrelevant rows cost real schedule</td></tr>
+    <tr><td><strong>Precision</strong></td><td>What exactly is verified, in what context? Dependencies, disqualifying conditions, value ranges, event timing &mdash; and different goals in different contexts?</td><td>"Verify 2D transfers" fails. <code>DMA-F06a</code>'s attribute list passes</td></tr>
+    <tr><td><strong>Completeness</strong></td><td>For each influencing variable, how can it change and what does that do? For each scenario, what do you expect <em>and what do you not expect</em>? Which combinations need their own rows?</td><td>Produce new rows &mdash; which is what the outsiders in the room are for</td></tr>
+  </table>
+  <p class="ex"><span class="tag">Scenario &mdash; the objection that must not win</span>The designer objects to <code>DMA-F06a</code>: <em>"that can't happen &mdash; the driver library always allocates row-aligned buffers."</em> Two questions settle it. <strong>Is that library the only software that will ever program this block?</strong> (No.) <strong>Does the RTL check the condition, or assume it?</strong> (Assume.) The row stays, its risk rank <em>rises</em>, and a must-not-happen row is added.</p>
+  <p class="note"><b>Say</b>The objection and its resolution are recorded on the row. Those records outlive both engineers &mdash; they are the review testing the plan against knowledge that exists only in people.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- ============ 12. RISK SETS DEPTH ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 5 &middot; Depth</p>
+  <h2>Risk sets depth, feature by feature</h2>
+  <p class="small muted" style="margin-bottom:3px">A plan that assigns every feature the same depth has not been planned; it has been transcribed. Depth is bought with <strong>consequence &times; likelihood</strong>.</p>
+  <table class="cols"><tr><td>
+    <h3>Five drivers, scored per feature</h3>
+    <table class="compact">
+      <tr><th style="width:52%">Driver</th><th>DMA-F06</th></tr>
+      <tr><td>Novelty (new logic vs silicon-proven reuse)</td><td><span class="pill no">HIGH</span> new 2D negative-stride path</td></tr>
+      <tr><td>Structural complexity (shared state, concurrency)</td><td><span class="pill no">HIGH</span> splitter state shared across channels</td></tr>
+      <tr><td>Specification quality</td><td><span class="pill no">HIGH</span> the document is silent</td></tr>
+      <tr><td>Controllability / observability at this level</td><td><span class="pill ok">LOW</span> good at block level</td></tr>
+      <tr><td>Cost of escape</td><td><span class="pill no">WORST</span> silent corruption, no flag</td></tr>
+    </table>
+    <p class="small">Four drivers high &mdash; and the favourable one only makes depth <em>affordable</em>, not unnecessary. Run the same five questions on <code>DMA-F01</code> and every answer inverts.</p>
+  </td><td>
+    <h3>What the ranking buys</h3>
+    <table class="compact">
+      <tr><th style="width:38%">Feature</th><th>Planned depth</th></tr>
+      <tr><td>F01 register access</td><td>Generated register tests; review of the generator config</td></tr>
+      <tr><td>F03 1D legalization</td><td>Random sim + scoreboard; boundary-value coverage</td></tr>
+      <tr><td><strong>F06 2D neg-stride @ 4&nbsp;KB</strong></td><td><strong>Two rows: full cross in random sim + formal safety property</strong></td></tr>
+      <tr><td>N01 window violation</td><td>Two rows: always-on scoreboard check + its injection test</td></tr>
+    </table>
+    <div class="ex"><span class="tag">Priority pre-draws the cut line</span><strong>Must-have</strong> defines first-time success and is verified thoroughly. <strong>Should-have</strong> gets basic operation, depth as time allows. <strong>Nice-to-have</strong> is verified "as time allows" &mdash; which today's schedules almost guarantee means never. That is the point: the cut line is drawn in daylight, months early.</div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- ============ 13. DISCUSSION 1 ============ -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for the room &mdash; the plan</h2>
+  <ol class="big" style="margin-top:16px">
+    <li style="margin-bottom:14px">Open your current plan. How many rows came from the <strong>architecture pass or a designer interview</strong> rather than the specification's headings?</li>
+    <li style="margin-bottom:14px">Pick any row. Can you name its <strong>single closure metric</strong> in one breath? If it needs an "and", it is two rows.</li>
+    <li style="margin-bottom:14px">Which of your checkers has <strong>never been seen to fail</strong>? What would it take to write its injection test this week?</li>
+  </ol>
+  <p class="note"><b>Facilitation</b>Question 3 usually produces an uncomfortable pause. An unfired checker is a testbench feature nobody has verified.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- ============ 14. DIVIDER CH6 ============ -->
+<section class="slide divider">
+  <p class="chno">06</p>
+  <h1>Coverage: Theory and Practice</h1>
+  <p class="sub">The instrument that measures what your tests never did &mdash; and the discipline of trusting it only as far as it deserves.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- ============ 15. THE OPENING + QUADRANTS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 6 &middot; The opening scenario, diagnosed</p>
+  <h2>The bug that walked through 100% code coverage</h2>
+  <table class="cols"><tr><td>
+    <p class="small">Two weeks of clean regressions. Code coverage on the accelerator RTL: <strong>100%</strong> &mdash; every line, every branch. Then a firmware engineer programs a job nobody imagined: <strong>2-bit weights</strong>, a tensor <strong>one pixel wide</strong>, launched while the DMA streams camera frames through the same SRAM banks.</p>
+    <p class="small">Starved by contention, the weight prefetcher wraps its buffer pointer one entry early. The output feature map is subtly wrong.</p>
+    <div class="ex warn"><span class="tag">The question nobody could answer</span><strong>What did the tests never do?</strong> Code coverage says "every line executed." It cannot say "every configuration exercised" &mdash; the missing scenario was not a line of RTL but a <em>combination</em>: precision &times; geometry &times; contention.</div>
+  </td><td>
+    <h3>Two axes, four coverage spaces</h3>
+    <table class="compact">
+      <tr><th style="width:20%"></th><th style="width:40%">From the implementation</th><th>From the specification</th></tr>
+      <tr><td><strong>Implicit</strong><br><span class="small muted">inherent in a representation</span></td><td>Code and structural coverage<br><span class="pill no">FILLED &mdash; and green</span></td><td>Metrics inferred from a natural-language spec<br><span class="pill">no practical implementation</span></td></tr>
+      <tr><td><strong>Explicit</strong><br><span class="small muted">invented by the engineer</span></td><td>Functional coverage of microarchitecture &mdash; the prefetch buffer's occupancy<br><span class="pill no">EMPTY &mdash; where the bug lives</span></td><td>Functional coverage from the spec &mdash; precision, geometry, contention<br><span class="pill no">EMPTY</span></td></tr>
+    </table>
+    <p class="small"><strong>Three quadrants empty, and the one that was filled embodies nobody's judgment.</strong></p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Implicit metrics come for free and embody nobody's judgment. Explicit ones cost effort and are exactly as good as the engineering behind them. Ask of any metric: <em>whose judgment is this?</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- ============ 16. CODE COVERAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 6 &middot; The free metric</p>
+  <h2>Code coverage: free, necessary, structurally blind</h2>
+  <table class="compact">
+    <tr><th style="width:20%">Sub-metric</th><th style="width:40%">What it catches</th><th>Its blind spot</th></tr>
+    <tr><td><strong>Line / statement</strong></td><td>Dead configuration branches, unexercised error legs, whole features no test reached</td><td>Why or in what context a line ran &mdash; executed once, under the friendliest conditions, is "covered"</td></tr>
+    <tr><td><strong>Branch</strong></td><td>Each decision point taking both directions &mdash; strictly stronger than statement</td><td><strong>Paths.</strong> A suite can hold 100% statement coverage while covering only 75% of control paths</td></tr>
+    <tr><td><strong>Condition / expression</strong></td><td>Whether each term independently caused the decision &mdash; <code>parity==ODD || parity==EVEN</code> reads 100% statement, 50% expression</td><td>Reaching 100% expression coverage is itself extremely difficult</td></tr>
+    <tr><td><strong>Toggle</strong></td><td>Bit-level activity: integration sanity, power-intent connectivity &mdash; the only metric that sees inside structures the others treat as one object</td><td>The coarsest of the family; says nothing about behaviour</td></tr>
+    <tr><td><strong>FSM</strong></td><td>Visited states and traversed arcs</td><td>A 5-state machine with 14 transitions hits 100% <em>state</em> coverage from one sequence covering <strong>36%</strong> of transitions &mdash; and the graph is extracted from the implementation, so it needs review against the spec</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">The sharpest formulation of the blindness</span><strong>"The code in an empty module is always 100% covered."</strong> If the accelerator's designer never implemented the 2-bit unpacking mode, no code metric reports it missing. <strong>Low numbers are a reliable alarm; a high number is no indication that the job is over.</strong></p>
+  <p class="note"><b>Say</b>Its holes are meaningful; its fullness is not. Code coverage gates the floor. Functional coverage against the plan is the ceiling.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- ============ 17. FUNCTIONAL COVERAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 6 &middot; The metric you must deserve</p>
+  <h2>Functional coverage inverts the economics</h2>
+  <table class="cols"><tr><td>
+    <h3>The vocabulary</h3>
+    <table class="compact">
+      <tr><td style="width:28%"><strong>covergroup</strong></td><td>The container: a user-defined type encapsulating a coverage model</td></tr>
+      <tr><td><strong>coverpoint</strong></td><td>One variable or expression to observe</td></tr>
+      <tr><td><strong>bins</strong></td><td>Counters partitioning that variable's values into the cases worth counting</td></tr>
+      <tr><td><strong>cross</strong></td><td>The Cartesian combinations &mdash; where most interesting bugs live</td></tr>
+      <tr><td><strong>ignore_bins</strong></td><td>"Not my job" &mdash; removes values from the space</td></tr>
+      <tr><td><strong>illegal_bins</strong></td><td>"Must never happen" &mdash; raises a runtime error, taking precedence over any other bin</td></tr>
+    </table>
+    <p class="small muted">Keep that last asymmetry: the second is a <strong>checker wearing coverage syntax</strong>.</p>
+  </td><td>
+    <div class="ex warn"><span class="tag">One language default to suspect immediately</span>A coverpoint with no bins gets them automatically: one per value for small domains, otherwise the range sliced uniformly into at most <code>auto_bin_max</code> bins &mdash; <strong>default 64</strong>.<br><span class="small">Slice the accelerator's 9-bit tensor-width field into 64 uniform bins and each is eight values wide, so the boundary value <strong>16</strong> &mdash; the MAC lane count, where behaviour changes &mdash; lands in an anonymous bucket with widths 17 to 23. The tool has just merged the two the datapath treats differently.</span></div>
+    <h3>Three families, three sources of truth</h3>
+    <ul class="small">
+      <li><strong>Code coverage</strong> asks the implementation: <em>"was all of you exercised?"</em></li>
+      <li><strong>Functional coverage</strong> asks the specification: <em>"did everything you promise actually happen?"</em> &mdash; data coverage in covergroups, activity coverage in <code>cover property</code></li>
+      <li><strong>Assertion coverage</strong> asks the checkers: <em>"were you there when it did?"</em> &mdash; an assertion whose antecedent never occurred has verified nothing</li>
+    </ul>
+  </td></tr></table>
+  <p class="src">OpenHW CV32E40Pv2 (Dolphin Design + Imperas), the v1 core having reached verification closure at TRL-5 in 2020: 120 instructions cost ~3,600 lines of hand-written coverage code; +300 PULP instructions would need ~9,000 more &mdash; which is why the model was generated from a machine-readable ISA description instead. [D6, pp.&nbsp;2&ndash;3, 7]</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- ============ 18. WHAT 100% MEANS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 6 &middot; The deflation</p>
+  <h2>What "100%" means &mdash; and what it never can</h2>
+  <p class="lead">Every coverage percentage is a fraction, and the denominator is the part people forget. It is not "everything the block can do." It is <strong>"everything the model's author thought to enumerate."</strong></p>
+  <table class="cols"><tr><td>
+    <div class="ex"><span class="tag">Chapter 3 collecting its debt</span>A functional coverage model <em>is</em> the equivalence-class partition, made executable: <strong>bins are equivalence classes with a counter attached.</strong> So it inherits the partition's property &mdash; a lossy, chosen projection of an intractable space.</div>
+    <h3>Fidelity, and the bug's footprint</h3>
+    <ul class="small">
+      <li><strong>Fidelity</strong> = how well the model captures the actual behavioural requirements. 18 specified register values as 18 bins: no gap. 2<sup>32</sup> addresses in 16 ranges: a substantial one. Omitting <em>relationships</em> loses fidelity too.</li>
+      <li><strong>Footprint:</strong> some bugs occupy a huge region &mdash; any test in the right mode trips them. Others occupy a <em>point</em>: one instruction, one fault, one interrupt, coincident.</li>
+      <li>A high-fidelity model <strong>demands</strong> the bug-exposing scenario. A low-fidelity one files it with its harmless neighbours &mdash; so fidelity is <em>spent</em> where the risk analysis says the bugs are.</li>
+    </ul>
+  </td><td>
+    <div class="ex warn"><span class="tag">The most important deflation in the chapter</span><strong>Coverage measures sampling, not correctness.</strong> It records that a situation occurred; whether the design behaved correctly in it is the business of the checkers. Coverage methodology openly <em>assumes</em> an orthogonal mechanism detects misbehaviour.</div>
+    <p class="small">Break that assumption and coverage becomes vanity: a covergroup counting jobs whose outputs nobody compares is <strong>a tally of unwitnessed events</strong>.</p>
+    <div class="ex warn"><span class="tag">And why it is gameable</span>The goal is to remove bugs. Coverage closure is a well-defined, measurable <strong>derivative</strong> of that goal &mdash; and a derivative can be optimised directly. Stimulus tuned to tickle bins while checkers sleep converges on 100% <em>faster</em> than honest verification, having discarded the part that was slowing it down.</div>
+    <p class="small"><strong>The cure is structural, not moral:</strong> review coverage models together with the checkers watching the same events, and make <em>"who fails if this scenario misbehaves?"</em> a mandatory review question for every coverpoint.</p>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- ============ 19. HONEST VS VANITY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 6 &middot; Worked example</p>
+  <h2>Bins at the behavioural cliffs &mdash; and two ways to fake it</h2>
+  <table class="cols"><tr><td>
+    <p class="small"><strong>Honest.</strong> The width bins follow the datapath, not the number line: behaviour bends at the 16-lane boundary and at the extremes.</p>
+<pre class="mini">cp_width : coverpoint job.tensor_w {
+  bins single     = {1};        // degenerate geometry
+  bins sub_lane   = {[2:15]};   // partial lane use
+  bins lane_exact = {16};       // one full MAC pass
+  bins lane_plus1 = {17};       // full pass + remainder
+  bins multi_lane = {[18:255]}; // steady-state
+  bins max_width  = {256};      // architectural max
+  // Legal range is 1..256 in a 9-bit field: reaching the
+  // datapath with anything else is a bug, not a hole.
+  illegal_bins out_of_range = {0, [257:511]};
+}
+// precision x width-class x contention = 3 x 6 x 2 = 36
+x_prec_width_dma : cross cp_prec, cp_width, cp_dma;
+// channels interact with precision, not contention
+x_prec_ch        : cross cp_prec, cp_ch;      // 3 x 5 = 15</pre>
+    <p class="small">Instead of one cross of 3 &times; 6 &times; 5 &times; 2 = <strong>180</strong>, two crosses totalling <strong>51</strong> &mdash; each defensible. The opening bug lives in <code>(PREC_2B, single, contended)</code>: a bin this model <em>demands</em>.</p>
+  </td><td>
+    <p class="small"><strong>Vanity.</strong> Same attributes, same sampling call, same instant. It compiles, runs, and reaches 100% before the first coffee of the first regression.</p>
+<pre class="mini">cp_width : coverpoint job.tensor_w {
+  bins lo_half = {[1:128]};
+  bins hi_half = {[129:256]};
+}
+cp_dma : coverpoint dma_contended;
+// no cross</pre>
+    <ul class="small">
+      <li><code>lo_half</code> lumps the degenerate width 1, the lane boundary 16 and the remainder case 17 into one 128-value bin &mdash; filing the bug-exposing scenarios with their harmless neighbours</li>
+      <li><strong>No cross:</strong> "2-bit weights" and "contention" are each ticked without ever having occurred <em>together</em></li>
+    </ul>
+    <div class="ex warn"><span class="tag">A third way, needing no change to the bins</span>Keep the honest model and read contention <strong>live at job completion</strong> instead of latching it across the streaming window. That measures whether the DMA happened to be busy at one irrelevant instant &mdash; and fills the bin either way.</div>
+    <p class="small"><strong>Nothing in the report distinguishes any of these from the honest model.</strong> The metric is exactly as good as the model, and the model can only be judged by <em>reading it</em>.</p>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- ============ 20. SHAPING THE CROSS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 6 &middot; When the cross explodes</p>
+  <h2>Shaping: state the reachable space, with the reasons attached</h2>
+  <table class="cols"><tr><td>
+    <p class="small">The crossbar's route coverage &mdash; did every manager reach every subordinate? &mdash; is 5 &times; 4 = <strong>20</strong> combinations, trivially worth having. Then add what protocol verification cares about:</p>
+    <table class="compact">
+      <tr><th style="width:70%">Axis set</th><th>Cross size</th></tr>
+      <tr><td>manager &times; subordinate</td><td>20</td></tr>
+      <tr><td>+ burst type &times; direction</td><td><strong>120</strong></td></tr>
+      <tr><td>+ 6 length buckets &times; 4 transfer sizes</td><td>2,880</td></tr>
+      <tr><td>+ 16 transaction IDs</td><td>46,080</td></tr>
+    </table>
+    <div class="ex warn"><span class="tag">Why unreachable bins are not harmless padding</span>They make 100% unattainable &mdash; which forces late bulk exclusions and destroys the audit trail &mdash; or they normalise a dashboard that reads 61% forever, teaching everyone to stop looking.</div>
+  </td><td>
+<pre class="mini">x_route : cross cp_mgr, cp_sub, cp_burst, cp_dir {
+  // Instruction port is read-only by construction.
+  ignore_bins ifetch_wr = binsof(cp_mgr.core_i)
+                       &amp;&amp; binsof(cp_dir.wr);
+  // Debug manager issues only INCR accesses.
+  ignore_bins dbg_burst = binsof(cp_mgr.dbg)
+                       &amp;&amp; (binsof(cp_burst.fixed)
+                        || binsof(cp_burst.wrap));
+  // Writes to the boot ROM must be rejected: observing the
+  // error response is a REQUIRED event, so it lives in its
+  // own error-response covergroup, not as a hole here.
+  ignore_bins rom_wr    = binsof(cp_sub.rom)
+                       &amp;&amp; binsof(cp_dir.wr);
+}</pre>
+    <p class="small">Exclusions remove 12 + 16 + 15, overlapping in 5, so their union is <strong>38</strong>. What remains is <strong>82 defensible combinations rather than 120</strong> &mdash; in a model that never grew to 2,880.</p>
+    <div class="ex good"><span class="tag">Shaping is relocation, not deletion</span>The boot-ROM line split one lump into an <em>ignored</em> stimulus combination <strong>and</strong> a required error-response coverage point elsewhere. And the shaped cross is <strong>falsifiable</strong>: if the "read-only" instruction port ever produces a write, the protocol checkers scream.</div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The real tractability criterion is not the bin count. It is whether a reviewer can hold the model in their head.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- ============ 21. CLOSURE ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 6 &middot; From holes to done</p>
+  <h2>Closure: the loop, the hole analysis, and the endgame</h2>
+  <table class="chain" style="width:100%">
+    <tr>
+      <td style="width:17%"><div class="cbox">RUN<span class="q">regression across seeds</span></div></td>
+      <td style="width:3%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:17%"><div class="cbox">MERGE<span class="q">coverage databases</span></div></td>
+      <td style="width:3%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:19%"><div class="cbox">ANALYSE<span class="q">aggregate and rank the holes</span></div></td>
+      <td style="width:3%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:19%"><div class="cbox">CLASSIFY<span class="q">valid hole, or model bug?</span></div></td>
+      <td style="width:3%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:16%"><div class="cbox out">ACT<span class="q">tune, target, fix model, exclude</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:8px"><tr><td>
+    <h3>Reading holes &mdash; four techniques</h3>
+    <ul class="small">
+      <li><strong>Aggregation</strong> coalesces many point-holes into few larger regions</li>
+      <li><strong>Partitioning</strong> groups holes that share semantics</li>
+      <li><strong>Projection</strong> finds attribute values <em>never</em> observed in any combination &mdash; it outranks any single missing cross product, because it says a whole dimension of the stimulus is broken</li>
+      <li><strong>Hamming distance</strong> measures how close two holes are</li>
+    </ul>
+    <p class="small">Fifty scattered holes aggregate into <em>"no 2-bit-weight job has ever run under contention, at any geometry"</em>: one finding, one root cause, one action.</p>
+  </td><td>
+    <h3>Classify, then tune or target</h3>
+    <ul class="small">
+      <li><strong>Valid hole</strong> &mdash; an intended observation that has not happened: usually a stimulus weakness, possibly a design error suppressing the behaviour</li>
+      <li><strong>Invalid hole</strong> &mdash; a bug in the coverage model itself. Its fix is a <em>restriction on the model with a reason</em>, not a test</li>
+      <li><strong>Tune</strong> (bias the constraints) while holes come in families; <strong>target</strong> (write the test) when the survivors become singular</li>
+    </ul>
+    <div class="ex warn"><span class="tag">The endgame inverts the economics</span>As of <strong>2012</strong>, manually closing the last 20% of coverage costs up to <strong>80%</strong> of a verification team's time and resources. That cost is why closure automation is a product area, not a convenience &mdash; and every automation optimises the <em>derivative</em>, making the checking question more urgent, not less.</div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Stop when the <em>reviewed</em> model is full, the exclusion file is current, and the closure history is boring. Models legitimately evolve during closure &mdash; that is the process working, not failing.</p>
+  <p class="src">IBM z-series Storage Control Element: a Bayesian generator closed the last 223 tasks in 250 test-cases; hand-written directives, two-thirds in 400+ (DAC 2003). And on Infineon Technologies' Radar Signal Processing Unit in the AURIX TC3XX &mdash; a block whose production closure runs on the order of 2 million simulated tests &mdash; machine-learning test selection <em>nearly</em> closed the same coverage model with 18% fewer tests. Nearly closed, not closed: the distinction is the authors' own (arXiv 2205.08524, pp.3, 6).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- ============ 22. HONEST EXCLUSIONS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 6 &middot; The waiver as a reviewable artifact</p>
+  <h2>Honest exclusions</h2>
+  <p class="lead">Every real project excludes coverage. Exclusion is not the failure mode. <strong>Unreviewable</strong> exclusion is.</p>
+  <table class="compact">
+    <tr><th style="width:6%">#</th><th style="width:34%">Rule</th><th>What it looks like</th></tr>
+    <tr><td><strong>1</strong></td><td>Every exclusion carries its reason, <strong>inline</strong></td><td>Not "waived" but <em>"instruction port is read-only by construction &mdash; see integration spec &sect;3.2"</em>. The justification travels in the same artifact, so the review is a code review</td></tr>
+    <tr><td><strong>2</strong></td><td>Exclusions are <strong>classified by kind</strong>, because kinds differ in owner and expiry</td><td><em>Structural</em> (tied parameters &mdash; expires if the parameterisation changes) &middot; <em>specification</em> (expires if the spec revs) &middot; <em>risk-accepted</em> (reachable but not worth the cost &mdash; expires never, so it needs the most senior signature)</td></tr>
+    <tr><td><strong>3</strong></td><td>The model distinguishes <strong>"not my job" from "must never happen"</strong></td><td>Excluding a forbidden combination with <code>ignore_bins</code> rather than <code>illegal_bins</code> is a double loss: the space shrinks <em>and</em> the watchdog is dismissed</td></tr>
+    <tr><td><strong>4</strong></td><td>Exclusions are <strong>versioned and re-derived</strong>, not archaeological</td><td>The file lives with the RTL and the vplan, is re-audited when either changes, and appears at sign-off as a first-class document. Formal unreachability analysis can <em>prove</em> many structural exclusions</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">The auditor's test</span>For any uncovered bin, can the team produce <strong>within a minute</strong> either a plan to cover it, or a written, attributed, still-valid reason not to? Anything else is 100% by redefinition &mdash; moving the goalposts and mowing the old penalty box.</p>
+  <p class="note"><b>Say</b>Every real project ships with an exclusion file that was argued about, and the arguing is the value. A waiver nobody contested is a waiver nobody read.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- ============ 23. DISCUSSION 2 ============ -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for the room &mdash; the measurement</h2>
+  <ol class="big" style="margin-top:16px">
+    <li style="margin-bottom:14px">Open one of your covergroups. For each coverpoint, answer: <strong>who fails if this sampled scenario misbehaves?</strong> Any coverpoint without an answer is vanity.</li>
+    <li style="margin-bottom:14px">Find a bin in your reports named <code>auto[...]</code>. What behavioural cliff is hiding inside it?</li>
+    <li style="margin-bottom:14px">Take your exclusion file. Pick a line at random. Can anyone in the room <strong>explain and defend it</strong> &mdash; and is it still true?</li>
+  </ol>
+  <p class="note"><b>Facilitation</b>Question 1 is the single most productive review habit in this deck. It converts a coverage review into a checker review at no extra cost.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- ============ 24. DIVIDER CH7 ============ -->
+<section class="slide divider">
+  <p class="chno">07</p>
+  <h1>Metrics-Driven Sign-off</h1>
+  <p class="sub">Building the instruments, reading them honestly, and turning them into the one decision that cannot be un-made.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- ============ 25. FIVE INSTRUMENTS ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 7 &middot; The instrument panel</p>
+  <h2>Five instruments &mdash; and none of them trustworthy alone</h2>
+  <table class="compact">
+    <tr><th style="width:24%">Instrument</th><th>What it tells you</th></tr>
+    <tr><td><strong>1 &middot; Per-feature status</strong></td><td>The <strong>master instrument</strong>, denominated in the only currency that matters: the plan. Discharged / in progress / blocked / waived, per vplan row, with traceability from spec clause to result. Everything else is a <em>leading indicator</em> of this</td></tr>
+    <tr><td><strong>2 &middot; Coverage trends</strong></td><td>Not the number &mdash; the <em>curve</em>. "The DMA is at 96%" is nearly information-free: alarming if it was 96% three weeks ago with stimulus running, encouraging if it was 78% last Monday</td></tr>
+    <tr><td><strong>3 &middot; Bug curves</strong></td><td>Bug-open and bug-closure rates over time &mdash; the simplest trend report in the discipline, and the most misread instrument on the panel</td></tr>
+    <tr><td><strong>4 &middot; Regression health</strong></td><td>Pass rate over time, plus the health of the machine: turnaround from check-in to result, farm utilisation, runtime per block. A runtime spike is actionable the week it appears and archaeology a month later</td></tr>
+    <tr><td><strong>5 &middot; Debug-time share</strong></td><td>The quiet one, and the most often missing. Debug dominates verification time and <strong>varies unpredictably between projects</strong> &mdash; it is the one early warning the other four miss</td></tr>
+  </table>
+  <table class="cols"><tr><td>
+    <div class="ex"><span class="tag">The test for every proposed metric</span><em>What decision changes if this number moves?</em> If nothing changes, do not build it. Metrics must be architected and maintained like any other verification code.</div>
+  </td><td>
+    <div class="ex warn"><span class="tag">Two rules that keep the panel honest</span><strong>Count only clean runs</strong> &mdash; coverage from a failed simulation or a stale build is contamination, not evidence. <strong>Version everything the numbers depend on</strong> &mdash; RTL revision, testbench revision, tool versions, seed, configuration.</div>
+  </td></tr></table>
+  <p class="src">Metrics are code, and one team measured what rebuilding them buys: Graphcore pulled its coverage model out of SystemVerilog into an in-house Python implementation so coverage could be collected in an offline generation step with no simulator, cutting collection over the same 200 seeds from 40,493&nbsp;s to 3,718&nbsp;s &mdash; a 10.9&times; speed-up. The limit travels with the number: a model that is not timing-accurate carries only coverage that does not rely on cycle-accurate information, and the authors call this &ldquo;a rather small testbench&rdquo; (DVCon Europe, pp.1, 3).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- ============ 26. BUG CURVES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 7 &middot; The most misread instrument</p>
+  <h2>Two identical tails, two different truths</h2>
+  <p class="small muted" style="margin-bottom:2px">Bugs found per week. A discovery needs three things at once: <strong>stimulus</strong> that reaches the condition, a <strong>checker</strong> that catches it, an <strong>engineer</strong> who triages it into the tracker. The curve goes flat when bugs run out &mdash; or when any one of those three supply lines does.</p>
+  <table class="cols"><tr><td>
+    <h3 style="color:#256b46">Flat because clean</h3>
+    <table class="chart">
+      <tr>
+        <td><div class="b" style="height:6px"></div></td><td><div class="b" style="height:14px"></div></td>
+        <td><div class="b" style="height:26px"></div></td><td><div class="b" style="height:42px"></div></td>
+        <td><div class="b" style="height:54px"></div></td><td><div class="b" style="height:64px"></div></td>
+        <td><div class="b" style="height:59px"></div></td><td><div class="b" style="height:50px"></div></td>
+        <td><div class="b" style="height:38px"></div></td><td><div class="b" style="height:29px"></div></td>
+        <td><div class="b" style="height:21px"></div></td><td><div class="b" style="height:14px"></div></td>
+        <td><div class="b" style="height:8px"></div></td>
+        <td><div class="b tail" style="height:3px"></div></td><td><div class="b tail" style="height:2px"></div></td><td><div class="b tail" style="height:2px"></div></td>
+      </tr>
+    </table>
+    <p class="axis">week 1 &nbsp;&rarr;&nbsp; 16 &nbsp;&nbsp;|&nbsp;&nbsp; shaded = the flat window</p>
+    <div class="ex good"><span class="tag">During the flat window</span>New irritator sequences and new constraints went in. Coverage plateaued <em>at target</em>, holes dispositioned. Fresh-seed yield measured and ~zero. Checkers stable or strengthened. Triage queue empty. Last finds scattered, low severity, in modelled corners.</div>
+  </td><td>
+    <h3 style="color:#9c3a2a">Flat because starved</h3>
+    <table class="chart">
+      <tr>
+        <td><div class="b" style="height:6px"></div></td><td><div class="b" style="height:14px"></div></td>
+        <td><div class="b" style="height:26px"></div></td><td><div class="b" style="height:42px"></div></td>
+        <td><div class="b" style="height:54px"></div></td><td><div class="b" style="height:64px"></div></td>
+        <td><div class="b" style="height:59px"></div></td><td><div class="b" style="height:50px"></div></td>
+        <td><div class="b" style="height:38px"></div></td><td><div class="b" style="height:29px"></div></td>
+        <td><div class="b" style="height:21px"></div></td><td><div class="b" style="height:14px"></div></td>
+        <td><div class="b" style="height:8px"></div></td>
+        <td><div class="b tail" style="height:3px"></div></td><td><div class="b tail" style="height:2px"></div></td><td><div class="b tail" style="height:2px"></div></td>
+      </tr>
+    </table>
+    <p class="axis">week 1 &nbsp;&rarr;&nbsp; 16 &nbsp;&nbsp;|&nbsp;&nbsp; the same picture, exactly</p>
+    <div class="ex warn"><span class="tag">During the flat window</span>Same tests, more seeds &mdash; a fixed constraint set keeps re-sampling the same region, so the regression has <strong>memorised its own answers</strong>. Coverage plateaued <em>below</em> target. Checkers waived to "stabilise" the regression. A triage backlog hides undiagnosed discoveries.</div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Progress metrics are snapshots of what has happened &mdash; like a stock index or a batting average. They cannot be extrapolated, and the bug curve is where that limitation does the most damage.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- ============ 27. INTERROGATING A FLAT TAIL ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 7 &middot; The corroboration discipline</p>
+  <h2>Six questions to ask a flat tail</h2>
+  <table class="compact">
+    <tr><th style="width:40%">Question</th><th style="width:28%">Flat because clean</th><th>Flat because blind</th></tr>
+    <tr><td>Was new stimulus added during the flat window &mdash; sequences, constraints, <em>irritators</em>?</td><td>Yes &mdash; and it found nothing</td><td>No &mdash; same tests, more seeds</td></tr>
+    <tr><td>Is functional coverage still moving?</td><td>Plateaued <em>at target</em>, holes dispositioned</td><td>Plateaued <em>below</em> target, or bins nobody reviewed</td></tr>
+    <tr><td>What is the fresh-seed yield (failures per thousand new seeds)?</td><td>Measured, and ~zero</td><td>Not measured, or seeds re-explore the same space</td></tr>
+    <tr><td>Did checker strength change?</td><td>Checkers stable or strengthened</td><td>Checkers waived or disabled to "stabilise" regression</td></tr>
+    <tr><td>Is the triage queue empty?</td><td>Yes &mdash; failures were dispositioned</td><td>A backlog hides undiagnosed discoveries</td></tr>
+    <tr><td>Where were the <em>last</em> bugs found?</td><td>Scattered, low severity, in modelled corners</td><td>Clustered, severe, in a corner the plan never modelled</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">The last row deserves its own rule</span>A severe bug found late, in a corner the coverage model did not describe, <strong>is not one bug &mdash; it is a sample from a region your instruments were not watching.</strong> The honest response is to treat it as evidence about the <em>model</em>: extend the coverage model and the stimulus around the find, and let the curve earn its flatness again.</p>
+  <p class="note"><b>Say</b>One more curve belongs beside it: bug-open versus bug-closure. The gap is the debug backlog. The two lines must <em>meet</em>, not merely both go flat.</p>
+  <p class="src">DAC 2015: all 73 <em>functional</em> bugs attendees injected into an 8&times;8 interconnect were caught by Oski Technology's End-to-End formal testbench (DVCon, p.8).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- ============ 28. THE SIGN-OFF CHECKLIST ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 7 &middot; Aggregating the evidence</p>
+  <h2>The sign-off checklist</h2>
+  <p class="small muted" style="margin-bottom:3px">An <strong>evidence aggregation</strong>: every claim of doneness traced to an artifact a skeptic could re-derive. Written <em>before</em> the end &mdash; it is the plan's last column, not a document invented under deadline.</p>
+  <table class="compact">
+    <tr><th style="width:5%">#</th><th style="width:32%">Item</th><th>What sign-off adds</th></tr>
+    <tr><td>1</td><td><strong>Every plan row discharged or dispositioned</strong></td><td>With an executable plan, a database query rather than an interview. A row nobody can trace is undischarged, whatever anyone remembers</td></tr>
+    <tr><td>2</td><td><strong>Coverage closed or waived</strong></td><td>Every hole carries a waiver with five fields: <strong>hole, reason, risk argument, owner, expiry</strong></td></tr>
+    <tr><td>3</td><td><strong>Static verification clean</strong></td><td>Lint, CDC and RDC with their waiver files <em>reviewed</em>, not just present</td></tr>
+    <tr><td>4</td><td><strong>Formal results, assumptions on the table</strong></td><td>A full proof under an over-constrained environment is a beautifully formatted blind spot. Read the assume list, not the checkmarks</td></tr>
+    <tr><td>5</td><td><strong>Open-bug disposition</strong></td><td>Fix / waive as errata (workaround named, doc owner assigned) / defer (with the argument). An open bug with no disposition is an unread instrument</td></tr>
+    <tr><td>6</td><td><strong>Regression health over a window</strong></td><td>A single green run proves the weather, not the climate &mdash; and only error-free runs on the tagged candidate contribute</td></tr>
+    <tr><td>7</td><td><strong>Reproducibility</strong></td><td>Every number regenerable from RTL and testbench revision, tool versions, configuration and seed</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">Three outcomes &mdash; and note the middle one</span><strong>Signed off &middot; conditionally signed off &middot; held.</strong> A conditional sign-off without a condition you can test is sign-off with a guilty conscience.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- ============ 29. THE DASHBOARD ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 7 &middot; Worked example &mdash; week 40, two weeks before tape-out</p>
+  <h2>Three flat bug curves, three different verdicts</h2>
+  <table class="compact">
+    <tr><th style="width:19%">Block</th><th>Plan rows</th><th>Func cov</th><th>Code cov</th><th>Bugs S1/S2/S3</th><th>7-day pass</th><th>Discovery (3wk)</th><th style="width:20%">Fresh stimulus (3wk)</th></tr>
+    <tr><td><strong>the crossbar</strong></td><td>41/41</td><td>100% &rarr;</td><td>98.7% &rarr;</td><td>0 / 0 / 1</td><td>100% &rarr;</td><td>flat</td><td>yes &mdash; new irritators, zero finds</td></tr>
+    <tr><td><strong>the neural accelerator</strong></td><td>37/38</td><td>98.9% &uarr;</td><td>97.8% &uarr;</td><td>0 / 0 / 2</td><td>99.8% &uarr;</td><td>flat</td><td>yes &mdash; quantization corners, zero finds</td></tr>
+    <tr><td><strong>the DMA engine</strong></td><td>44/47</td><td>96.0% &rarr;</td><td>98.2% &rarr;</td><td>0 / 1 / 3</td><td>99.2% &rarr;</td><td>flat</td><td><strong>no</strong> &mdash; team in debug</td></tr>
+  </table>
+  <table class="cols3" style="margin-top:6px"><tr>
+    <td><div class="ex good"><span class="tag">Signed off</span><strong>The crossbar.</strong> Corroborated on every axis: fresh stimulus found nothing, coverage at target, triage queue empty, last finds months old and scattered. Three formal properties are proven only to a bound &mdash; on the record. <em>Eleven minutes of the meeting.</em></div></td>
+    <td><div class="ex"><span class="tag">Conditional</span><strong>The accelerator.</strong> One row undischarged: 2-bit weights &times; concurrent DMA traffic, which no block-level bench can generate. Waiver with all five fields &mdash; hole, reason, risk argument, owner (SoC verification lead), <strong>expiry: closes in SoC regression by week 41, or the block returns to this room</strong>.</div></td>
+    <td><div class="ex warn"><span class="tag">Held</span><strong>The DMA.</strong> Three rows undischarged. Corroboration fails on four of six axes. And the disqualifier: the week-35 find &mdash; abort-and-resume corruption &mdash; had <em>no cross behind it</em>. Coverage there reads 71%, but that is not the hole: <strong>the hole has no bins at all.</strong></div></td>
+  </tr></table>
+  <p class="note"><b>Say</b>The DMA is held two weeks with the work aimed at the <em>blind spot</em>, not the bug: abort-and-resume as a class, a cross of abort point &times; geometry &times; other-channel state, and a checker on the invariant the bug violated. The curve must earn its flatness under the new instruments.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- ============ 30. ESCAPE ANALYSIS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 7 &middot; The post-mortem that feeds the next plan</p>
+  <h2>Escape analysis: five questions, answered in writing</h2>
+  <p class="small muted" style="margin-bottom:4px">Escapes are the statistical norm: <strong>14%</strong> first-silicon success, <strong>87%</strong> of FPGA projects with non-trivial production escapes (2024). An escape is a perfectly targeted audit of your process, bought at the worst price. Wasting it is the unforgivable part.</p>
+  <table class="compact">
+    <tr><th style="width:6%">#</th><th style="width:34%">Question</th><th>Worked on the event unit's retention escape</th></tr>
+    <tr><td><strong>1</strong></td><td>What was the bug? <em>Mechanism, not symptom</em></td><td>A wake event arriving in the same cycle as isolation release corrupts the restore path of the retention flops</td></tr>
+    <tr><td><strong>2</strong></td><td>Why did our stimulus never reach it?</td><td>Power tests stepped through save/sleep/restore with <em>directed</em> timing; nothing randomized wake arrival against the power FSM</td></tr>
+    <tr><td><strong>3</strong></td><td>Why did no checker catch it &mdash; or could none have seen it?</td><td>Checks looked at configuration <em>after</em> restore completed, so the race window was unobserved &mdash; and plain RTL does not model state loss at all. <strong>Checker gap <em>and</em> platform gap</strong></td></tr>
+    <tr><td><strong>4</strong></td><td>Why did our metrics say we were done?</td><td>The plan rows were discharged by those directed tests; the model had no cross of wake-timing &times; power-state transition. <strong>The dashboard was faithful to a blind plan</strong></td></tr>
+    <tr><td><strong>5</strong></td><td>What changes? <em>For the class, never only the instance</em></td><td>New plan-row family for randomized wake timing; the missing cross; power-aware simulation pulled earlier; and a new checklist item &mdash; <em>power-intent behaviour verified on a power-aware platform, not inferred from RTL</em></td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">The non-negotiable ground rule</span>The analysis is <strong>blameless</strong> &mdash; not out of kindness, but as instrumentation hygiene. The moment a post-mortem can end a career, every future post-mortem receives laundered data. Question 4's answer is often <em>"the metrics were fine and the plan was blind"</em> &mdash; obtainable only from an engineer who is not defending herself.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- ============ 31. DISCUSSION 3 ============ -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for the room &mdash; sign-off</h2>
+  <ol class="big" style="margin-top:16px">
+    <li style="margin-bottom:14px">Your bug curve is flat this week. <strong>Which of the six corroborating instruments can you actually produce today?</strong> Whichever you cannot is the one to build first.</li>
+    <li style="margin-bottom:14px">Take your last waiver. Does it have all five fields &mdash; hole, reason, risk argument, owner, <strong>expiry</strong>? An empty expiry makes it permanent by accident.</li>
+    <li style="margin-bottom:14px">Name your organisation's last escape. Did it end as a <strong>changed row in the plan and the checklist</strong> &mdash; or as a slide nobody reopened?</li>
+  </ol>
+  <p class="note"><b>Facilitation</b>A mature team's checklist reads like a scar-tissue map: each odd-looking item is a former escape, filed where it can never surprise anyone again.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- ============ 32. CLOSING ============ -->
+<section class="slide">
+  <p class="kicker">Part II &middot; Closing</p>
+  <h2>What Part II established</h2>
+  <table class="cols"><tr><td>
+    <ul class="small">
+      <li><strong>A behaviour is verified only if it is in the plan.</strong> Every downstream metric measures against the feature list, so extraction has the highest cost of omission in verification.</li>
+      <li><strong>One row, one metric.</strong> A row that needs two kinds of evidence is two rows &mdash; otherwise it closes by fatigue.</li>
+      <li><strong>Coverage measures sampling, not correctness</strong>, and "100%" is a statement about your model. Checkers are what keep the derivative attached to the goal.</li>
+      <li><strong>Exclusions are legitimate only as reviewable artifacts</strong>: classified, reasoned, attributed, versioned.</li>
+      <li><strong>No single metric portrays the project.</strong> Sign-off is the act of reading the instruments against each other &mdash; and then accepting the residue, on the record.</li>
+    </ul>
+  </td><td>
+    <h3>Read the chapters</h3>
+    <table class="compact">
+      <tr><td style="width:8%"><strong>5</strong></td><td>Verification Planning &mdash; extraction, the vplan row, executable plans, the review, risk</td></tr>
+      <tr><td><strong>6</strong></td><td>Coverage: Theory and Practice &mdash; the taxonomy, model design, closure, honest exclusions</td></tr>
+      <tr><td><strong>7</strong></td><td>Metrics-Driven Sign-off &mdash; the instruments, bug curves, the checklist, escape analysis</td></tr>
+    </table>
+    <div class="ex"><span class="tag">The loop that closes on itself</span>The checklist is not a static document. It is the accumulated sediment of every post-mortem the organisation has survived &mdash; new rows in the two artifacts every future project must walk past: <strong>the plan and the checklist</strong>.</div>
+    <p class="small muted">Next: <strong>Part III &mdash; Dynamic Verification.</strong> Testbench architecture, stimulus, UVM as a methodology, assertions, regression engineering.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Part I said completeness is impossible. Part II is what makes the alternative respectable: promises written down, evidence measured, residue accepted by name.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<script>
+  // Keyboard navigation in the browser (ignored by weasyprint).
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var idx = 0;
+    function go(i) {
+      idx = Math.max(0, Math.min(slides.length - 1, i));
+      try { slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+      if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(idx - 1); }
+      if (e.key === 'Home') { e.preventDefault(); go(0); }
+      if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+    });
+  })();
+</script>

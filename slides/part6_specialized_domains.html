@@ -1,0 +1,1377 @@
+<meta charset="utf-8">
+<title>Specialized Domains — Lecture Deck, Part VI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<!-- =====================================================================
+     PART VI DECK -- WHAT WAS CUT, AND WHY
+     Three chapters, 43 slides. Cut whole topics, not slivers of every topic.
+
+     1. ch22 SS22.3's plateau / formal-convergence topic, as a slide: the 8K
+        memory that would not converge in twelve hours, the black-boxing, the
+        back-to-back-flip-flop abstraction, and the direction-of-error
+        argument. Its load-bearing claim -- a proof answers "under any
+        stimulus", simulation answers "under this stimulus" -- is already the
+        punchline of slide 23, and the remainder is Chapter 14's abstraction
+        discipline with an auditor attached. One sentence survives in the
+        speaker note of slide 24.
+     2. ch23 SS23.6's whole "where each question is answered" routing table
+        (formal / connectivity / static flow / dynamic flow / emulation /
+        silicon), together with its emulator-contention and
+        environment-divergence material. Slide 41 carried the table for three
+        drafts and measured 175 pt over the frame every time; the slide's
+        teaching point is the "can you name the signals?" test, and the table
+        is a reference chart rather than a judgment. Cut whole. One clause of
+        the scheduling argument survives in slide 41's speaker note.
+     3. ch23 SS23.6's video-codec adversarial-stimulus scenario -- the
+        invariant oracle for hostile input, and mutation-based generation.
+        Cut whole rather than thinned: it is a stimulus-generation lesson and
+        Part III owns stimulus generation. Its transferable line -- mutation
+        pays where the input is a structured byte stream a mutation leaves
+        ALMOST legal, and pays badly on a bus interface -- went with it.
+     4. ch22 SS22.5's "where this is engineering, and where it is not". Some
+        of the best prose in the chapter, and no verification judgment a
+        lecture can act on.
+     5. ch21 SS21.3's LPDDR4 PHY training division (the algorithm is
+        discharged pre-silicon, the DISTRIBUTION of training outcomes across
+        parts and temperature is not). Reduced to a speaker note on slide 10:
+        Part V already taught the pre-silicon / post-silicon split at length,
+        and carrying it again was the only duplicated argument across the
+        three chapters.
+     6. ch23's security-bug severity and access-controlled-tracker material,
+        and ch21's model-creation calendar data beyond the effort shape.
+        Both fold into a sentence elsewhere or are dropped.
+
+     Demoted rather than cut, all for frame budget, all recorded here because
+     a speaker note is not a slide and the distinction should be visible:
+     ch21's sensor-hub trim-search scenario (slide 13 note), ch21 SS21.2's
+     coverage-bin/tolerance-token covergroup (slide 7 keeps the package and
+     the correlation check; the floating-point argument survives as prose),
+     ch22's flow-qualification-by-mutation contrast (slide 28 note), ch23's
+     software-reachable-DVFS capability-tier argument (slide 40 note), and
+     ch23's fixed-latency assertion, reduced from a code block to an inline
+     expression on slide 40.
+     ===================================================================== -->
+
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Part VI -- Specialized Domains (Chapters 21-23).
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid -- table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     House sheet carried verbatim from Part V, including its
+     table-layout / box-sizing / td:first-child fixes. Diagram primitives are
+     per-deck: kept diag/db/stem and chain/cbox/arrowr (both used here);
+     dropped Part V's .bar proportion strip and .db.off, which have no claim
+     to state in this Part. Three additions, all needed by Chapter 23's
+     trust-boundary figure and Chapter 22's good/faulty-machine figure:
+     .db.no (a second, deliberately corrupted copy of a block), .db.strad
+     (a block that genuinely straddles a trust boundary and must not be drawn
+     on one side of it), and .rot (a dashed enclosure naming a trust boundary
+     around a nested row of blocks).
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+  pre.mini  { font-size: 10.5px; line-height: 1.36; padding: 7px 9px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  /* table-layout:fixed is load-bearing: several slides nest a full width:100%
+     table inside a column cell; without fixed layout the nested table's natural
+     minimum width inflates its parent column, squeezes the sibling to a ribbon
+     and pushes the slide onto a second page. */
+  table.cols, table.cols3 { width: 100%; table-layout: fixed; }
+  /* border-box is required once the layout is fixed: with content-box the
+     gutter is ADDED outside the declared percentage. */
+  table.cols td { border: none; padding: 0 16px 0 0; box-sizing: border-box; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; font-size: 13.5px; box-sizing: border-box; }
+  /* Default width on the FIRST cell only, never on every cell. Under fixed
+     layout a per-cell default of 50% would be ADDED to an inline 57% first
+     column, running the last column past the slide edge and clipping it. */
+  table.cols td:first-child { width: 50%; }
+  table.cols3 td:first-child { width: 33.3%; }
+  /* the last column has no neighbour to be separated from, and under border-box
+     its right gutter is subtracted from usable width rather than added outside. */
+  table.cols td:last-child, table.cols3 td:last-child { padding-right: 0; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* One density step beyond .dense, for the three slides that carry a source
+     line on top of an already-full frame. Anchoring a claim to a named company
+     costs vertical space the layout had none of, and the alternative to a
+     further step is deleting the anchor — which is the one thing that must not
+     happen, since the source line is what makes the number checkable. Must
+     follow .dense: equal specificity, so source order decides. */
+  .denser h2  { margin-bottom: 6px; }
+  .denser h3  { margin: 5px 0 3px; font-size: 14px; }
+  .denser p   { margin-bottom: 4px; }
+  .denser li  { margin-bottom: 2px; font-size: 12.5px; line-height: 1.28; }
+  .denser td  { padding: 2px 7px 2px 0; font-size: 12px; }
+  .denser .ex { padding: 5px 9px; margin: 4px 0; font-size: 12px; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .pill.arg { background: #fbf0e0; color: #8a5a1c; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex.good { background: #eef7f1; border-left-color: #256b46; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .ex.good .tag { color: #256b46; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- block-diagram boxes (Part I / III / IV / V lineage) ---- */
+  table.diag { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  table.diag td { padding: 0 3px; border: none; vertical-align: middle; }
+  .db {
+    text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.22;
+    border: 1.5px solid #2c4f8c; border-radius: 4px; padding: 7px 5px; background: #eef2f9;
+  }
+  .db .s { display: block; font-weight: 400; font-size: 10.5px; color: #566174; font-style: italic; margin-top: 2px; }
+  .db.bus { background: #2c4f8c; color: #ffffff; font-size: 13px; padding: 9px 6px; }
+  .db.bus .s { color: #c6d5ec; font-style: normal; }
+  .db.obs { background: #f7f9fc; border-style: dashed; border-color: #98a3b3; color: #566174; }
+  .db.chk { background: #e2f2e9; border-color: #256b46; }
+  .db.no  { background: #fbf3f1; border-color: #9c3a2a; color: #7a2e21; }
+  .db.no .s { color: #9c3a2a; }
+  .db.strad { background: #fbf0e0; border-color: #a8712a; color: #5d4212; }
+  .db.strad .s { color: #8a5a1c; }
+  tr.stem td { padding: 0; }
+  tr.stem i { display: block; width: 0; height: 11px; border-left: 2px solid #2c4f8c; margin: 0 auto; }
+  tr.stem i.dash { border-left-style: dashed; border-left-color: #98a3b3; }
+
+  /* ---- trust-boundary enclosure (Chapter 23) ---- */
+  .rot { border: 2px dashed #256b46; border-radius: 6px; padding: 5px 7px 1px; background: #f4faf6; }
+  .rot .rl {
+    display: block; font-family: "IBM Plex Mono", monospace; font-size: 9.5px;
+    font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #256b46; margin-bottom: 3px;
+  }
+
+  /* ---- chain: stage -> stage -> stage ---- */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; font-style: italic; }
+  .cbox.out { background: #e2f2e9; border-color: #256b46; }
+  .cbox.no  { background: #fbf3f1; border-color: #9c3a2a; }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification: A Holistic Guide &middot; Part VI</p>
+  <h1>Specialized&nbsp;Domains</h1>
+  <p class="sub">Chapters 21&ndash;23. Analog and mixed-signal verification; safety verification; security verification.</p>
+  <p class="sub" style="margin-top:16px"><em>Three markets, three obligations. Each one takes something you have relied on for twenty chapters and removes it.</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- src: the three chapters' chapter maps, one capability drawn from each --
+     ch21:17 (tolerance-based verdict) + ch21:21 (the ownership boundary);
+     ch22:15 (failure analysis as a verification input) + ch22:16 (pruning honestly)
+     + ch22:17 (the half teams forget: it must not fire when it should not);
+     ch23:16 (threat model as a versioned artifact) + ch23:19 (verifiable vs arguable) -->
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part VI &middot; Orientation</p>
+  <h2>What you will be able to do</h2>
+  <ul>
+    <li>State an analog check as a <em>band, a window and a condition set</em> &mdash; and say what the band is a percentage <em>of</em>.</li>
+    <li>Read a failure analysis as a verification input, and say why a fault count is not a diagnostic-coverage metric.</li>
+    <li>Tell a fault that is <em>safe</em> from a fault your workload never excited &mdash; and never let the second be recorded as the first.</li>
+    <li>Verify a safety mechanism the way teams forget: that it stays <em>silent</em> on a healthy part.</li>
+    <li>Write a threat-model row, recognise the one you cannot close, and say so rather than widening it.</li>
+  </ul>
+  <div class="ex">
+    <span class="tag">The register shift</span>
+    Parts I&ndash;V asked whether the evidence was enough. Part VI asks a question with a third party in it: <em>enough for whom?</em> A continuous quantity, a safety assessor, an adversary. Each arrives with its own idea of what counts as evidence, and none of the three accepts the other two's.
+  </div>
+  <p class="note"><b>Say</b>These are not three techniques. They are three markets &mdash; and a market is a set of obligations you did not choose.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- src: ch21:13,29,37 (oracle rebuilt as a band; verdict is a property of the design AND every tolerance);
+     ch22:9,33 (what you must be able to SAY; the premises of somebody else's argument);
+     ch23:9,25 (can it be made to do something the specification never mentioned) -->
+<!-- ============ 3. THE MAP ============ -->
+<section class="slide dense">
+  <p class="kicker">Part VI &middot; The map</p>
+  <h2>Three chapters, three things the market takes away from you</h2>
+  <table class="diag">
+    <tr><td colspan="3"><div class="db bus">Twenty chapters of practice, resting on assumptions the tools never made you state<span class="s">a value is exact &middot; a specification sets the scope &middot; the reasoning lives in the room</span></div></td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db">21 &middot; The continuous world<span class="s">there is no bit-exact oracle</span></div></td>
+      <td><div class="db">22 &middot; A standard is watching<span class="s">the argument is the deliverable</span></div></td>
+      <td><div class="db">23 &middot; There is an adversary<span class="s">no denominator, so no percentage</span></div></td>
+    </tr>
+  </table>
+  <table class="compact" style="margin-top:8px">
+    <tr><td style="width:11%"><span class="pill">CH 21</span></td><td>The oracle stops being an equality. <em>Correct</em> becomes a <strong>band</strong>, and checker, coverage bin and regression verdict are all rebuilt on it &mdash; so a mixed-signal regression's verdict is a property of the design <em>and</em> of every tolerance somebody typed into a checker.</td></tr>
+    <tr><td><span class="pill">CH 22</span></td><td>The reasoning that connects evidence to &ldquo;good enough to ship&rdquo; stops living in the heads of the people at the table. You are no longer producing results; you are producing <strong>the premises of somebody else's argument</strong>.</td></tr>
+    <tr><td><span class="pill">CH 23</span></td><td>The specification stops setting the scope. The property is not &ldquo;the design does X&rdquo; but &ldquo;the design cannot be made to do Y&rdquo; &mdash; where <strong>Y is chosen by someone who read the specification looking for what nobody wrote down</strong>.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Read the third row against the first two. Twenty-two chapters assumed a document defined the job. Chapter 23 is what happens when an opponent defines it instead.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. DIVIDER 21 ============ -->
+<section class="slide divider">
+  <p class="chno">21</p>
+  <h1>Analog and Mixed-Signal<br>Verification</h1>
+  <p class="sub">The digital abstraction stops here. The oracle, the checkers, the coverage model and the pass/fail rule that decides whether a regression passed all have to be rebuilt on a foundation where <em>correct</em> is a band rather than an equality.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- src: ch21:3-13 (the opening failure, 1.8 V / 4096 / 439 uV, the +/-2 LSB that became the spec) -->
+<!-- ============ 5. THE OPENING FAILURE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 21 &middot; Where the abstraction stops</p>
+  <h2>Three engineers spend a week looking for the bug. There is no bug.</h2>
+  <pre>assert (adc_code == expected_code);</pre>
+  <p class="small">It fails on nearly every run &mdash; not by much: one code, occasionally two. One least-significant bit against the analog front-end's 1.8&nbsp;V reference is 1.8&nbsp;/&nbsp;4096&nbsp;&asymp;&nbsp;<strong>439&nbsp;&micro;V</strong>, and 439&nbsp;&micro;V is smaller than the amount by which the model, the schematic and the eventual silicon are <em>designed</em> to disagree. The comparison was never going to hold.</p>
+  <div class="ex warn">
+    <span class="tag">What happens next is the real defect</span>
+    Someone changes the check to <code>&plusmn;2 LSB</code>, the regression goes green, and the number is never written down anywhere but that line of code. Six months later a run fails at 3&nbsp;LSB and nobody can say whether that is a bug, a modelling artifact, or an unlucky seed &mdash; because nobody knows where the 2 came from. <strong>A debugging convenience has quietly become the specification.</strong>
+  </div>
+  <p class="note"><b>Say</b>The instinct to widen the check is correct. Everything wrong here happens in the ten seconds after it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- src: ch21:29-33 (band / window / condition set); ch21:37-39 (verdict is a property of the design and
+     of every tolerance; a mixed-signal row closes on a band with a NAMED SOURCE); ch21:41 (PLL scenario --
+     chapter-local illustrative parameters per example_bank canonical-numbers note) -->
+<!-- ============ 6. BAND, WINDOW, CONDITION SET ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; The oracle</p>
+  <h2>The verdict has three parts where a digital verdict has one</h2>
+  <table class="compact">
+    <tr><th style="width:17%">Part of the verdict</th><th>What it fixes, and what goes wrong without it</th></tr>
+    <tr><td><strong>A band</strong></td><td>Absolute (&plusmn;&nbsp;10&nbsp;mV) or relative (&plusmn;&nbsp;2%) &mdash; and the choice is a trap in <em>both</em> directions. Next slide.</td></tr>
+    <tr><td><strong>A window</strong></td><td>Analog outputs settle. A comparison made before the settling time has elapsed is checking a transient; one made at an arbitrary time is checking whatever the model's step size happened to produce. Every analog check needs a stated moment or interval at which it is valid.</td></tr>
+    <tr><td><strong>A condition set</strong></td><td>Supply voltage, temperature, process corner, input frequency, load. <strong>A tolerance without the conditions under which it holds is not a specification.</strong></td></tr>
+  </table>
+  <div class="ex">
+    <span class="tag">Scenario &middot; the same four fields, as a plan row</span>
+    The PLL must be within <strong>100&nbsp;ppm</strong> of target after lock. The row states the band (100&nbsp;ppm), the window (1024 output cycles beginning 20&nbsp;&micro;s after the lock request), the conditions (nominal supply, three temperature points, three process corners), and the <em>source</em> of the band &mdash; the tightest frequency accuracy any consumer of the system clock demands. The checker reads all four from a package, not from literals. <strong>Why:</strong> when a run fails at 140&nbsp;ppm the conversation is about which requirement is violated and whether the band or the design should move. Without the row it is about whether 100 was ever the right number, and it has no ending.
+  </div>
+  <p class="small">A digital plan row closes when a coverpoint is hit or an assertion is proven. A mixed-signal row closes when a measured quantity sits inside a stated band under stated conditions, <strong>with a named source for the band</strong>. Scattered as literals through the testbench, those numbers leave the team unable to answer the two questions that matter in a bring-up crisis: <em>where did this tolerance come from</em>, and <em>who approved it</em>.</p>
+  <p class="note"><b>Say</b>Those PLL numbers are that chapter's illustration, not a house constant. What transfers is the four fields, and that the fourth one is a name.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- src: ch21:185-216 (afe_spec_pkg + covergroup + correlation check, abridged: module wrapper and
+     signal declarations dropped by WHOLE declaration, nothing elided inside a construct);
+     ch21:218 (the reference-point argument: percentage of measured value vs of full scale);
+     ch21:31 (the OTHER direction: absolute tolerance over three decades); ch21:35 (0.1+0.2, tolerance tokens) -->
+<!-- ============ 7. THE REFERENCE POINT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; The oracle</p>
+  <h2>A band is only as meaningful as the thing it is a percentage <em>of</em></h2>
+  <table class="cols"><tr><td style="width:53%">
+<pre class="mini">package afe_spec_pkg;
+  // Bands for the front-end: one place, one owner,
+  // quoted everywhere.
+  localparam real V_REF = 1.8;   // reference, volts
+  // Model-vs-schematic band: 1% of FULL SCALE, named
+  // in register row MDL-AFE-ADC-01.
+  localparam real V_CORR_ABS = 0.01 * V_REF;
+endpackage
+
+// Correlation runs only: model vs transistor level.
+always @(posedge sample_done)
+  if (corr_run &amp;&amp; !(v_mdl inside {[v_ckt +/- V_CORR_ABS]}))
+    $error("AFE model outside its correlation band");</pre>
+  </td><td>
+    <p class="small">The correlation check uses the <strong>absolute</strong> token, and that is the whole argument. A band taken as a percentage of the <em>measured value</em> shrinks with the signal and collapses near zero. The same percentage of the <em>fixed full-scale reference</em> is a constant band across the whole range.</p>
+    <div class="ex warn">
+      <span class="tag">And the trap runs both ways</span>
+      An absolute tolerance on a quantity that legitimately spans three decades is <strong>meaningless over most of its range</strong>. The reference point is a choice with a failure mode on each side &mdash; so state which one you picked, and against what.
+    </div>
+    <p class="small">Coverage inherits the same problem. A bin naming a single real value can fail to be hit at all, because floating point has limited precision: <code>0.1 + 0.2</code> yields <code>0.30000000000000004</code>, which is not in a bin covering <code>{0.3}</code>. A tolerance token attached to a single value defines an implicit range a real measurement can land in.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>None of those numbers is a bare literal. Each is a named constant with a comment, and the correlation band names the model-register row behind it &mdash; which is the entire point. <code>corr_run</code> keeps the nightly regression and the correlation campaigns apart in one file.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- src: ch21:45-49 (what RNM is: no matrix solution, model decides when to update, no continuous-time
+     operation; no analog solver therefore no convergence failure; no standard for discrete modelling of
+     analog nets); ch21:55-59 (the three measurements table, verbatim); ch21:61 (0.3% vs checkers at 5%;
+     model to the tolerance); ch21:63 (different baselines, not composable) -->
+<!-- ============ 8. REAL NUMBER MODELLING ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 21 &middot; Real number modelling</p>
+  <h2>No matrix solve, therefore no convergence failure &mdash; that is the whole value proposition</h2>
+  <p class="small">An <em>analog</em> model describes the current-versus-voltage relationship between nodes, and the solver finds all node voltages and branch currents by Newton&ndash;Raphson iteration with matrix inversion, choosing each timestep from accuracy criteria. A <strong>real</strong> model has no matrix solution at all: the output is computed directly, the model itself decides when to perform each internal computation, and there is no continuous-time operation &mdash; only sampled, clocked or event-driven updates, inside the ordinary event-driven simulator.</p>
+  <table class="compact">
+    <tr><th style="width:32%">Design</th><th style="width:19%">Compared against</th><th>Result</th><th style="width:9%">Year</th></tr>
+    <tr><td>A major analog block driver with filtering and fault detection &mdash; <strong>LSI Corporation</strong></td><td>SPICE netlist</td><td>24&times; faster, 0.3% gain inaccuracy at 100&nbsp;MHz</td><td>2011</td></tr>
+    <tr><td>PLL loop filter</td><td>Verilog-AMS</td><td>90&times; faster (47&nbsp;s vs 1&nbsp;h&nbsp;8&nbsp;min&nbsp;32&nbsp;s)</td><td>2015</td></tr>
+    <tr><td>Delta-sigma ADC</td><td>Verilog-AMS</td><td>230&times; faster (0.4&nbsp;s vs 92.5&nbsp;s), ENOB 11.515 vs 11.72</td><td>2015</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">Do not chain these</span>
+      Three ratios, two independent sources, three different baselines &mdash; one against SPICE, two against Verilog-AMS models of the same blocks. They measure separate things. <strong>Any composite figure built by multiplying them is a new claim with nothing behind it.</strong>
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">The first row is the design rule, not the headline</span>
+      Its 0.3% inaccuracy was <em>far better than required</em>, because the tolerances on the checkers were in the range of 5%. The accuracy traded away for the speedup was accuracy the verdict never depended on. <strong>Model to the tolerance the plan row states, and not one digit finer.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Be blunt about the state of standardisation: there is no standard for how discrete modelling of analog nets should be done, so published examples are one method among several rather than a normative pattern.</p>
+  <p class="src">Row&nbsp;1: Khan and Kashai (Cadence Design Systems) with Fang (LSI Corporation), <em>Metric Driven Verification of Mixed-Signal Designs</em>, DVCon &mdash; [D19, pp.&nbsp;4&ndash;5]. Self-reported; one analog block driver in one design, gain measured at a single frequency. Rows&nbsp;2&ndash;3 are not anchored to a named organisation.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- src: ch21:65-75 (the three things discarded, and the closing argument about which checks depend on
+     them); ch21:77 (radar receive-chain scenario and its stated limit -- the noise floor is a parameter) -->
+<!-- ============ 9. WHAT RNM DISCARDS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; Real number modelling</p>
+  <h2>Speed is bought with abstraction &mdash; know exactly what left the building</h2>
+  <table class="compact">
+    <tr><td style="width:24%"><strong>Electrical relationships</strong></td><td>A real net carries a value, not a Kirchhoff relation. Loading, drive strength, input impedance and current draw are simply absent unless the modeller writes them in. <strong>A shared bias line feeding two loads behaves in a real model exactly as it would with one</strong> &mdash; which is the point at which a whole class of real circuit failures becomes invisible.</td></tr>
+    <tr><td><strong>Continuous time</strong></td><td>The model updates on events; between updates the quantity is a held value, and any transient shorter than the update interval does not exist. Glitches, ringing, overshoot on a supply ramp, and the settling behaviour a tolerance window is supposed to be checking, appear <em>only</em> if the modeller decided in advance to represent them.</td></tr>
+    <tr><td><strong>Noise, variation, margin</strong></td><td>Thermal noise, jitter, offset, mismatch and the spread across process corners are not free consequences of a real model the way they are consequences of a circuit. Each one is a feature somebody wrote, with parameters somebody chose.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:47%">
+    <div class="ex">
+      <span class="tag">Not an argument against the technique</span>
+      The alternative to abstraction here is not simulating everything &mdash; it is simulating nothing. It is an argument for <strong>enumerating which of your checks depend on the discarded physics</strong>, because those checks are checking the model rather than the design.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Scenario &middot; the radar receive chain, and its stated limit</span>
+      A real model of the analog path lets the testbench <em>generate</em> the chirp: sweep return amplitude across the full input range, inject a controlled noise floor, drive the amplifier into and out of saturation, run it as a constrained-random regression. <strong>The limit:</strong> the model's noise floor is a <em>parameter</em>, not a measurement, so a detection threshold tuned against it has been tuned against a cleaner world than the silicon.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>That last sentence is the whole of the next three slides in miniature. The number needs a source, and the source is a correlation run.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- src: ch21:81-85 (two solvers; connect modules inserted automatically; the BLOCKING interpolation
+     request; the 0.4 s vs 92.5 s ratio read backwards; campaign not tier); ch21:87-92 (the selection rule
+     and its four cases); ch21:94 (sensor-hub shared bias reference scenario); ch21:96-100 (PHY: algorithm
+     vs distribution -- carried as a speaker note only, see cut list item 5) -->
+<!-- ============ 10. AMS CO-SIMULATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; AMS co-simulation</p>
+  <h2>Co-simulation is a campaign, not a regression tier</h2>
+  <p class="small">One simulation, two solvers exchanging values at their shared boundary; where a continuous discipline meets a discrete one, connect modules are inserted automatically. Every time the digital side wants an analog value it must ask the analog solver to interpolate one, and that request is <strong>blocking</strong>: control passes to the analog solver and does not return until the value is available. A sampling clock chosen without thought does not merely add work &mdash; it repeatedly stalls the digital engine on the slowest component in the system.</p>
+  <table class="cols"><tr><td style="width:47%">
+    <div class="ex">
+      <span class="tag">The rule that survives contact with a schedule</span>
+      <strong>Co-simulate what real number modelling threw away, and nothing else.</strong>
+      <ul class="small" style="margin-top:5px">
+        <li><strong>Model correlation runs</strong> &mdash; the most valuable use, because it is what makes every subsequent real-model run mean something.</li>
+        <li><strong>Failures that live in loading, current and impedance</strong> &mdash; precisely the class a real model cannot express and therefore cannot fail on.</li>
+        <li><strong>Power-up, power-down, supply ramps.</strong></li>
+        <li><strong>One end-to-end signal-path scenario per configuration</strong> &mdash; not for bug-finding, but as evidence that the composed system behaves as the real models claim.</li>
+      </ul>
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Scenario &middot; the sensor hub's shared bias reference</span>
+      Two channels, one bias reference, firmware may enable them independently. The real model of the bias generator delivers its nominal output regardless of how many channels are enabled, so <strong>a real-model regression will never show a problem</strong>. One co-simulated scenario enables both and checks the reference under the doubled load. The failure is a droop that shifts the first channel's conversion beyond its stated tolerance &mdash; a loading failure by construction, invisible to any abstraction that does not carry current. <strong>What it costs:</strong> one scenario, re-run when the bias generator's schematic changes. Not nightly.
+    </div>
+    <p class="small">Read the previous slide's table backwards for the magnitude: 0.4&nbsp;s against 92.5&nbsp;s. At anything like that ratio an hour of real-model regression becomes a multi-day proposition, and a job that had to finish overnight does not finish at all.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The memory PHY's training, owed from Part V: the AMS boundary can discharge the <em>algorithm</em> &mdash; convergence against a channel model, termination rather than looping, reachable retry and fallback paths, timing obligations throughout. It cannot discharge the <em>distribution</em> of training outcomes across parts and temperature, which does not exist until there are parts. Two rows; the second closes in the lab.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- src: ch21:104 (a model nobody has correlated); ch21:106-110 (the inversion: golden because it is the
+     specification vs golden because it is what gets fabricated; no analog synthesis, no equivalence
+     checking; chip-level verification assumes correlated models); ch21:112 (analog's second pair of eyes) -->
+<!-- ============ 11. THE REFERENCE IS INVERTED ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; The trust problem</p>
+  <h2>In analog the schematic is the reference &mdash; and nothing mechanically checks the model against it</h2>
+  <p class="lead"><strong>A model nobody has correlated is a lie you regress against nightly</strong> &mdash; an expensive one, because it produces green results, at speed, in volume, for months.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>Digital</h3>
+    <p class="small">The specification is the reference and the implementation is checked against it. That is what makes a <em>golden</em> model golden in this book's vocabulary: it is golden <strong>because it is the specification</strong>. Synthesis then produces the gates, and equivalence checking closes the RTL-to-gates gap mechanically.</p>
+  </td><td>
+    <h3>Analog</h3>
+    <p class="small">The direction reverses. The schematic is treated as the reference &mdash; golden because it is <strong>what gets fabricated</strong>. There is <strong>no analog synthesis</strong>, so the schematic is a creative artifact rather than a derived one, and there is <strong>no equivalence checking</strong> to confirm that a hand-written model matches it.</p>
+  </td></tr></table>
+  <div class="ex warn">
+    <span class="tag">Which relocates the whole problem</span>
+    Digital's risk is a misinterpreted specification, which is why the discipline puts two independent pairs of eyes between specification and RTL. Analog specifications are usually interpreted correctly and are quite simple; the problems are <em>creating the implementation</em> and <em>creating the model</em>. So analog's second pair of eyes is not an assertion in a testbench &mdash; it is <strong>the comparison of two independently created representations of the same block</strong>, the schematic and the model.
+  </div>
+  <p class="note"><b>Say</b>Chip-level verification assumes correlated models. Without them, chip-level verification is suspect &mdash; and it will not look suspect, because it will be green.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- src: ch21:116-122 (the three-step procedure; 10 mV / 1 mA per-port criteria; criterion invented after
+     seeing the mismatch); ch21:124 (little state -- modes are enumerable); ch21:128-134 (staleness triggers;
+     correlation as a campaign with named triggers); ch21:146-159 (the model register, abridged to five rows) -->
+<!-- ============ 12. MODEL CORRELATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; The trust problem</p>
+  <h2>Correlation is a procedure with an artifact &mdash; and its result expires</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>The procedure</h3>
+    <ol class="small">
+      <li><strong>One self-checking testbench</strong>, written against the block's specification.</li>
+      <li><strong>Run twice</strong> &mdash; once against the behavioural model, once against the schematic at transistor level.</li>
+      <li><strong>Compared per port, against a declared tolerance.</strong> In a published programmable-gain-amplifier example: output voltage within <strong>10&nbsp;mV</strong>, supply current on the supply pin within <strong>1&nbsp;mA</strong>. The third point is where most teams fall short: the correlation tolerance is part of the specification, <strong>per port, before anyone runs anything</strong>. A match criterion invented after seeing the mismatch is not a criterion.</li>
+    </ol>
+  </td><td>
+    <h3>The model register &mdash; one row per model</h3>
+    <table class="compact" style="table-layout:fixed">
+      <tr><td style="width:32%"><strong>Correlated against</strong></td><td>Schematic rev.&nbsp;7, transistor level</td></tr>
+      <tr><td><strong>Criteria</strong></td><td>Output code within 1% of full scale (&asymp;&nbsp;41&nbsp;LSB); conversion time within 5%</td></tr>
+      <tr><td><strong>Conditions covered</strong></td><td>Nominal supply, 3 temperature points; corners <strong>not</strong> correlated</td></tr>
+      <tr><td><strong>Date and owner</strong></td><td>Named analog engineer, with date</td></tr>
+      <tr><td><strong>If wrong</strong></td><td>Every result in the chip-level regression that passes through the converter, and every plan row that closes on one of its measurements</td></tr>
+      <tr><td><strong>Re-correlate when</strong></td><td>The schematic or specification changes; a new operating condition is used; a parameter changes with no schematic change; or <strong>a model is edited during debug</strong> &mdash; the most dangerous, because it happens under pressure and makes a failing test pass</td></tr>
+    </table>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The last three rows are what make the register worth maintaining. A <strong>date</strong> turns &ldquo;the model is correlated&rdquo; into a claim that can visibly go stale, and the <strong>consequence</strong> field lets a reviewer ask the only question that matters about a model: <em>if this is wrong, what else is wrong with it?</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- src: ch21:163-173 (the boundary and the four things owned; interface faults as a documented source of
+     chip bugs); ch21:175 (sensor-hub trim-search scenario and its trap); ch21:177 (flash read-retry
+     scenario and the third currency: a bit-error-rate distribution) -->
+<!-- ============ 13. WHAT THE DIGITAL TEAM OWNS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; The boundary</p>
+  <h2>You are almost certainly not verifying the analog block. Name what you <em>do</em> own.</h2>
+  <table class="compact">
+    <tr><td style="width:23%"><strong>The interface contract</strong></td><td>Every control line's meaning, every status line's timing, the register map, and the wiring &mdash; supply lines, current bias lines, voltage references, and at chip level thousands of digital control lines into the analog domain. A swapped or inverted control line here produces a <strong>plausible-looking analog output</strong> rather than an obvious failure.</td></tr>
+    <tr><td><strong>The control and calibration sequences</strong></td><td>Trim searches, offset cancellation, lock acquisition, gain ranging. Pure digital logic operating on analog feedback &mdash; and <strong>the only part of the system whose correctness depends on both a state machine and a tolerance</strong>.</td></tr>
+    <tr><td><strong>The failure handling</strong></td><td>What the design does when the analog reports out-of-range, fails to converge, or saturates. A must-not-happen class, systematically under-verified here because the failure conditions are ones the model must be <em>told</em> to produce.</td></tr>
+    <tr><td><strong>The tolerances themselves</strong></td><td>Not the physics behind them &mdash; their <strong>provenance</strong>. Every band in the plan traceable to a specification, and the model register kept current.</td></tr>
+  </table>
+  <div class="ex good">
+    <span class="tag">Scenario &middot; a third currency, on the flash controller</span>
+    Read-retry walks a table of reference-voltage offsets. The correctness questions are entirely digital: the table is applied in order, the retry budget is respected, and exhausting the table reports an uncorrectable error rather than silently returning the last attempt. But <strong>the oracle is a <em>probability</em>, not a band</strong>: with correction downstream, a marginal read is not wrong, it is more likely to need correcting. The row closes on a bit-error-rate distribution &mdash; a third currency after equality and tolerance, and a reason to <strong>name the currency explicitly in every mixed-signal plan row</strong>.
+  </div>
+  <p class="note"><b>Say</b>The sensor hub's wake-up trim search is the second row made concrete: verify the search, not the sensor. Does it terminate for every starting code? What does it do when two codes tie? What happens when the reading never settles &mdash; does it converge on a wrong code, or report failure? <strong>The trap:</strong> a search that always converges in the model may be relying on monotonic behaviour the real sensor does not guarantee &mdash; a modelling assumption, and it belongs in the register with the model that carries it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- src: ch21:222-226 (two populations; the supply-randomisation habit with the fractional-N PLL numbers;
+     split ownership from accounting); ch21:138 (the effort economics, explicitly experiential and undated) -->
+<!-- ============ 14. IN PRACTICE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 21 &middot; In practice</p>
+  <h2>Two populations, a supply randomised wider than legal, and an owner for each half</h2>
+  <table class="compact">
+    <tr><td style="width:24%"><strong>Two populations, not one</strong></td><td>A nightly regression built entirely on real number models, and correlation campaigns fired by the named triggers. Mixing them produces a nightly job too slow to be nightly, and a correlation result nobody can locate.</td></tr>
+    <tr><td><strong>Randomise the supply, and cover it</strong></td><td>The highest-value analog coverage habit. In a published fractional-N PLL case: nominal <strong>2.5&nbsp;V</strong>, randomised across <strong>&plusmn;7%</strong> &mdash; deliberately wider than the &plusmn;5% legal band &mdash; with three coverage bins, an under-voltage region below 2.375&nbsp;V, a healthy band from 2.375&nbsp;V to 2.625&nbsp;V, and an over-voltage region above. Twenty runs then produce a report that <em>shows</em> whether the supply ever left its healthy band. <strong>The numbers belong to that design; the habit is what transfers</strong> &mdash; and a team that has never asked the question is usually surprised by the answer.</td></tr>
+    <tr><td><strong>Split ownership from accounting</strong></td><td>The analog engineer writes and correlates the model; the verification team owns its row in the register and its expiry. Neither role works alone: the writer does not see the chip-level runs that depend on it, and the accountant cannot judge whether the physics is right.</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">The economics, as a shape rather than a budget line</span>
+    One consultancy's experience across many mixed-signal chips puts creating correlated analog functional models at <strong>as much as 80%</strong> of the effort of getting analog blocks into chip-level verification, and analog verification as a whole at <strong>typically 20% of the design effort</strong> &mdash; rising to 30% or 40% for a team new to it. The same source puts the proportion of analog designers skilled at <em>reading</em> models at around <strong>20%</strong>, with fewer able to write them. These are experiential figures rather than survey data and they carry no year: treat them as the shape of the problem.
+  </div>
+  <p class="note"><b>Say</b>That skill distribution is why ownership needs an artifact rather than an org chart. The person who can tell whether the model is right is not the person who notices when it is wrong.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- ============ 15. DIVIDER 22 ============ -->
+<section class="slide divider">
+  <p class="chno">22</p>
+  <h1>Safety Verification</h1>
+  <p class="sub">She is not asking whether the design works. She is asking whether it <em>notices when its silicon breaks</em>, how much of the breaking it notices, and how you know.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- src: ch22:3-9 (the assessor's three demands, quoted; nobody was asked to); ch22:27-33 (the three
+     obligations and the consequence that outranks them); ch22:21 (44% IC/ASIC 2024, 63% FPGA, median
+     quarter-to-half of project time); ch22:35 (what teams name as hardest, AHEAD of fault injection) -->
+<!-- ============ 16. THE ASSESSOR'S QUESTION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; What changes</p>
+  <h2>Every plan row discharged, coverage closed, regression green &mdash; and the first question is about none of it</h2>
+  <div class="ex warn">
+    <span class="tag">Eleven weeks before tape-out, at the end of the table</span>
+    &ldquo;Your architecture says the tightly-coupled memory is protected by single-error-correcting, double-error-detecting code, and that a double-bit error is reported to the safety island inside the fault-tolerant time interval. <strong>Show me the faults you injected into that path. Show me the ones the mechanism did not catch. And show me your argument for why the faults you did not inject did not need injecting.</strong>&rdquo;
+  </div>
+  <p class="small">Nobody in the room can answer, because nobody was asked to. The error-correcting code was verified the way every other block was &mdash; correct data in, correct data out. A perfectly good functional argument, answering a different question.</p>
+  <table class="compact">
+    <tr><td style="width:19%"><strong>Process</strong></td><td>Activities have prescribed inputs and outputs, reviews prescribed independence, changes prescribed impact analysis. You can no longer quietly delete a test that has become useless, quietly re-scope a coverage model, or quietly upgrade a tool.</td></tr>
+    <tr><td><strong>Evidence</strong></td><td>Green is a <em>state</em>; evidence is a <strong>retained</strong> state &mdash; tied to a specific design revision and tool configuration, with the raw results kept and not just the summary. From <em>we ran it</em> to <em>we can show, later, what we ran and what came back</em>.</td></tr>
+    <tr><td><strong>Traceability</strong></td><td>Forward from every safety requirement to the thing that discharges it, and &mdash; the direction most teams never build &mdash; <strong>backwards</strong>: given a test, name the requirement it serves. A test that traces to nothing is an unexplained artifact in a controlled repository.</td></tr>
+    <tr><td><strong>And the consequence that outranks all three</strong></td><td><strong>The argument itself becomes a deliverable.</strong> You are no longer producing results &mdash; you are producing <strong>the premises of somebody else's argument</strong>, and you will be asked whether each premise says what the argument needs it to say.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>In 2024, 44% of IC/ASIC projects worked to at least one safety-critical standard or guideline, 63% on FPGA; among those that do, the median spends between a quarter and half of total project time on functional-safety activities. And what teams themselves name as hardest is safety architecture and requirements traceability &mdash; <em>ahead of</em> fault list generation and injection. The technique is not the bottleneck; the bookkeeping around it is.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- src: ch22:51 (the two definitions, verbatim shape); ch22:53 (Chapters 1-21 aim at systematic faults;
+     a design can be perfectly correct and still kill somebody); ch22:55 (you cannot verify it away) -->
+<!-- ============ 17. TWO TARGETS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 22 &middot; The organising distinction</p>
+  <h2>A design can be perfectly correct and still kill somebody</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>Systematic fault &mdash; a design bug</h3>
+    <p class="small">A mistake made during development, present in <strong>every part ever manufactured</strong>, and always permanent. Constrained-random stimulus, formal proof, coverage closure, regression engineering, gate-level simulation, post-silicon bring-up: <strong>almost everything in Chapters 1 to 21 is aimed at this.</strong> A safety standard demands that work too, with more process around it.</p>
+  </td><td>
+    <h3>Random hardware fault &mdash; a physical defect</h3>
+    <p class="small">A latch-up, a marginal via, an aging transistor, a particle strike. Arising during manufacturing or in operation, and either permanent or transient. <strong>You cannot verify it away.</strong> It is a physics problem, and the physics will happen at some rate whatever you do.</p>
+  </td></tr></table>
+  <div class="ex">
+    <span class="tag">Which is why this work feels alien</span>
+    What you <em>can</em> do is show that when it happens, the design <strong>notices</strong> and does something safe. For the first time you are not hunting a bug &mdash; you are measuring <strong>a mechanism's effectiveness against a population of defects that are nobody's fault</strong>.
+  </div>
+  <p class="note"><b>Say</b>Safety verification does not replace functional verification. It adds a second target, and the second target has no bug at the end of it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- src: ch22:39-41 (ASIL from hazard: severity, exposure, controllability; the headlamp; a number in a
+     requirements document); ch22:43-45 (reference SoC scenario: no ECC anywhere, 512 KB four-banked;
+     the flagship-A derivative; detection is architecture and the finding is a DESIGN finding);
+     ch22:47 (ASIL D island inside an ASIL B system, and why the island is an island) -->
+<!-- ============ 18. WHERE THE TARGET COMES FROM ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Where your target comes from</p>
+  <h2>You inherit a target &mdash; and where no mechanism exists, no campaign can improve its coverage</h2>
+  <p class="small">An <strong>ASIL</strong> &mdash; automotive safety integrity level, A through D, with D the most demanding &mdash; is <strong>not a property of your block</strong>. It is arrived at by assessing the risk of a potential <em>hazard</em>, weighing three judgments: how severe the harm would be, how often the vehicle is exposed to the situation, and how well a driver could control the outcome. A headlamp that fails on a lit motorway and one that fails on an unlit country road are the same electronics and different hazards. The level then travels down &mdash; hazard, safety goal, system requirements, requirements on your part, requirements on your block &mdash; and by the time it reaches you it is <strong>a number in a requirements document</strong>. You almost never get to argue about it.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">Scenario &middot; the reference SoC has nothing to measure</span>
+      No error-correcting code anywhere. Its 512&nbsp;KB of tightly-coupled SRAM is fast, four-banked, and completely undefended: a particle strike that flips a bit in a weight buffer produces a wrong answer <strong>with no indication that anything happened</strong>. That was a defensible choice for a low-power edge part whose worst failure is a wrong inference. The answer is not to bolt detection onto it &mdash; it is a derivative, the flagship-A, with error-correcting protection on the tightly-coupled memory, the L2 slices and the memory path, a dual-core delayed-lockstep safety island, and monitored reset and clock.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Detection is architecture, not a verification add-on</span>
+      There is <strong>no fault campaign you can run on the reference SoC that will improve its diagnostic coverage</strong>, because it has no mechanism whose coverage could be measured. This is the first judgment call of a safety project and it happens <em>before</em> verification starts: if the failure analysis says a failure mode needs covering and no mechanism covers it, <strong>the finding is a design finding</strong> &mdash; and the later you raise it, the more expensive it is.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>One structural fact about the flagship-A, because it recurs: the safety island is built to ASIL&nbsp;D inside a system built to ASIL&nbsp;B. Different parts of one chip carry different targets, and the boundary between them is itself something you verify &mdash; a fault in the ASIL&nbsp;B region must not defeat the ASIL&nbsp;D region's mechanisms. That is the reason the safety island exists as an island.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- src: ch22:59 (what the analysis asks, element by element; the small stable family of mechanisms);
+     ch22:63 (written before your evidence exists; estimated DC; injection converts estimate to
+     measurement; campaigns start late and end badly); ch22:65 (granularity fixes the fault list, with the
+     FIFO-flags example verbatim); ch22:87-89 (brake-controller walk: two days vs multi-week) -->
+<!-- ============ 19. THE FAILURE ANALYSIS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Failure analysis as an input</p>
+  <h2>The failure analysis is a verification input, not a document to file</h2>
+  <p class="small">A failure mode, effects and diagnostic analysis works element by element and asks a fixed set of questions of each: in what manner can this element fail; what is the consequence if it does; how likely and how severe is that consequence; and <strong>which safety mechanism handles it</strong>. A typical answer names a mechanism from a small, stable family &mdash; error-correcting code on a memory, a dual-core lockstep pair, a software test library, a triply-redundant structure with a majority voter.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">It is written before your evidence exists</span>
+      Produced by a safety engineer, early, from design data and technology data, and it carries an <em>estimated</em> diagnostic coverage for each mechanism. <strong>Fault injection is what converts that estimate into a measurement.</strong> If your measurement comes in below the estimate, the architecture's metrics move &mdash; and if they move far enough the part misses its target. This is why fault campaigns start late and end badly: they are the last chance to discover that an architectural assumption was optimistic.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Its granularity fixes the shape of your fault list</span>
+      &ldquo;The FIFO indicates its flags incorrectly, so data is overwritten or lost, and the mechanism is redundant flag logic&rdquo; tells you exactly <em>where to inject</em> and <em>which signal is the alarm</em>. &ldquo;The block malfunctions&rdquo; tells you nothing and cannot be measured. <strong>Argue with the granularity while arguing is cheap; you cannot re-cut it in the last four weeks.</strong>
+    </div>
+  </td></tr></table>
+  <div class="ex good">
+    <span class="tag">Scenario &middot; walk it row by row, on a part you can enumerate</span>
+    The brake controller MCU is small enough to be honest about: a lockstep core pair, its protected memories, a watchdog, and a safety island holding the comparator and the alarm aggregation. The verification lead walks the analysis with the safety engineer <em>before</em> writing any injection infrastructure, and produces one artifact per row: <strong>where faults are injected, which signal is the observation point, and which signal is the detection point</strong>. On a part this size the walk takes two days and removes almost all the late surprises. On the flagship-A the same walk is a multi-week activity across a dozen sub-teams. <strong>The technique does not change with scale; the coordination cost does, and it dominates.</strong>
+  </div>
+  <p class="note"><b>Say</b>That is why large safety programmes staff a safety architect whose full-time job is keeping the analysis and the campaign definition in agreement.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- src: ch22:69-75 (the five classes, worded from the chapter; the dead comparator as the canonical
+     latent fault); ch22:77 (the three metrics and the tabulated per-level thresholds; safe fraction by
+     structural analysis and formal proof, diagnostic coverage by fault injection) -->
+<!-- ============ 20. THE FIVE CLASSES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Classification</p>
+  <h2>The deliverable is a classification &mdash; and ordinary English gets every one of these words wrong</h2>
+  <table class="compact">
+    <tr><td style="width:16%"><strong>safe</strong></td><td>Cannot violate the safety goal &mdash; either it cannot affect safety-related logic at all, or its effect is one the system tolerates.</td></tr>
+    <tr><td><strong>single-point</strong></td><td>Violates the safety goal and <strong>no safety mechanism is present</strong> to catch it. This is the class that must be nearly empty.</td></tr>
+    <tr><td><strong>residual</strong></td><td>Violates the safety goal in a place where a mechanism <em>is</em> present, but this particular fault is outside what the mechanism covers. <strong>The honest measure of how good your mechanism is not.</strong></td></tr>
+    <tr><td><strong>latent</strong></td><td>Cannot violate the safety goal on its own, and is neither detected by a mechanism nor perceived. It waits, silently, for a second fault to arrive and combine with it. <strong>A dead comparator in a lockstep pair is the canonical example</strong> &mdash; nothing goes wrong until the day the two cores disagree and nobody is listening.</td></tr>
+    <tr><td><strong>multi-point</strong></td><td>A combination that violates the safety goal, classified by whether the mechanism detects it, whether it is merely perceived, or whether it stays latent.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <table class="compact" style="table-layout:fixed">
+      <tr><th style="width:22%">ASIL</th><th>Single-point fault metric</th><th>Latent fault metric</th><th>Probabilistic metric</th></tr>
+      <tr><td><strong>ASIL&nbsp;D</strong></td><td>&ge;&nbsp;99%</td><td>&ge;&nbsp;90%</td><td>&lt;&nbsp;10&nbsp;FIT</td></tr>
+      <tr><td>ASIL&nbsp;C</td><td>&ge;&nbsp;97%</td><td>&ge;&nbsp;80%</td><td>&lt;&nbsp;100&nbsp;FIT</td></tr>
+      <tr><td>ASIL&nbsp;B</td><td>&ge;&nbsp;90%</td><td>&ge;&nbsp;60%</td><td>&lt;&nbsp;100&nbsp;FIT</td></tr>
+    </table>
+  </td><td>
+    <div class="ex">
+      <span class="tag">Which half of the formula is yours</span>
+      The fraction of <strong>safe faults</strong> is established by structural analysis and formal proof. The <strong>diagnostic coverage</strong> terms &mdash; the ones that make or break the metric &mdash; are measured by fault injection. Every threshold on the left is a number your campaign is an input to, and none of them is a number your campaign produces.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Learn these five precisely. &ldquo;Not detected&rdquo; is not one of them, and the next two slides are about why.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- src: ch22:81-85 (the temptation to divide; metrics are ratios of failure rates, not fault counts;
+     base failure rate per failure mode per element; the over-sampling consequence; agree the list per
+     failure mode and keep per-mode results separate; a single aggregate cannot be composed) -->
+<!-- ============ 21. THE UNIT TRAP ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 22 &middot; The unit trap</p>
+  <h2>Your campaign counts faults. The metrics are ratios of failure <em>rates</em>.</h2>
+  <p class="lead">Your campaign injects a number of faults and reports how many were detected, and the temptation to divide one by the other and call the quotient your diagnostic coverage is overwhelming. <strong>It is a unit error.</strong></p>
+  <p class="small">Each failure mode of each design element carries a <strong>base failure rate</strong> computed from design data and technology data, and the metric formulas combine those rates &mdash; the safe fraction, the residual fraction, the multi-point fractions &mdash; into a single number for the element and then for the part. Your campaign's detected fraction is <strong>an input applied to a weighted quantity, not the quantity itself</strong>.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">The practical consequence</span>
+      Two campaigns with <em>identical fault counts</em> can produce different metrics. A fault list that over-samples a large but low-rate structure while under-sampling a small critical one misleads you in a direction <strong>no coverage report shows</strong>.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">So do two things, from the beginning</span>
+      Agree the fault list with the safety engineer <strong>per failure mode</strong>, and keep the per-mode results separate all the way to the report. <strong>A single aggregate percentage across a whole block cannot be composed with anything</strong> &mdash; which is exactly what makes it useless to the person who has to compute the architectural metric.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Nothing in the toolflow warns you about this. The tool will happily divide two numbers it has, and the quotient will look like a metric.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- src: ch22:93 (good machine vs faulty machine, strobe times, designated signals); ch22:97-100
+     (observation vs detection points, and the published campaign's choice of read-data port /
+     single-error, multi-error, any-error); ch22:102 (fault injection vs error injection, with ch02/03/08/10
+     attribution taken from ch22's own gloss); ch22:169 (redundancy and lockstep, both glosses taken from
+     ch22's own cross-references rather than re-derived) -->
+<!-- ============ 22. THE MACHINERY AND THE WORDS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Fault injection</p>
+  <h2>Good machine, faulty machine &mdash; and three words that do not mean here what they meant earlier</h2>
+  <p class="small">Make a second copy of the design with one hypothetical fault inserted &mdash; the <em>faulty machine</em>, against the unmodified <em>good machine</em> &mdash; and run the same workload on both. At designated strobe times, compare designated signals: <strong>if a signal differs between the two runs, the fault has reached it.</strong> Two kinds of signal are designated, and confusing them is a common beginner error.</p>
+  <table class="diag">
+    <tr>
+      <td><div class="db">Good machine</div></td>
+      <td><div class="db no">Faulty machine</div></td>
+    </tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db obs">Observation point<span class="s">where the failure becomes visible to the outside world &mdash; a fault seen here is <em>observed</em></span></div></td>
+      <td><div class="db chk">Detection point<span class="s">where the safety mechanism raises its alarm &mdash; a fault seen here is <em>detected</em></span></div></td>
+    </tr>
+  </table>
+  <table class="compact" style="margin-top:6px">
+    <tr><th style="width:15%">The word here</th><th style="width:40%">What it means in this chapter</th><th>What it meant earlier in this book</th></tr>
+    <tr><td><strong>fault injection</strong></td><td>Corrupting the design's own <strong>internal state</strong> &mdash; a net, a flip-flop &mdash; to model a physical defect no interface can produce.</td><td>Not <em>error injection</em>, which Chapter 2 introduces and Chapters 3, 8 and 10 practise: driving erroneous <strong>stimulus at an interface</strong>. A safety assessor means only the first.</td></tr>
+    <tr><td><strong>redundancy</strong></td><td>Duplicated or triplicated <strong>silicon</strong> &mdash; two cores computing the same thing, three copies of a register voted bit by bit.</td><td>Not Chapter 2's sense, where redundancy is <strong>a second engineer's independent reading of the specification</strong>.</td></tr>
+    <tr><td><strong>lockstep</strong></td><td>The <strong>hardware pair</strong> &mdash; two cores running the same instruction stream, watched by a comparator.</td><td>Not Chapter 3's sense, where an instruction-set simulator runs in lockstep with the RTL <strong>as a reference model</strong>.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Same words, different mechanisms &mdash; and mixing them produces sentences that sound right and mean nothing. In the published campaign the observation point is the read-data port and the detection points are the single-error, multi-error and any-error signals on the block's boundary. That choice is not incidental bookkeeping; it <em>is</em> the definition of what you are measuring.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- src: ch22:106 (the four verdicts, and which is the dangerous one); ch22:108-110 (not detected is not
+     not dangerous; both explanations look identical; classifying un-excited faults as safe gets you any
+     number you like); ch22:112-117 (the two honest positions, verbatim in shape) -->
+<!-- ============ 23. THE FOUR OUTCOMES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Verdicts</p>
+  <h2>A fault that is not detected is not the same as a fault that is not dangerous</h2>
+  <p class="small">Cross the two axes and you get four verdicts. <em>Observed and detected</em>: the mechanism caught it &mdash; it corrupted something and the alarm went off. <em>Detected but not observed</em>: the alarm went off without anything being corrupted &mdash; not dangerous, if noisy. <em>Neither</em>: it did nothing visible <strong>in this run</strong>. And <strong>observed but not detected</strong> &mdash; it corrupted the design's output while the mechanism stayed silent. <strong>That last class is the dangerous one, and it is the whole point of the campaign.</strong></p>
+  <div class="ex warn">
+    <span class="tag">The distinction that separates a competent safety engineer from a dangerous one</span>
+    A fault never observed in your campaign has two possible explanations, and <strong>your campaign cannot tell them apart</strong>: either it is genuinely safe &mdash; it cannot affect the safety goal under any stimulus &mdash; or it is dangerous and your workload simply failed to excite it. Both look identical in the results database. Both are a row that says &ldquo;not observed&rdquo;. Which explanation you choose is the largest single lever on your reported metrics: <strong>classifying every un-excited fault as safe will get you to any number you like</strong>, and an assessor will ask for exactly the argument you did not make.
+  </div>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:50%">
+    <div class="ex good">
+      <span class="tag">Structural and formal answer &ldquo;under any stimulus&rdquo;</span>
+      A fault outside the cone of influence of every observation point cannot reach one under any workload whatsoever &mdash; a property of the netlist, established statically. A fault a proof engine shows can never cause a difference at the observation point is <strong>untestable by construction</strong>, not merely unstimulated. <strong>Real safe faults. Exclude them without apology.</strong>
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Simulation answers &ldquo;under this stimulus&rdquo;</span>
+      A fault your workload did not excite is a fault about which you have learned <strong>nothing</strong>. It is not evidence of safety; it is <strong>absence of evidence</strong>, and it must be resolved by better stimulus, by proof, or by a recorded engineering judgment with a name attached.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Keep those two apart every time you prune, and the pruning is defensible. Blur them and the campaign is theatre.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- src: ch22:121 (every site x at least two permanent models plus transient; millions on a large block);
+     ch22:139 (collapsing, prime and collapsed faults, structural then formal pruning); ch22:141 (the
+     reduction chain: 3,606 / -973 / -144 / 2,489 / 763 unobservable / 1,726 / -248 as 232+16 / 1,478);
+     ch22:143 (nothing in the chain is a guess; cheap arguments first); ch22:153 (the final classification
+     over the 1,726 that entered detection analysis -- quoted with the chapter's own framing, and NOT
+     bridged to the 1,478 above, which the chapter does not do either); ch22:149 (the black-boxing
+     abstraction, reduced to one clause of the speaker note per cut-list item 1) -->
+<!-- ============ 24. HONEST PRUNING ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; The fault list</p>
+  <h2>Nothing in the chain from 3,606 to 1,478 is a guess</h2>
+  <table class="chain">
+    <tr>
+      <td style="width:20%"><div class="cbox">3,606<span class="q">faults at ports, flip-flops and wires</span></div></td>
+      <td style="width:6%" class="arrowr">&rarr;</td>
+      <td style="width:20%"><div class="cbox">2,489<span class="q">&minus;973 collapsing, &minus;144 testability analysis</span></div></td>
+      <td style="width:6%" class="arrowr">&rarr;</td>
+      <td style="width:20%"><div class="cbox">1,726<span class="q">&minus;763 marked unobservable by cone-of-influence analysis</span></div></td>
+      <td style="width:6%" class="arrowr">&rarr;</td>
+      <td style="width:22%"><div class="cbox out">1,478<span class="q">&minus;248 by formal observability (232 in one phase, 16 in a second); these genuinely reach the read-data port</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:6px"><tr><td style="width:47%">
+    <p class="small">A <strong>collapsed</strong> fault is dropped because an equivalent <em>prime</em> fault stays in the list to represent it. Every other fault is dropped by an argument that holds <strong>under any stimulus whatsoever</strong>. That is what makes the reduction defensible &mdash; and it is why the order matters: <strong>cheap arguments first</strong>, so the expensive engine only ever sees what the cheap ones could not settle.</p>
+  </td><td>
+    <div class="ex">
+      <span class="tag">The campaign's final classification, over the 1,726 faults that entered detection analysis</span>
+      <strong>225</strong> neither observed nor detected &middot; <strong>23</strong> detected without being observed &middot; <strong>966</strong> both observed and detected &middot; <strong>512 observed but not detected</strong> &mdash; faults that corrupt read data while the error signals stay quiet.
+      <br><br><strong>Those 512 are the result. Everything else in the campaign existed to isolate them.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The published campaign behind these numbers ran on a SECDED ECC block guarding an 8K memory at NXP Semiconductors, with Synopsys. Every net, port and sequential element is a fault site, and each carries at least two permanent fault models plus transient ones &mdash; on a large block the raw count runs to millions. This block was small enough to publish, and it was only <em>almost</em> small enough to prove: the memory on its periphery had to be black-boxed and abstracted first, under an abstraction whose error can only make a fault look <em>more</em> observable than it is. An abstraction whose error runs the other way is not an abstraction; it is a bug in your evidence.</p>
+  <p class="src">Chain and classification: <em>Formal Assisted Fault Campaign for ISO26262 Certification</em>, NXP Semiconductors with Synopsys, DVCon &mdash; [D12, pp.&nbsp;6&ndash;7]. Self-reported. The memory was black-boxed because the campaign &ldquo;could not converge in even 12 hours&rdquo; with it in place (p.&nbsp;6).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- src: ch22:167-171 (a safety mechanism is a design and it has bugs; least-verified block, and the one
+     the metrics assume away); ch22:173-179 (the three questions); ch22:161-163 (the time axis: FTTI/FRTI,
+     detected-late, the post-divergence budget); ch22:181 (the asymmetry, and must-not-happen discharge);
+     ch22:183-185 (the sensor hub's clock monitor: every legal transition looks like the failure) -->
+<!-- ============ 25. THREE QUESTIONS PER MECHANISM ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Verifying the mechanism</p>
+  <h2>A safety mechanism is a design, and it has bugs</h2>
+  <p class="small">It was written by the same people, under the same schedule, from the same specification as the logic it protects. It gets less verification attention than the functional path because <strong>it does nothing in the nominal case</strong>, and it integrates last because it depends on everything else. A safety mechanism is therefore, structurally, <strong>the least-verified block on the part &mdash; and the one whose failure the metrics assume away.</strong></p>
+  <table class="chain">
+    <tr>
+      <td style="width:30%"><div class="cbox">1 &middot; Does it fire when it should?<span class="q">the fault campaign &mdash; the easiest of the three, answered as a by-product</span></div></td>
+      <td style="width:5%" class="arrowr">&rarr;</td>
+      <td style="width:30%"><div class="cbox">2 &middot; Does it fire <em>in time</em>?<span class="q">the budgeted interval is part of the requirement</span></div></td>
+      <td style="width:5%" class="arrowr">&rarr;</td>
+      <td style="width:30%"><div class="cbox no">3 &middot; Does it stay silent when nothing is wrong?<span class="q">the question teams forget</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:6px"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">Late is not partial credit</span>
+      A mechanism must detect and react <strong>within a budgeted interval measured from the moment the fault occurs</strong>, and must run continually while the device operates. So a campaign classifies detected-in-time against detected-late, and <strong>a late detection is an undetected fault with a misleading log message</strong>. The simulation therefore cannot stop at the first difference &mdash; set the post-divergence budget from the timing requirement, not from what makes the run finish quickly.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">The asymmetry that explains the skip</span>
+      Proving a mechanism <em>fires</em> means injecting a fault &mdash; deliberate, scripted, easy to demonstrate. Proving it <em>stays silent</em> means running the design's <strong>entire legal operating space</strong> with the alarm never asserting: an obligation with no natural stopping point. A mechanism with false positives is a reliability defect, often worse than the fault it guards against, because it takes a <em>healthy</em> system to a safe state &mdash; a warning lamp, a limp mode, a dealership visit.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The sensor hub's clock monitor makes the third question concrete. The domain it watches legitimately changes frequency on a low-power transition, legitimately stops during power-down, and legitimately restarts with a ramp &mdash; every one of those a healthy event that looks exactly like the failure the monitor exists to catch. The obligation is a cross of every legal power and clock transition against the alarm, with the alarm asserted as an error.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- src: ch22:193-215 (the assertion/cover pair verbatim, comments abridged; the argument that silence is
+     what a dead mechanism looks like; what inject_active is doing); ch22:187-189 (the GPU instrument
+     cluster and the general pattern: a proposition false exactly when the design is healthy) -->
+<!-- ============ 26. THE NON-FIRING OBLIGATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Verifying the mechanism</p>
+  <h2>The assertion is worthless without the cover</h2>
+  <table class="cols"><tr><td style="width:52%">
+<pre class="mini">// Bound to the error-correcting wrapper on the
+// flagship-A's memory. inject_active is the campaign's
+// own control: high only while a fault is deliberately
+// present. Every other cycle is a claim about health.
+property p_no_spurious_ecc_alarm;
+  @(posedge clk) disable iff (!rst_n)
+  !inject_active |-&gt; !(ecc_err_single || ecc_err_double);
+endproperty
+a_no_spurious_ecc_alarm : assert property
+                            (p_no_spurious_ecc_alarm);
+
+// The mechanism must also be ALIVE, not merely quiet:
+// a mechanism that can no longer fire is a latent
+// fault, and silence is what it looks like.
+c_ecc_double_reported : cover property (
+  @(posedge clk) disable iff (!rst_n)
+  inject_active &amp;&amp; ecc_err_double
+);</pre>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Why the assertion alone proves nothing</span>
+      A wrapper whose error outputs <em>never</em> assert &mdash; a design bug tied them off, or a fault killed the mechanism &mdash; passes <code>a_no_spurious_ecc_alarm</code> on every run of every test, forever. <strong>Silence is exactly what a dead mechanism looks like, and a dead mechanism is the latent fault of the classification.</strong> The cover is what makes the silence mean something.
+    </div>
+    <div class="ex good">
+      <span class="tag">And <code>inject_active</code> is doing real work</span>
+      Without that qualifier the assertion fires on every campaign run, so the team disables it during campaigns, so it protects nothing during exactly the runs where the protected path is most exercised. Gate it on the injection control and it holds <em>in campaign runs too</em> &mdash; everywhere the campaign is not currently corrupting something.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The instrument cluster generalises it. Frozen-frame detection watches for content that stops changing &mdash; but a <em>correct</em> cluster is legitimately static most of the time, so the mechanism cannot be a frame comparison; it needs an injected, known-varying region the renderer must update every frame. <strong>The alarm condition must be a proposition that is false exactly when the design is healthy, never a heuristic that happens to correlate with health.</strong> When you find yourself verifying a heuristic, the finding belongs back with the architect &mdash; early.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- src: ch22:219-223 (the obvious test passes on a design with a serious defect; independence and the
+     delayed pair; the three questions; dependent-failure analysis and what verification owes it) -->
+<!-- ============ 27. LOCKSTEP ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; Verifying the mechanism</p>
+  <h2>The obvious lockstep test passes on a design with a serious defect</h2>
+  <p class="small">Two cores, one comparator. Inject a fault into one core, check the comparator flags a mismatch. It passes &mdash; and it establishes almost nothing, because what makes a lockstep pair effective is not that a mismatch is detectable. It is that <strong>the two cores fail independently</strong>.</p>
+  <div class="ex">
+    <span class="tag">What the mechanism actually is</span>
+    On the flagship-A the pair is <strong>delayed</strong>: the shadow core runs some cycles behind, so a disturbance hitting both at the same instant hits them at <em>different points in their execution</em> and produces a mismatch instead of two identical wrong answers. <strong>That delay, and the separation behind it, is the mechanism.</strong>
+  </div>
+  <table class="cols"><tr><td style="width:50%">
+    <ul class="small">
+      <li>Does the <strong>delay pipeline</strong> preserve the comparison across every stall, flush and interrupt?</li>
+      <li>Do the two cores share any resource &mdash; a clock buffer, a reset synchroniser, a power rail, a memory port &mdash; <strong>whose single failure would corrupt both identically</strong>?</li>
+      <li>Does the comparator's <strong>own</strong> failure get caught by something else? That is the latent-fault question again, and its usual answer is a periodic self-test that provokes a mismatch on purpose and confirms the alarm.</li>
+    </ul>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">And where the answers come from</span>
+      None of that is found by injecting a fault into one core. It is found by asking what a <em>single</em> physical event could do to <em>both</em> halves at once &mdash; the analysis of dependent failures, a discipline of its own that a verification engineer contributes to rather than owns. <strong>What you owe it is the list of shared resources your netlist actually contains, which nobody else can produce.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Notice the shape repeating from the previous two slides: the interesting obligation is never the one the mechanism was designed to satisfy.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- src: ch22:227-237 (your evidence is tool output; qualification scoped to version, use case,
+     configuration; the three consequences; diversity as fallback); ch22:241-245 (flow qualification by
+     deliberate systematic-fault injection, and keeping the two questions apart); ch22:257-263 (the three
+     plan rows, abridged to ID / obligation / closure; FA-SM04c as the honest name for the plateau);
+     ch22:265 (who signs) -->
+<!-- ============ 28. YOUR EVIDENCE IS TOOL OUTPUT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 22 &middot; The evidence trail</p>
+  <h2>The tool is part of the evidence &mdash; and qualification is scoped to a version, a use case and a configuration</h2>
+  <table class="compact">
+    <tr><td style="width:33%"><strong>Version pinning becomes a safety obligation</strong></td><td>The exact tool build is part of the evidence, not part of the environment. Chapter 12's run manifest &mdash; seed, design revision, testbench revision, exact build, configuration, host &mdash; stops being good practice and becomes <strong>the atom of the evidence trail</strong>.</td></tr>
+    <tr><td><strong>A mid-project upgrade is a re-argument, not an IT ticket</strong></td><td>When the vendor ships a fix you need, the question is not whether it installs but <strong>what evidence produced under the old version must be re-established</strong>. Teams that have not thought this through discover it in month nine.</td></tr>
+  </table>
+  <table class="compact" style="margin-top:2px">
+    <tr><th style="width:12%">Plan row</th><th style="width:45%">Obligation</th><th>Closure metric</th></tr>
+    <tr><td><code>FA-SM04a</code></td><td>Every injected double-bit error raises the alarm to the safety island within the budgeted fault reaction time</td><td>Fault classification report complete; dangerous-undetected list itemised and dispositioned</td></tr>
+    <tr><td><code>FA-SM04b</code></td><td>The mechanism raises no alarm on healthy traffic, including low-power entry and exit</td><td><code>a_no_spurious_ecc_alarm</code> enabled and passing in 100% of regression runs</td></tr>
+    <tr><td><code>FA-SM04c</code></td><td>The classification's residue is <strong>argued, not assumed</strong></td><td><strong>Zero faults in state <code>not observed, unargued</code></strong> at sign-off</td></tr>
+  </table>
+  <p class="note"><b>Say</b>A third consequence, less obvious than the two above: <strong>using a qualified tool outside its qualified use case buys nothing</strong> &mdash; the same simulator driving a flow the qualification never contemplated is a tool you happen to trust. Row <code>FA-SM04c</code> is the honest name for the plateau: it does not promise that every fault is safe, it promises that <strong>no fault is silently assumed safe</strong>. And keep two questions apart, because answering one with the other is a recognisable move. <strong>Tool qualification</strong> asks whether the <em>software you ran</em> can be trusted. <strong>Flow qualification</strong> asks whether the <em>environment you built</em> can fail &mdash; answered by injecting systematic faults into the design deliberately and measuring what the environment detects, where the <em>undetected</em> ones point at a missing checker rather than a missing test. When a hole survives it goes into a waiver with Chapter 7's five fields; a safety project changes only <em>who signs it</em>. The safety engineer owns the residual risk; the verification lead owns the accuracy of the statement.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- ============ 29. DIVIDER 23 ============ -->
+<section class="slide divider">
+  <p class="chno">23</p>
+  <h1>Security Verification</h1>
+  <p class="sub">The functional plan answered its own question completely: the engine does what the specification says it does. The security question is a different one &mdash; <em>can the engine be made to do something the specification never mentioned?</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- src: ch23:3-7 (the two reviews; the four obligations with no rows behind them, quoted in shape);
+     ch23:9 (no quantity of the first kind of evidence accumulates into the second);
+     ch23:11 (the published AES result: unmodified block, thousands of vectors, key XORed with data
+     reaching the output pin as plaintext) -->
+<!-- ============ 30. THE SECOND REVIEW ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; The gap</p>
+  <h2>Signed off twice. The second review opens with a question the plan does not contain.</h2>
+  <div class="ex">
+    <span class="tag">The question</span>
+    <em>What would an attacker want from this block, what are they able to do, and where do those two meet?</em> &mdash; and within an hour the room has produced obligations with no rows behind them.
+  </div>
+  <ul class="small">
+    <li>Nothing in the plan says what the engine's completion <strong>latency</strong> may and may not depend on.</li>
+    <li>Nothing says what becomes of a working key when the key ladder's power domain goes down <strong>in the middle of an operation</strong>.</li>
+    <li>Nothing says whether the debug port &mdash; once opened by the authenticated unlock path everyone trusts &mdash; <strong>can reach</strong> the key ladder, as opposed to merely not being <em>wired</em> to it.</li>
+    <li>And nothing anywhere in the plan <strong>names an adversary</strong>, which is why none of those questions had a reason to be asked.</li>
+  </ul>
+  <div class="ex warn">
+    <span class="tag">How wide the gap can be</span>
+    A published information-flow study took an encryption block from a public repository &mdash; unmodified, fully functional, encrypting correctly across <strong>thousands of test vectors</strong> &mdash; and checked one rule against it: <em>the key must not flow to the data output.</em> <strong>The rule fails. The key, exclusive-ORed with the data, reaches the output pin as plaintext.</strong> Every functional test that block will ever run continues to pass.
+  </div>
+  <p class="note"><b>Say</b>None of that is a failure of the functional plan. The functional plan answered its own question completely. <strong>No quantity of the first kind of evidence accumulates into the second.</strong></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- src: ch23:25-33 (the four structural consequences: negative properties, rarity, functional silence
+     with ch03's activate/propagate/check vocabulary, no denominator); ch23:41 (why each obvious approach
+     under-delivers, and that none of them is a bad technique) -->
+<!-- ============ 31. WHY AN ADVERSARY CHANGES EVERYTHING ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; No anchor</p>
+  <h2>Four consequences, structural rather than a matter of degree</h2>
+  <table class="compact">
+    <tr><td style="width:27%"><strong>The properties are negative</strong></td><td>&ldquo;This key never reaches that bus&rdquo; is a claim about the <strong>complement</strong> of the design's intended behaviour. You cannot establish it by demonstrating intended behaviour, however much of it you demonstrate.</td></tr>
+    <tr><td><strong>Rarity stops being a defence</strong></td><td>Risk-driven verification allocates effort by likelihood times cost, and likelihood is computed against a stimulus distribution the team controls. <strong>An adversary is not a distribution. An adversary is an optimiser with a budget</strong>, who will spend a month arranging exactly the four conditions your generator would only ever have stumbled into &mdash; and who, having arranged them once, can arrange them on demand.</td></tr>
+    <tr><td><strong>The failure is often functionally silent</strong></td><td>A confidentiality breach need not corrupt any output. In Chapter 3's vocabulary: the bug is <em>activated</em> and it <em>propagates</em> &mdash; propagation to an observable point is not the detection mechanism here, <strong>it is the failure</strong> &mdash; but nothing <em>checks</em>, because no checker was ever written for a value that was correct.</td></tr>
+    <tr><td><strong>Coverage does not close</strong></td><td>There is no enumeration of &ldquo;everything an attacker might try&rdquo;, so there is no denominator, so there is no percentage.</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">And the obvious approaches under-deliver, each in its own way</span>
+    Architecture review is manual and rarely reaches the implementation as built. Red-team exercises are essential for the finished product and find nothing before silicon exists. Formal belongs inside a larger strategy and does not scale to a large design running hardware and software together. Directed tests take substantial effort to write and mostly re-confirm vulnerabilities already known. <strong>None is a bad technique &mdash; each simply has its strength somewhere other than where an adversary's advantage lies</strong>, so a plan built on any one alone inherits precisely its blind spot.
+  </div>
+  <p class="note"><b>Say</b>The second row is the one that should unsettle you. Prioritising by unlikeliness is load-bearing for every functional plan in this book, and it is <em>void</em> inside the threat model's scope.</p>
+  <p class="src">The architecture-review and formal limits (not the red-team or directed-test ones): <em>System-Level Security Verification Starts with the Hardware Root of Trust</em>, Dr Jason Oberg, Tortuga Logic, DVCon&nbsp;2019 &mdash; [D28, slide&nbsp;20]. A vendor's assessment, qualitative, and now dated: it reports no measured result, and no security-verification payoff figure exists in this book's corpus.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- src: ch23:33 (no settled tool-friendly definition of security coverage; not a temporary tooling
+     shortfall); ch23:37 (what the process outputs; the residual is unquantifiable, not merely
+     unquantified); ch23:39 (be explicit about which part you looked at); ch23:43-47 (the one thing that
+     transfers, and "write that artifact first, and write it as an engineer") -->
+<!-- ============ 32. NO PERCENTAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; What it costs</p>
+  <h2>There is no security-coverage percentage &mdash; and the reason is not a tooling shortfall</h2>
+  <p class="lead">The output of the process is <strong>a threat model, a set of properties discharged against it, a set of properties <em>not</em> discharged with their reasons, and a residual-risk statement someone signs.</strong> A chapter that promised a coverage number would be lying.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">Why there is no number</span>
+      No enumeration of what an attacker might try &rArr; <strong>no denominator</strong> &rArr; no percentage. Functional metrics &mdash; line, toggle, FSM &mdash; correlate only loosely with an attacker's search space, and the field has no settled, tool-friendly definition of security coverage. <strong>This is not a temporary tooling shortfall: it is what happens when the space being covered is defined by an opponent rather than by a document.</strong>
+    </div>
+    <div class="ex warn">
+      <span class="tag">Which makes the residual a different animal</span>
+      The shape is Chapter 7's sign-off with one difference that matters: the residual is <strong>not merely unquantified, it is unquantifiable</strong> &mdash; because you cannot count what you have not enumerated.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">The one thing that transfers &mdash; and it is most of the job</span>
+      Everything downstream of the threat model is verification: properties, assumptions, stimulus, coverage, waivers, sign-off. Once someone has written <em>&ldquo;the working key must not be observable at the debug port under adversary capability C3&rdquo;</em>, the question of how to establish that is a question this book has spent twenty-two chapters on.
+      <br><br><strong>The specialist knowledge is concentrated almost entirely in one artifact. So write that artifact first, and write it as an engineer.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>That is uncomfortable, and it is why the discipline leans so hard on structure: if you cannot bound the space, be explicit about <em>which part</em> you looked at, and make each look exhaustive within its scope. Every practice in this chapter follows from that trade.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<!-- src: ch23:53 (assets: identification comes first; the non-obvious ones; the anti-rollback counter
+     needs integrity not confidentiality); ch23:55-60 (capabilities not attacks; the four tiers verbatim);
+     ch23:62 (C4 out of scope, with the reason); ch23:64 (boundaries are where the tier changes, and the
+     asset-boundary-capability triple) -->
+<!-- ============ 33. THE THREAT MODEL ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; The plan's root</p>
+  <h2>Assets, capabilities, boundaries &mdash; and each is useless without the other two</h2>
+  <p class="small"><strong>Assets</strong> are identified first, because where that is left late the fixes land in the far more expensive post-silicon stage. The obvious ones are cryptographic; <strong>the non-obvious ones matter more</strong>. The firewall and address-decode configuration that enforces every other protection is an asset: if an adversary can rewrite the enforcement, no other lock needs breaking. And an asset need not be secret &mdash; the anti-rollback counter is <em>public by design</em>, and everything depends on nobody being able to <strong>decrement</strong> it, so what it needs is <strong>integrity</strong>, not confidentiality.</p>
+  <p class="small"><strong>Capabilities:</strong> write capabilities, not attacks &mdash; attacks are an open set, capabilities are enumerable, <strong>and only an enumerable list can be closed over</strong>. <strong>Boundaries</strong> are the surfaces where the tier changes, and they make the first two lists checkable: a property is always &ldquo;<strong>asset A does not cross boundary B under capability C</strong>&rdquo;.</p>
+  <table class="compact">
+    <tr><td style="width:6%"><span class="pill">C1</span></td><td>Unprivileged software on the host cluster: loads and stores, programming what it is allowed to program, and <em>timing itself</em>.</td></tr>
+    <tr><td><span class="pill">C2</span></td><td>Privileged software: everything in C1, plus configuration of the interconnect, the MMU, the power controller and the debug fabric.</td></tr>
+    <tr><td><span class="pill">C3</span></td><td>Physical access to the package pins: probing debug, measuring supply current and emission, perturbing clock and supply.</td></tr>
+    <tr><td><span class="pill arg">C4</span></td><td>Invasive physical access, to decapsulation and direct die probing. <strong>Declared out of scope &mdash; with the reason written down.</strong></td></tr>
+  </table>
+  <p class="note"><b>Say</b>The reason for the C4 exclusion: countering it is a packaging, sensor and countermeasure-design problem whose evidence does not come from RTL verification, and pretending otherwise would put rows in a plan that no pre-silicon activity could ever discharge. <strong>An out-of-scope declaration with a reason is engineering. An out-of-scope declaration without one is where the next escape lives.</strong></p>
+  <p class="src">The asset and capability lists above are this book's own. For a published enumeration on a real block &mdash; the NVDLA CSB master at the public <code>nvdlav1</code> snapshot, assets mapped to CWE identifiers: <em>AI-Assisted Hardware Security Verification</em>, University of Florida, arXiv&nbsp;2604.01572 &mdash; [P13, p.&nbsp;3]. Third-party, not NVIDIA's own report; the authors state they do not claim that every NVDLA deployment is exploitable.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">33</span>
+</section>
+
+<!-- src: ch23:66-91 (the figure, redrawn: the same blocks, the same enclosure, the same edges);
+     ch23:93 (what the figure asserts; the engine deliberately outside the box; a figure that boxes such a
+     block on one side has already told a lie about it) -->
+<!-- ============ 34. THE TRUST BOUNDARY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; The plan's root</p>
+  <h2>A figure that boxes a straddling block on one side has already told a lie about it</h2>
+  <table class="diag">
+    <tr>
+      <td><div class="db">Host cluster<span class="s">operating system and applications</span></div></td>
+      <td><div class="db">Debug access ports<span class="s">one per power domain</span></div></td>
+      <td><div class="db">Flash controller<span class="s">signed image, anti-rollback counter</span></div></td>
+    </tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr><td colspan="3"><div class="db bus">Mesh NoC &mdash; register interface to the unlock unit, memory traffic to the engine</div></td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr><td colspan="3">
+      <div class="rot"><span class="rl">Root of trust &mdash; inside the trust boundary</span>
+        <table class="diag" style="margin:0">
+          <tr>
+            <td><div class="db chk">OTP key fuses</div></td>
+            <td><div class="db chk">Key ladder</div></td>
+            <td><div class="db chk">Secure boot ROM</div></td>
+            <td><div class="db chk">TRNG</div></td>
+            <td><div class="db chk">Debug unlock unit</div></td>
+          </tr>
+        </table>
+      </div>
+    </td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td colspan="2"><div class="db strad">Inline AES-GCM engine &mdash; straddles<span class="s">holds key material from the ladder <em>and</em> sits on a memory path carrying untrusted traffic</span></div></td>
+      <td><div class="db obs">Memory subsystem<span class="s">untrusted DRAM</span></div></td>
+    </tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">What the figure asserts &mdash; exactly one thing</span>
+    Which blocks sit inside the trust boundary. Everything drawn outside it is reachable, <em>in some mode</em>, by an adversary at C2 or above. The inline engine is deliberately outside the box and is the interesting case, because it is the one component that genuinely straddles.
+  </div>
+  <p class="note"><b>Say</b>This is not a diagram detail. The boundary supplies the third field of every row in the plan, so a block placed on the wrong side of it silently rewrites the capability tier of every property that mentions it.</p>
+  <p class="src">The boundary drawn here is this book's own. A published commercial root of trust with a comparable block list &mdash; OTP management core, key transport core, TRNG, AES, hash, public-key and key-derivation blocks &mdash; is the Rambus CryptoManager Root of Trust RT-360, whose diagram Tortuga Logic presented courtesy of Rambus &mdash; [D28, slide&nbsp;18], DVCon&nbsp;2019. Qualitative; no measurement.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">34</span>
+</section>
+
+<!-- src: ch23:99-106 (the six rows verbatim, asset and boundary merged into one column for the slide);
+     ch23:108 (read the last column first; TM-06 names none; a model whose rows all close was written
+     backwards); ch23:112-114 (versioned artifact, and how rows are invalidated invisibly) -->
+<!-- ============ 35. THE SIX ROWS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; The plan's root</p>
+  <h2>Read the last column first</h2>
+  <table class="compact">
+    <tr><th style="width:8%">ID</th><th style="width:26%">Asset &middot; boundary</th><th style="width:6%">Cap.</th><th>Obligation</th><th style="width:22%">Discharged by</th></tr>
+    <tr><td><code>TM-01</code></td><td>Device root key (fuses) &middot; root-of-trust register interface</td><td>C1</td><td>No sequence of register accesses makes fuse content observable outside the ladder</td><td>Information flow, RTL</td></tr>
+    <tr><td><code>TM-02</code></td><td>Working key &middot; memory path through the engine</td><td>C2</td><td>Key material influences no value on the memory path except through the cipher</td><td>Information flow <em>+</em> negative connectivity rows</td></tr>
+    <tr><td><code>TM-03</code></td><td>Working key &middot; debug access port into the root-of-trust domain</td><td>C3</td><td>A debug request addressing the key region is never granted, unlocked or not</td><td>Formal, on the always-on control logic</td></tr>
+    <tr><td><code>TM-04</code></td><td>Working key &middot; power-domain edge of the root of trust</td><td>C2</td><td>Powering the domain down destroys the key; leaving the unlocked state requests a wipe</td><td>Formal <em>+</em> power-aware simulation</td></tr>
+    <tr><td><code>TM-05</code></td><td>Anti-rollback counter &middot; flash controller register interface</td><td>C2</td><td>No command sequence decreases the counter</td><td>Formal, on the counter's control logic</td></tr>
+    <tr><td><code>TM-06</code></td><td>Working key &middot; the engine's physical emissions</td><td>C3</td><td>No key material is recoverable from the engine's power signature</td><td><span class="pill arg">argued, not verified</span></td></tr>
+  </table>
+  <p class="small">Three rows name a single technique that produces evidence, two name a pair, and <strong>TM-06 names none</strong>, because at RTL there is no honest way to discharge it. That row is not a defect in the table; <em>it is the table doing its job</em>. <strong>A threat model that contains only rows you know how to close is a threat model that was written backwards from the tools you own.</strong></p>
+  <p class="note"><b>Say</b>Treat it exactly as Chapter 5 treats the verification plan: versioned, reviewed, owned, with traceability from each row to its evidence. Design changes invalidate rows constantly and almost never visibly &mdash; a performance counter made readable from user mode, a new DMA channel given an address range for convenience. A boundary just moved, and yesterday's report is still green. And a finding at a module boundary is conditional on integration: &ldquo;this block does not enforce X&rdquo; and &ldquo;this SoC is vulnerable to Y&rdquo; are different claims with different evidence.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">35</span>
+</section>
+
+<!-- src: ch23:120 (integrity and confidentiality as flow relations, verbatim in shape);
+     ch23:122 (ch11's 4 KB property is a claim about values at a point; a confidentiality property
+     quantifies over PAIRS of executions; a concurrent assertion evaluates one execution; mismatch of
+     SHAPE, which is why information flow is a separate technique) -->
+<!-- ============ 36. PROPERTIES OVER FLOW ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 23 &middot; The properties</p>
+  <h2>Confidentiality quantifies over <em>pairs</em> of executions. That is a mismatch of shape.</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>Both shapes are statements about flow</h3>
+    <p class="small"><strong>Integrity</strong> is violated when an unauthorised agent &mdash; software or physical &mdash; can <em>modify</em> the state of a target register or memory: untrusted sources must not flow to trusted state. <strong>Confidentiality</strong> is violated when an unauthorised agent can <em>read</em> it: secret sources must not flow to observable destinations. Every row of the table is one or the other &mdash; which is why sorting assets by which they need was worth the effort.</p>
+  </td><td>
+    <h3>Now compare a functional property</h3>
+    <p class="small">Chapter 11's 4&nbsp;KB-boundary property is a claim about <strong>values at a point</strong>: given an accepted incrementing write address, this arithmetic relation holds. It is decidable by looking at <em>one</em> execution at that point. A confidentiality property is not decidable that way at all: its natural statement is <strong>change the secret and nothing the adversary can see may change</strong> &mdash; and a concurrent assertion evaluates sampled values from one execution.</p>
+  </td></tr></table>
+  <div class="ex warn">
+    <span class="tag">You cannot write around this with a cleverer sequence</span>
+    It is a mismatch of <em>shape</em> rather than a limitation of expressiveness &mdash; and it is exactly why information-flow analysis exists as a <strong>separate technique</strong> rather than as a style of assertion.
+  </div>
+  <p class="note"><b>Say</b>Hold that thought for two slides. Everything expressible as a single-execution invariant goes to formal; everything that is really a statement about dependence goes somewhere else.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">36</span>
+</section>
+
+<!-- src: ch23:126 (why formal fits: a negative property, exhaustive within scope, used on localised
+     precisely stateable things); ch23:131-151 (the six directives verbatim, whitespace compressed only);
+     ch23:157-159 (readings of a_unlock_needs_token and a_key_region_locked -- the grant, not the request);
+     ch23:161 (a_relock_wipes asserts the request, not completion); ch23:163 (the covers are not optional;
+     reusing the functional environment is a silent deletion of the threat model);
+     ch23:167 (where the fit ends: the engine's two key-handling properties do not converge) -->
+<!-- ============ 37. WHERE FORMAL FITS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; The properties</p>
+  <h2>Proved in seconds &mdash; and every one of the six lines needs reading precisely</h2>
+  <table class="cols"><tr><td style="width:50%">
+<pre class="mini">// Root-of-trust debug port: obligations TM-03 and TM-04.
+// All signals below are in the always-on domain.
+a_unlock_needs_token : assert property (@(posedge clk)
+    disable iff (!rst_n)
+    $rose(dbg_unlock) |-&gt; token_verified);
+
+a_key_region_locked  : assert property (@(posedge clk)
+    disable iff (!rst_n)
+    (dbg_req &amp;&amp; dbg_addr_in_key_region) |-&gt; !dbg_gnt);
+
+a_relock_wipes       : assert property (@(posedge clk)
+    disable iff (!rst_n)
+    $fell(dbg_unlock) |=&gt; wipe_req);
+
+// One cover per assertion; the third is the one that matters.
+c_key_region_probed  : cover property (@(posedge clk)
+    disable iff (!rst_n)
+    dbg_req &amp;&amp; dbg_addr_in_key_region);</pre>
+  </td><td>
+    <ul class="small">
+      <li><code>a_unlock_needs_token</code> constrains <strong>one cycle</strong>. It says nothing about <em>which</em> token, and nothing about whether the verification that produced that signal is itself sound. That obligation belongs on the verifier, discharged there rather than enjoyed here.</li>
+      <li><code>a_key_region_locked</code> deliberately <strong>does not mention <code>dbg_unlock</code></strong>: guarding a security property with the very state the adversary is working to reach would make it vacuous exactly where it is needed. And note which signal it constrains &mdash; the <strong>grant</strong>, not the request. The request belongs to the adversary; <strong>a property written over an adversary-controlled signal is not a property, it is a wish.</strong></li>
+    </ul>
+    <div class="ex warn">
+      <span class="tag">The three covers are not optional</span>
+      <code>c_key_region_probed</code> demands something a functional environment will not produce: <strong>a request no cooperative requester would make</strong>. Constraints encode what the interface makes <em>legal</em> and what the testbench steers toward, and neither covers traffic whose only purpose is to be refused. An adversary is under no such restraint.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>None of the six looks back or forward more than one cycle, and all read always-on signals, so a proof engine settles them in seconds and the result holds <em>for every arrival time of an unlock request</em>. Read <code>a_relock_wipes</code> precisely too: it asserts the wipe is <em>requested</em>, not that it completes, which is all TM-04 asks of it here &mdash; the row's other half is the power-aware test, which is why the row names two techniques. And <strong>reusing the functional environment unchanged is not a saving; it is a silent deletion of the entire threat model</strong>, and the most common way a security campaign runs green for a month while checking nothing.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">37</span>
+</section>
+
+<!-- src: ch23:175 (labels, taint, and that you track DEPENDENCE not the value); ch23:179-184 (the four
+     parts of a rule, verbatim as a table); ch23:186 (the published vocabulary covers the same four ideas);
+     ch23:190-192 (the exception clause carries the whole argument, and why it is worse than an
+     over-constraining assumption) -->
+<!-- ============ 38. INFORMATION FLOW ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; Information flow</p>
+  <h2>Four parts to a rule &mdash; and the exception clause carries the whole argument</h2>
+  <p class="small">Labels are attached to data &mdash; secret or public, trusted or untrusted &mdash; and their propagation is followed through the design. The label is usually called <em>taint</em>, and the mental model is worth stating exactly: <strong>you are not tracking the value, you are tracking dependence.</strong> Anything whose value could differ <em>because the secret differs</em> is tainted &mdash; whether it holds a copy of the secret, a function of it, or merely a bit that was set because of it.</p>
+  <table class="compact">
+    <tr><th style="width:14%">Part</th><th style="width:32%">What it names</th><th>On the crypto engine</th></tr>
+    <tr><td><strong>Source set</strong></td><td>the asset, as the signals that hold it</td><td>every bit of the key ladder's working-key output</td></tr>
+    <tr><td><strong>Sink set</strong></td><td>what the adversary can observe</td><td>bus-readable registers, the debug data register, the trace fabric's input</td></tr>
+    <tr><td><strong>Activation</strong></td><td>when tracking starts</td><td>from the cycle a key is loaded, rather than from reset</td></tr>
+    <tr><td><strong>Exception</strong></td><td>the flow that is permitted</td><td>the cipher core's ciphertext output</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">Read the fourth row again &mdash; it is worse than an over-constraining assumption, in one specific way</span>
+    In words the rule is: <em>the working key must not flow to any output, ignoring the cipher's ciphertext output.</em> Without the exception the rule fails immediately and <em>correctly</em> &mdash; the ciphertext depends on the key; that is what a cipher is. With it, the rule becomes checkable and <strong>exactly as strong as the exception is narrow</strong>. And an over-constraining assumption looks like a modelling shortcut, so a reviewer who reads assumption lists will challenge it &mdash; whereas <strong>an exception clause looks like <em>domain knowledge</em></strong>, so it reads as competence rather than as a concession and gets waved through. <strong>Widen it by one signal and you have declared a whole port secure.</strong>
+  </div>
+  <p class="note"><b>Say</b>&ldquo;The ciphertext output is declassified because the cipher is trusted&rdquo; is an argument. &ldquo;We added <code>busy</code> to the ignore list because the rule kept failing&rdquo; is a defect with a comment on it. Every exception is a row, with a written argument, an owner and an expiry &mdash; reviewed exactly like a waiver.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">38</span>
+</section>
+
+<!-- src: ch23:196 (ch15 proved the negative connectivity rows; the key bus exists BY DESIGN and no
+     cone-of-influence check can answer the flow question); ch23:198 (the opening result is exactly that
+     failure; non-adjacency filed under the wrong heading); ch23:206 (the GPU context-switch scenario and
+     residue; the activation condition is what makes the rule statable); ch23:208 (covers belong on the
+     SOURCES; a rule over an untainted run is a vacuous pass); ch23:202-204 (over- vs under-approximation
+     and scoping by threat-model row) -->
+<!-- ============ 39. NON-ADJACENCY IS NOT NON-LEAKAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; Information flow</p>
+  <h2>A no-connection result proves non-adjacency. The key's own path is supposed to be there.</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>What connectivity established</h3>
+    <p class="small">Chapter 15 proved the negative rows for this exact key ladder &mdash; no structural path to a bus-readable address, to the debug data register, or to a scan-observable point. That is a <strong>structural</strong> result: <em>no path exists.</em></p>
+  </td><td>
+    <h3>What it cannot establish</h3>
+    <p class="small">The key bus from the ladder to the cipher core is a path that exists <strong>by design</strong>. Nobody is going to prove it away. The question is whether anything reachable downstream depends on the key <em>other than through the cipher's intended transformation</em> &mdash; and <strong>no cone-of-influence check can answer it, because the cone is supposed to be there.</strong></p>
+  </td></tr></table>
+  <div class="ex warn">
+    <span class="tag">Which is precisely the failure in the opening result</span>
+    Structurally, key and datapath are adjacent &mdash; they must be. Functionally, a value carrying the key survived to the output pin. <strong>A team holding a green connectivity report and calling it non-leakage has proved non-adjacency and filed it under the wrong heading.</strong>
+  </div>
+  <div class="ex good">
+    <span class="tag">Scenario &middot; the GPU, where the failure is never a wire</span>
+    Four shader clusters share a unified memory and contexts belonging to different applications time-slice it. Asset: one context's data. Sink: anything the next context can read. Boundary: the context switch. The failure is <strong>residue</strong> &mdash; state a functional test cannot see because the next context overwrites it before reading, and that a taint rule sees immediately <em>because it tracks dependence rather than values</em>. And note what makes the rule statable at all: <strong>the activation condition</strong>. Without it the rule is &ldquo;context A's data never reaches memory&rdquo;, which is false by construction, since writing to memory is the point.
+  </div>
+  <p class="note"><b>Say</b>The interesting covers are on the <strong>sources</strong>, not the sinks: did this run ever put a secret in the source register, ever switch context with live data resident, ever load a key at all. A flow rule evaluated over a run in which no source was ever tainted is a vacuous pass wearing a different hat &mdash; green report, nothing tracked. And scope one rule per threat-model row, so every alert arrives already attached to an asset, a capability and a boundary: a screen returning four hundred benign alerts will be ignored within two weeks, and the instinct to loosen the policy is the move that starts deleting real findings.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">39</span>
+</section>
+
+<!-- src: ch23:212 (an RTL model does not model supply current AT ALL -- not badly, not approximately);
+     ch23:216-227 (timing is inside the model; the fixed-latency assertion + cover verbatim; where latency
+     varies it becomes a flow rule and op_done is just another sink); ch23:229 (proxies: what they license
+     and what they do not; a leakage verdict is not available); ch23:231 (same structural problem as
+     ch21); ch23:235-237 (software-reachable DVFS moves the capability tier); ch23:239 (borrow ch22's
+     tooling, rewrite the weighting) -->
+<!-- ============ 40. SIDE CHANNELS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; Side channels</p>
+  <h2>Sort the channels by whether the leaking quantity exists in your model</h2>
+  <p class="lead">An RTL model represents logic values at clock ticks and nothing else. It does not model supply current badly, or approximately. <strong>It does not model supply current at all.</strong></p>
+  <table class="compact">
+    <tr><td style="width:20%"><span class="pill ok">inside the model</span><br><strong>Timing</strong><br><em>the good news</em></td><td>A cycle count is a signal-level fact: if the number of cycles between an operation's start and its completion depends on key material, that dependence is <em>present in the RTL</em>. Where the specification declares a <strong>fixed</strong> latency, the claim is single-execution and mechanical: <code>$rose(op_start) |-&gt; ##LAT op_done</code>, with a cover on <code>op_start</code>. Where the latency legitimately <strong>varies</strong>, that assertion is false and the claim becomes a <strong>flow rule</strong> instead: no key bit may flow to the completion signal. <strong><code>op_done</code> is just another sink.</strong> A timing channel is not a new category of problem; it is a confidentiality property whose sink happens to be a control signal rather than a data bus.</td></tr>
+    <tr><td><span class="pill no">outside the model</span><br><strong>Power and emission</strong><br><em>the bad news</em></td><td>Nothing in the RTL holds them. Pre-silicon work can only reason over <strong>proxies</strong> &mdash; switching activity, performance counters, timing distributions. <strong>Be precise about what a proxy licenses:</strong> switching activity <em>correlates with</em> dynamic power; it is not power, and a countermeasure that improves the proxy has been shown to improve <em>the proxy</em>. Ranking structures by risk and comparing a countermeasure against its absence are real value. <strong>A leakage verdict is not available at this abstraction, and a report that implies one is worse than none, because it retires a question that is not closed.</strong></td></tr>
+  </table>
+  <p class="note"><b>Say</b><strong>And the capability tier is itself a design decision.</strong> Physical side channels are nominally C3 &mdash; they need the package. But software-controllable voltage and frequency scaling, and power monitoring, are ordinary features of modern chipsets, and they let an attacker mount fault-injection and side-channel attacks <em>without physical access</em>. The flagship has three operating points, and something selects among them: <strong>if that selector is reachable from C1 or C2, a whole row's capability tier has quietly changed</strong>, and every property justified by &ldquo;the adversary would need physical access&rdquo; is now unsupported. That is the question a verification engineer is placed to ask &mdash; not <em>how a power analysis works</em>, but <em>which side of a boundary that selector's enable sits on</em>.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">40</span>
+</section>
+
+<!-- src: ch23:280 (the test: can you name the signals? TM-03 and the timing claim pass, TM-06 fails;
+     the properties whose exception is doing suspicious work); ch23:243 (what TM-06 gets instead:
+     countermeasure, proxy comparison with limitations, post-silicon assessment with a date and an owner);
+     ch23:251-258 (the routing table verbatim in shape); ch23:282 (the three questions);
+     ch23:266 (a security campaign competes for slots explicitly -- speaker note only, cut-list item 2) -->
+<!-- ============ 41. NAME THE SIGNALS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 23 &middot; Where it lives in the flow</p>
+  <h2>The test is short enough to apply in a review: <em>can you name the signals?</em></h2>
+  <p class="small">A verifiable security property can be written down <strong>entirely as signals in a model you own</strong> &mdash; a source set, a sink set, an activation condition and an exception if it is a flow rule; an antecedent and a consequent if it is an invariant.</p>
+  <table class="compact">
+    <tr><td style="width:16%"><code>TM-03</code></td><td><span class="pill ok">passes</span> as an invariant: <code>dbg_req</code>, <code>dbg_addr_in_key_region</code>, <code>dbg_gnt</code></td></tr>
+    <tr><td>the timing claim</td><td><span class="pill ok">passes</span> as a flow rule: <code>op_start</code> and <code>op_done</code> are signals, and &ldquo;no key bit reaches the second&rdquo; is an ordinary rule</td></tr>
+    <tr><td><code>TM-06</code></td><td><span class="pill no">fails</span> &mdash; its subject is a <strong>physical quantity with no representation in the model</strong>. No signal list exists, and nothing will ever settle it. Between those poles sit the properties whose signals exist but <strong>whose exception is doing suspicious work</strong>, and that is where a reviewer should spend the meeting.</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">What TM-06 gets instead of a proof</span>
+    A named countermeasure recorded in the design review; a proxy comparison showing it moves the proxy in the expected direction, with its own limitations written down; and a post-silicon leakage assessment on the plan <strong>with a date and an owner</strong>. Chapter 7's conditional sign-off, applied honestly. <strong>What it is not is a green tick</strong> &mdash; and that distinction is the single most useful thing to hold clearly in a security review.
+  </div>
+  <p class="note"><b>Say</b>Which is also the answer to what someone without a security background contributes. Not attacks, and not cryptography: three questions asked persistently &mdash; <em>who can write this register?</em>, <em>what happens to this state across this transition?</em>, <em>what exactly does this exception permit?</em> None requires knowing how a power analysis works. And a security campaign is a <em>campaign</em> in Chapter 12's exact sense: it must compete for emulator slots explicitly, with a named block list and a named window, because an activity described as ongoing background work will lose every scheduling argument it is never present for.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">41</span>
+</section>
+
+<!-- src: cross-chapter, stated by no single chapter. ch21:29-33 (band, window, condition set) + ch21:39
+     (a named source for the band) + ch21:159 (the register's date field is what makes it go stale);
+     ch22:77 (the tabulated thresholds) + ch22:83 (ratios of failure rates, not fault counts) +
+     ch22:261 (FA-SM04c: zero faults in state "not observed, unargued") + ch22:265 (who signs);
+     ch23:33 (no settled definition, and not a tooling shortfall) + ch23:37 (named claims, named gaps,
+     and a residual that is unquantifiable) -->
+<!-- ============ 42. WHAT COUNTS AS EVIDENCE ============ -->
+<section class="slide dense">
+  <p class="kicker">Part VI &middot; The cross-chapter lesson</p>
+  <h2>Three domains, three incompatible answers to one question &mdash; <em>what counts as evidence?</em></h2>
+  <table class="compact">
+    <tr><th style="width:14%"></th><th style="width:29%">21 &middot; the continuous world</th><th style="width:29%">22 &middot; a standard is watching</th><th>23 &middot; there is an adversary</th></tr>
+    <tr><td><strong>The verdict is</strong></td><td><strong>a band</strong> &mdash; with a window and a condition set, and a named source for the band</td><td><strong>a metric against a threshold</strong> &mdash; SPFM &ge; 99%, LFM &ge; 90% at ASIL&nbsp;D, tabulated in advance</td><td><strong>a named claim</strong> &mdash; discharged against a named adversary, or explicitly not</td></tr>
+    <tr><td><strong>Its unit is</strong></td><td>the measured quantity's own units, against a stated reference point</td><td>a ratio of <strong>failure rates</strong> &mdash; never of fault counts</td><td>none. There is no denominator, because there is no enumeration</td></tr>
+    <tr><td><strong>The residue is</strong></td><td><strong>sourced</strong> &mdash; a tolerance with a specification behind it and a model register whose <em>date</em> makes it go visibly stale</td><td><strong>argued, or fixed</strong> &mdash; row <code>FA-SM04c</code>: zero faults in state <code>not observed, unargued</code> at sign-off</td><td><strong>signed</strong> &mdash; a residual that is not merely unquantified but unquantifiable</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">The sharpest contrast in Part VI is between the middle column and the right one</span>
+    Chapter 22 is <strong>entirely</strong> about percentages against thresholds &mdash; tabulated, per level, agreed before the campaign runs. Chapter 23 says there is no percentage, there will not be one soon, and <strong>that is not a tooling shortfall</strong>: it is what happens when the space being covered is defined by an opponent rather than by a document. Carry the two habits into the same review and one of them will corrupt the other &mdash; either a security report grows a number nobody can defend, or a safety residue gets waved through as unquantifiable when it is nothing of the kind.
+  </div>
+  <p class="note"><b>Say</b>No single chapter states this, and it is the real lesson of Part VI: before you can say whether the evidence is <em>enough</em>, you have to say what <em>kind of thing</em> the evidence is. Get that wrong and every downstream argument inherits the error. Note too that all three end at a name, but at different names &mdash; the analog engineer correlates the model while the verification team owns its register row and its expiry; the safety engineer owns the residual risk while the verification lead owns the accuracy of the statement; and the security residual takes one signature on a quantity nobody can count.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">42</span>
+</section>
+
+<!-- src: through-line across ch21-ch23. ch21:11 (the convenience that became the specification);
+     ch21:218 (what a band is a percentage of); ch21:104 (an assumption with a waveform);
+     ch22:83 (counted vs weighted); ch22:108 (the two verdicts); ch22:171 (least-verified block);
+     ch23:196-198 (non-adjacency); ch23:108 (a model whose rows all close); ch23:163 (the environment);
+     forward pointers: ch21:163 (the analog block itself), ch22:312 + ch23:315 (the standards and the
+     side-channel literature, both outside the corpus) -->
+<!-- ============ 43. CLOSING ============ -->
+<section class="slide dense">
+  <p class="kicker">Part VI &middot; Closing</p>
+  <h2>The through-line: a market you did not choose decides what counts as done</h2>
+  <p class="small">Chapter 21's market is physics &mdash; the digital abstraction stops and the oracle is rebuilt as a band. Chapter 22's is a standard and its assessor &mdash; the argument stops living in the room and becomes the deliverable. Chapter 23's is an opponent &mdash; the scope stops coming from the specification. None of the three is optional once you are inside it, and none of them accepts the others' evidence.</p>
+  <table class="cols"><tr><td style="width:44%">
+    <table class="compact" style="table-layout:fixed">
+      <tr><td style="width:13%"><span class="pill">21</span></td><td>Mixed-signal &mdash; the band, its reference point, and the model register behind both</td></tr>
+      <tr><td><span class="pill">22</span></td><td>Safety &mdash; classify, weigh by failure rate, and argue the residue</td></tr>
+      <tr><td><span class="pill">23</span></td><td>Security &mdash; named claims, named gaps, and no percentage</td></tr>
+    </table>
+    <div class="ex warn">
+      <span class="tag">What Part VI deliberately left open</span>
+      The analog block itself &mdash; its performance, noise, linearity and corner behaviour belong to the analog team, who have tools and instincts you do not. The standards' own texts, which should be read rather than paraphrased. Cryptanalysis, and how a power analysis actually works. And the manufacturing-test flow the fault models were borrowed from.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Eight sentences worth leaving with</span>
+      <ul class="small">
+        <li>A debugging convenience becomes the specification the moment nobody writes down where the number came from.</li>
+        <li>A band is only as meaningful as the thing it is a percentage <em>of</em>.</li>
+        <li>An analog model is an assumption with a waveform.</li>
+        <li>Faults are counted; metrics are weighted by failure rates.</li>
+        <li>&ldquo;Not detected&rdquo; and &ldquo;not dangerous&rdquo; are different verdicts, and only one of them is yours to declare.</li>
+        <li>A safety mechanism is the least-verified block on the part and the one the metrics assume works.</li>
+        <li>A no-connection result proves non-adjacency; only a flow argument speaks to the paths that exist by design.</li>
+        <li>A threat model in which every row closes was written backwards from the tools you own.</li>
+      </ul>
+    </div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">43</span>
+</section>

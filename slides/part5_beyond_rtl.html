@@ -1,0 +1,1489 @@
+<meta charset="utf-8">
+<title>Beyond RTL Simulation — Lecture Deck, Part V</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<!-- =====================================================================
+     PART V DECK -- WHAT WAS CUT, AND WHY
+     Four chapters, 46 slides. Cut whole topics, not slivers of every topic.
+
+     1. ch17 SS17.5 market sizing and adoption statistics (USD 760.4M 2025,
+        USD 3.08bn 2035 at 15.0%, USD 641.5M 2024 at 15.2%, the ESD quarter).
+        Teaches no judgment a verification engineer can act on. The one
+        consequence that survives is kept as a sentence on slide 13:
+        an emulator is granted or it is not.
+     2. ch18 SS18.5 "In practice" lab logistics (bitstream automation, probe
+        manifests, the demo machine, board-queue policy). Real, but it is
+        operations, not verification judgment.
+     3. ch20 SS20.2 trace-signal-selection research apparatus (the worked
+        restoration ratio: 2 traced signals over 5 cycles = 10 traced values
+        restoring 16, ratio 2.6). The judgment survives as one line on
+        slide 40; the worked ratio is an academic instrument nobody ships.
+     4. ch17 SS17.2's GPU hybrid co-emulation scenario. Hybrid gets its full
+        treatment in ch18 SS18.3 and the GPU appears there; carrying it twice
+        was the only duplicated scenario across the four chapters.
+     5. ch19 SS19.5's USB U-state exclusion scenario and ch17's In-practice
+        environment-drift material -- both fold into one sentence elsewhere.
+     6. ch20 SS20.4's bring-up precedence chain (B01 power rails, B03 the PLL
+        lock that cannot happen on a rail that is not up). Slide 41 carries
+        five of the ten plan rows; the abstract ordering principle is stated
+        and B05-B10 demonstrate it, but the chapter's most quotable line for
+        WHY the order is what it is went with the two dropped rows.
+     ===================================================================== -->
+
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Part V -- Beyond RTL Simulation (Chapters 17-20).
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid -- table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     House sheet carried verbatim from Part IV, including its
+     table-layout/box-sizing/td:first-child fixes. Diagram primitives are
+     per-deck: kept diag/db/stem, chain/cbox, bar (all used here); dropped
+     Part IV's stack/layer, nest, pbox/path, .pill.und, .pill.mid and the
+     .rung ladder, which have no claim to state in this Part. One addition:
+     .db.off, a dashed/greyed variant of .db, for a block that is present in
+     the diagram but powered down or out of scope (slides 3 and 31).
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+  pre.mini  { font-size: 10.5px; line-height: 1.36; padding: 7px 9px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  /* table-layout:fixed is load-bearing: several slides nest a full width:100%
+     table inside a column cell; without fixed layout the nested table's natural
+     minimum width inflates its parent column, squeezes the sibling to a ribbon
+     and pushes the slide onto a second page. */
+  table.cols, table.cols3 { width: 100%; table-layout: fixed; }
+  /* border-box is required once the layout is fixed: with content-box the
+     gutter is ADDED outside the declared percentage. */
+  table.cols td { border: none; padding: 0 16px 0 0; box-sizing: border-box; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; font-size: 13.5px; box-sizing: border-box; }
+  /* Default width on the FIRST cell only, never on every cell. Under fixed
+     layout a per-cell default of 50% would be ADDED to an inline 57% first
+     column, running the last column past the slide edge and clipping it. */
+  table.cols td:first-child { width: 50%; }
+  table.cols3 td:first-child { width: 33.3%; }
+  /* the last column has no neighbour to be separated from, and under border-box
+     its right gutter is subtracted from usable width rather than added outside. */
+  table.cols td:last-child, table.cols3 td:last-child { padding-right: 0; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* One density step beyond .dense, for the three slides that carry a source
+     line on top of an already-full frame. Anchoring a claim to a named company
+     costs vertical space the layout had none of, and the alternative to a
+     further step is deleting the anchor — which is the one thing that must not
+     happen, since the source line is what makes the number checkable. Must
+     follow .dense: equal specificity, so source order decides. */
+  .denser h2  { margin-bottom: 6px; }
+  .denser h3  { margin: 5px 0 3px; font-size: 14px; }
+  .denser p   { margin-bottom: 4px; }
+  .denser li  { margin-bottom: 2px; font-size: 12.5px; line-height: 1.28; }
+  .denser td  { padding: 2px 7px 2px 0; font-size: 12px; }
+  .denser .ex { padding: 5px 9px; margin: 4px 0; font-size: 12px; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex.good { background: #eef7f1; border-left-color: #256b46; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .ex.good .tag { color: #256b46; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- block-diagram boxes (Part I / Part III / Part IV lineage) ---- */
+  table.diag { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  table.diag td { padding: 0 3px; border: none; vertical-align: middle; }
+  .db {
+    text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.22;
+    border: 1.5px solid #2c4f8c; border-radius: 4px; padding: 7px 5px; background: #eef2f9;
+  }
+  .db .s { display: block; font-weight: 400; font-size: 10.5px; color: #566174; font-style: italic; margin-top: 2px; }
+  .db.bus { background: #2c4f8c; color: #ffffff; font-size: 13px; padding: 9px 6px; }
+  .db.bus .s { color: #c6d5ec; font-style: normal; }
+  .db.obs { background: #f7f9fc; border-style: dashed; border-color: #98a3b3; color: #566174; }
+  .db.chk { background: #e2f2e9; border-color: #256b46; }
+  .db.off { background: #f1eef4; border-style: dashed; border-color: #7b6b8c; color: #5d4f6b; }
+  tr.stem td { padding: 0; }
+  tr.stem i { display: block; width: 0; height: 11px; border-left: 2px solid #2c4f8c; margin: 0 auto; }
+  tr.stem i.dash { border-left-style: dashed; border-left-color: #98a3b3; }
+
+  /* ---- chain: stage -> stage -> stage ---- */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; font-style: italic; }
+  .cbox.out { background: #e2f2e9; border-color: #256b46; }
+  .cbox.no  { background: #fbf3f1; border-color: #9c3a2a; }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+
+  /* ---- proportion bars: what a budget or a buffer actually holds ---- */
+  .bar {
+    border: 1px solid #2c4f8c; border-radius: 3px; padding: 5px 11px;
+    font-size: 12.5px; margin: 0 0 5px; background: #e7edf7; line-height: 1.25;
+  }
+  .bar .bl { font-weight: 600; }
+  .bar.s2 { background: #edf0f5; }
+  .bar.s3 { background: #f7ece8; border-color: #b9705f; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification: A Holistic Guide &middot; Part V</p>
+  <h1>Beyond RTL&nbsp;Simulation</h1>
+  <p class="sub">Chapters 17&ndash;20. Acceleration and emulation; FPGA prototyping and hardware/software co-verification; gate-level, timing and power-aware simulation; post-silicon validation.</p>
+  <p class="sub" style="margin-top:16px"><em>Four platforms. One question at each: what does this platform let me see, and what does it charge me for seeing it?</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part V &middot; Orientation</p>
+  <h2>What you will be able to do</h2>
+  <ul>
+    <li>Ask the one triage question that decides whether you need an emulator: <em>am I short of runs, or short of cycles in one run?</em></li>
+    <li>Place a transactor boundary where it pays, and predict what fraction of a machine's peak rate you will get.</li>
+    <li>Say what an FPGA prototype establishes that no model can, and what it structurally cannot see.</li>
+    <li>Scope a gate-level campaign that exhibits failures &mdash; and refuse the one that claims to sign off their absence.</li>
+    <li>Design observability months before the failure exists, and localise a bug you can run but cannot see.</li>
+  </ul>
+  <div class="ex">
+    <span class="tag">The register shift</span>
+    Parts I&ndash;IV asked <em>have we checked enough?</em> Part V asks a harder pair: <em>can this platform even run the thing I need to check</em>, and <em>if it runs it, will I be able to tell what happened?</em> Every chapter here trades one for the other.
+  </div>
+  <p class="note"><b>Say</b>Nobody buys an emulator because simulation is slow. They buy it because one workload has no simulation answer at any farm size.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- src: ch17:19 (ratio), ch18:7 (kind vs time), ch19:37 (thesis), ch20:25-31 (inversion table) -->
+<!-- ============ 3. THE MAP: FOUR INVERSIONS ============ -->
+<section class="slide dense">
+  <p class="kicker">Part V &middot; The map</p>
+  <h2>Four chapters, four inversions of something you already believe</h2>
+  <table class="diag">
+    <tr><td colspan="4"><div class="db bus">RTL that an event-driven simulator can no longer carry<span class="s">too long to run, or too late in the flow to be the right model</span></div></td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db">17 &middot; Acceleration<span class="s">compile the design into hardware</span></div></td>
+      <td><div class="db">18 &middot; Prototyping<span class="s">real software on real hardware</span></div></td>
+      <td><div class="db">19 &middot; Gate level<span class="s">the netlist, not the RTL</span></div></td>
+      <td><div class="db off">20 &middot; Post-silicon<span class="s">the fabricated part</span></div></td>
+    </tr>
+  </table>
+  <table class="compact" style="margin-top:8px">
+    <tr><td style="width:11%"><span class="pill">CH 17</span></td><td>Simulation does not run out of <em>capacity</em>; it runs out of <strong>cycles</strong>. Speed is for sale &mdash; you pay in visibility, turnaround and debug ergonomics.</td></tr>
+    <tr><td><span class="pill">CH 18</span></td><td>A prototype is pre-silicon in <em>time</em> and validation in <em>kind</em>: the first platform where real software meets real hardware.</td></tr>
+    <tr><td><span class="pill">CH 19</span></td><td>After synthesis the abstraction you trusted stops holding. RTL is <strong>optimistic</strong> about X where gate level is <strong>pessimistic</strong> &mdash; which is how a design passes RTL and hangs on silicon at reset.</td></tr>
+    <tr><td><span class="pill">CH 20</span></td><td>Chapter 3's budget, exactly inverted. Pre-silicon you see everything and run almost nothing; post-silicon you run everything and see almost nothing.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Read the fourth row twice. Every habit Parts I to IV built assumes the first half of it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. DIVIDER 17 ============ -->
+<section class="slide divider">
+  <p class="chno">17</p>
+  <h1>Acceleration and Emulation</h1>
+  <p class="sub">Compile the design into hardware and it runs a hundred to a thousand times faster. Everything else about the way you work has to change to pay for it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- src: ch17:19 (the ratio and the two anchors, cit P21); ch17:21 (order-of-magnitude reading) -->
+<!-- ============ 5. THE MILESTONE SIMULATION CANNOT REACH ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 17 &middot; Why simulation runs out</p>
+  <h2>Boot the operating system before tape-out. Now price it.</h2>
+  <p>Simulation with RTL models is approximately <strong>a billion times slower</strong> than the target clock of the system it models. Map the same RTL onto a fabric or a purpose-built emulator and it runs about <strong>100&ndash;1000&times;</strong> faster than the simulator.</p>
+  <table class="compact">
+    <tr><th style="width:46%">The same activity, two platforms</th><th>What the source reports</th></tr>
+    <tr><td>An operating-system boot &mdash; seconds on target silicon &mdash; on an <strong>RTL simulator</strong></td><td><span class="pill no">several years</span></td></tr>
+    <tr><td>The same boot on an <strong>accelerated platform</strong></td><td><span class="pill ok">back inside a few hours</span></td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">Do not divide these</span>
+    They are <strong>two independent anchors</strong> quoted from one source, not a ratio and its quotient. Divide "several years" by the 100&ndash;1000&times; band and you manufacture a third figure that composes with neither. Quote both; the argument turns on <em>years vs hours</em>, and no reordering of the numbers moves that boot into a nightly window.
+  </div>
+  <p class="note"><b>Say</b>Read all of these as order-of-magnitude claims &mdash; the band spans a factor of ten and where you land depends on design size, how much is instantiated, and how much instrumentation you compiled in.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- src: ch17:23 (event-driven serialism, frequency plateau cit R2, single sim cit D33);
+     ch17:25 (6,400 sims / 4,409 CPU-h, metastability 3-4x cit D34); ch17:27 (parallelism fallacy) -->
+<!-- ============ 6. WHY THE GAP DOES NOT CLOSE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 17 &middot; Why simulation runs out</p>
+  <h2>The gap is structural, and buying machines does not close it</h2>
+  <table class="cols"><tr><td style="width:52%">
+    <h3>Why the ratio exists</h3>
+    <p class="small">An event-driven simulator turns the design's parallelism into its own serialism: every signal change is a software event, and every process sensitive to it is re-evaluated in sequence. A million gates switching in one design cycle are a million pieces of work for one processor.</p>
+    <h3>Why it stopped improving</h3>
+    <p class="small">For two decades the industry rode processor frequency. Frequency scaling plateaued, and simulation stopped keeping pace with design complexity. The obvious escape does not exist: an individual RTL simulation does not usefully exploit multiple cores.</p>
+  </td><td>
+    <h3>The parallelism fallacy</h3>
+    <p class="small">"We will add machines." A farm's width multiplies <em>runs</em>; it does not shorten a <em>run</em>. Cycle <em>n</em> of a boot depends on cycle <em>n</em>&minus;1, so one run has no parallel fraction to exploit.</p>
+    <div class="ex">
+      <span class="tag">The triage question</span>
+      <strong>Is my problem the number of runs, or the length of one run?</strong> Ask it out loud before any conversation about capital equipment. Only the second answer leads to Chapter 17.
+    </div>
+    <p class="small muted">And the arithmetic is per <em>single</em> execution. The flagship's nightly candidate list is 6,400 simulations totalling 4,409 CPU-hours &mdash; already re-tiered and pruned to fit a night. Accurate metastability injection degrades simulation a further 3&ndash;4&times;.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>A 4,800-run random suite is a licence problem. One boot is a cycles problem. Same word "slow", two unrelated diseases.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- src: ch17:31 (video codec rate-control scenario); ch17:37-42 (the contrast pair table) -->
+<!-- ============ 7. THE CONTRAST PAIR ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; Why simulation runs out</p>
+  <h2>Two generations, one verification problem &mdash; and the interesting result is what <em>does not</em> move</h2>
+  <table class="compact">
+    <tr><th style="width:31%">Problem</th><th style="width:30%">Reference SoC</th><th>Flagship SoC</th></tr>
+    <tr><td>DMA 4&nbsp;KB legalization, 2D transfers, negative stride</td><td>Constrained-random simulation, multi-seed</td><td><em>Unchanged</em> &mdash; constrained-random simulation, more seeds, eight channels</td></tr>
+    <tr><td>Register and peripheral suites</td><td>Simulation</td><td><em>Unchanged</em> &mdash; carried forward</td></tr>
+    <tr><td>Boot to a working system</td><td>Bare-metal image, a few million cycles, one nightly run</td><td>Operating system; <strong>no simulation answer at any farm size</strong></td></tr>
+    <tr><td>Interconnect congestion behaviour</td><td>Crossbar arbitration, proved and simulated at block level</td><td>Mesh NoC latency and occupancy statistics under sustained load</td></tr>
+  </table>
+  <div class="ex">
+    <span class="tag">Scenario &middot; the shape that has no simulation answer</span>
+    A video codec's rate-control loop adapts quantisation to a rolling estimate of channel occupancy. A few macroblocks per run match the reference model exactly; in the lab, streams drift out of bitrate after a scene change followed by a long static passage. The bug is not a data corner more seeds would find &mdash; it is a control loop with hundreds of frames of memory. <strong>Randomising harder explores the wrong axis; only length reaches it.</strong>
+  </div>
+  <p class="note"><b>Say</b>Emulation is not "simulation but faster for everything". Buy it for the other shape and you own an idle machine and an unfinished regression.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- src: ch17:52-59 (platform table); ch17:61 (few thousand signals, decided before bitstream, cit P21);
+     ch17:63 (compile hours-to-days cit P14, nine-minute smoke tier); ch17:67 (debug ergonomics); ch17:71 (verification vs validation) -->
+<!-- ============ 8. THREE PLATFORMS, THREE PRICES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; Three platforms</p>
+  <h2>The comparison that matters is not speed &mdash; it is the three things you hand over to get it</h2>
+  <table class="compact">
+    <tr><th style="width:22%"></th><th style="width:24%">Simulator</th><th style="width:27%">Emulator</th><th>Prototyping platform</th></tr>
+    <tr><td><strong>Throughput</strong></td><td>baseline</td><td>10<sup>2</sup>&ndash;10<sup>3</sup>&times; the simulator</td><td>the fastest pre-silicon platform</td></tr>
+    <tr><td><strong>Capacity</strong></td><td>host memory and patience</td><td>order of a billion gates</td><td>device capacity; above it, multi-FPGA partitioning</td></tr>
+    <tr><td><strong>Build time</strong></td><td>minutes</td><td>hours to days for a complex design</td><td>hours for a bitstream</td></tr>
+    <tr><td><strong>Visibility</strong></td><td>any internal signal, at any time</td><td>triggers, selective trace, save/restore</td><td>a few thousand signals, chosen <em>before</em> the build</td></tr>
+    <tr><td><strong>Changing what you observe</strong></td><td>edit and re-run</td><td>re-arm a trigger; recompile if never brought out</td><td>recompile the bitstream</td></tr>
+    <tr><td><strong>Parallel width</strong></td><td>licences (hundreds)</td><td>capacity &divide; design size</td><td>capacity &divide; design size, per board</td></tr>
+  </table>
+  <div class="ex">
+    <span class="tag">Turnaround is the cost that reshapes the workflow</span>
+    In simulation you edit, rebuild in minutes, and can afford to be wrong about what to look at ten times a day &mdash; the reference SoC's smoke tier is under nine minutes end to end. On an emulator you may get <strong>one build per day</strong>. Every question you did not think to ask before the build costs a day &mdash; so engineers front-load: compile in the assertions and monitors, and treat "which signals come out" as a review decision, not a debug reflex.
+  </div>
+  <p class="note"><b>Say</b>The build is paid once and divided by everything that runs on it. One run per build is indefensible; two hundred makes it a rounding error.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- src: ch17:75 (speed adapter cit D33); ch17:79-81 (what ICE buys + USB compliance scenario);
+     ch17:83 (what ICE forecloses); ch17:85-87 (SCE-MI, model time, cit D34); ch17:91 (the rule) -->
+<!-- ============ 9. USE MODELS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; Use models</p>
+  <h2>In-circuit or virtual: the environment decides, not the feature list</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>In-circuit (ICE) &mdash; the environment is the world</h3>
+    <p class="small">The design runs at MHz; a real link runs at its specified rate and has timeouts. A <strong>speed adapter</strong> buffers, throttles and re-times between them &mdash; the quiet asterisk on every ICE fidelity claim: <em>real content at manufactured timing</em>.</p>
+    <p class="small"><span class="pill ok">buys</span> stimulus nobody could write (a real driver stack, quirks and all); interoperability against third parties you have no model of; compliance procedures that exist only as instruments.</p>
+    <p class="small"><span class="pill no">forecloses</span> repeatability (no seed, nothing to replay &mdash; and Chapter 12's whole triage apparatus assumes a run is a function of recorded inputs); scheduling; unattended operation; save/restore, because you cannot rewind the world.</p>
+  </td><td>
+    <h3>Virtual &mdash; the platform owns model time</h3>
+    <p class="small">Built on SCE&#8209;MI, the platform generates clocks <em>on the emulator</em> and tracks model simulation time inside it. Own model time and you can stop it, resume it, replay it, and place an event at an exactly chosen instant.</p>
+    <p class="small">Everything the industry wanted follows: deterministic reruns, controlled clock relationships, injection at a specified cycle, waveform display, and an elimination strategy &mdash; disable a subset of injection points, rerun the identical scenario, see if the failure persists.</p>
+    <div class="ex">
+      <span class="tag">The rule</span>
+      Use <strong>ICE when the environment is the thing you cannot model</strong>; virtual for everything else. A compliance instrument, a third-party host, a driver stack you do not own &mdash; those are <em>environments</em>. Noise, traffic patterns and workloads are <em>data</em>: recordable once, replayable forever, and paying the irreproducibility tax for nothing.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The USB compliance suite closes the protocol-state half of its vplan rows. Timing at the pins belongs to the adapter, not the design &mdash; those rows stay open until silicon.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- src: ch17:95-99 (physical cut; signal-level acceleration only, cit D33); ch17:101-118 (figure, read for what is absent) -->
+<!-- ============ 10. THE TRANSACTOR BOUNDARY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; The transactor boundary</p>
+  <h2>The transactor stops being a convenience and becomes a physical cut</h2>
+  <table class="diag">
+    <tr><td colspan="3"><div class="db obs">HOST WORKSTATION &mdash; untimed<span class="s">sequences, scoreboard, coverage, proxy. Not synthesisable. Knows nothing about a clock edge.</span></div></td></tr>
+    <tr class="stem"><td><i class="dash"></i></td><td><i class="dash"></i></td><td><i class="dash"></i></td></tr>
+    <tr><td colspan="3"><div class="db bus">THE LINK &mdash; one round trip costs <em>L</em> equivalent design cycles<span class="s">a driver call, a link traversal, host scheduling, a return</span></div></td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db">Transactors<span class="s">timed protocol, synthesised</span></div></td>
+      <td><div class="db">Design under test<span class="s">at the platform clock rate</span></div></td>
+      <td><div class="db chk">Assertions<span class="s">compiled in; talk to nobody</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:6px"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">The failure mode has a name</span>
+      Accelerate the DUT and change nothing else: the protocol is still in the UVM driver, so <strong>every pin event crosses the link</strong>. That is <em>signal-level acceleration only</em>. You have bought a machine that runs a billion gates at MHz and are feeding it one clock edge at a time from a workstation.
+    </div>
+  </td><td>
+    <p class="small">Read the figure for what is <strong>absent above the boundary</strong>: clock and reset generation, and the assertions. Nothing on the host knows what a clock edge is; nothing on the host is consulted per cycle. The scoreboard is fed at <em>transaction</em> rate by a monitor transactor.</p>
+    <p class="small muted">A UVM component is not synthesisable, so it cannot cross. The question is not <em>whether</em> to have a boundary &mdash; it is where to draw it. Answer: at the transaction.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Chapter 8 warned about this in advance: an environment that reaches into signals from twenty places cannot be moved at all.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- src: ch17:124-130 (R(N), S(N), ceiling 1+L, half-point N=L); ch17:132-140 (the fraction-of-peak table) -->
+<!-- ============ 11. THE ARITHMETIC OF THE BOUNDARY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; The transactor boundary</p>
+  <h2>Where you draw it, not the headline frequency, sets your throughput</h2>
+  <table class="cols"><tr><td style="width:44%">
+    <p class="small"><em>f</em> = platform clock rate. <em>N</em> = design cycles advanced between host interactions. <em>L</em> = cost of one host interaction, in equivalent design cycles. Each period delivers <em>N</em> cycles and costs <em>N</em>&nbsp;+&nbsp;<em>L</em>:</p>
+    <pre class="tight">R(N) = f &middot; N / (N + L)
+S(N) = R(N)/R(1) = N (1 + L) / (N + L)</pre>
+    <p class="small"><strong>S</strong> saturates at <strong>1&nbsp;+&nbsp;<em>L</em></strong> however large <em>N</em> grows &mdash; batching can never buy more than the round-trip cost itself &mdash; and reaches exactly <strong>half</strong> that ceiling at <strong><em>N</em>&nbsp;=&nbsp;<em>L</em></strong>.</p>
+    <div class="ex">
+      <span class="tag">The design rule</span>
+      Not "use transactions". <strong>Make transaction granularity comparable to your round-trip cost</strong> &mdash; and stop optimising once it is.
+    </div>
+  </td><td>
+    <p class="small"><strong>Fraction of the machine's peak rate you actually get</strong>, <em>N</em>/(<em>N</em>&nbsp;+&nbsp;<em>L</em>). <em>L</em> is the parameter you least control &mdash; take it as tens to thousands of cycles:</p>
+    <table class="compact">
+      <tr><th>Cycles per host interaction</th><th style="text-align:right"><em>L</em>=20</th><th style="text-align:right"><em>L</em>=200</th><th style="text-align:right"><em>L</em>=2000</th></tr>
+      <tr><td>1 (pin-level)</td><td style="text-align:right">4.8%</td><td style="text-align:right">0.5%</td><td style="text-align:right">0.05%</td></tr>
+      <tr><td>16 (a short burst)</td><td style="text-align:right">44%</td><td style="text-align:right">7.4%</td><td style="text-align:right">0.8%</td></tr>
+      <tr><td>256 (a max-length burst)</td><td style="text-align:right">93%</td><td style="text-align:right">56%</td><td style="text-align:right">11%</td></tr>
+    </table>
+    <p class="small">Pin-level throws away between <strong>95% and 99.95%</strong> of what you paid for. And the rightmost column is the warning against complacency: on a costly link even a full 256-beat burst leaves you at a tenth of peak. If your numbers look like that column, the answer is a <em>coarser</em> transaction &mdash; a descriptor, a page, a frame &mdash; not a faster link.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>This table is fraction of <em>peak rate</em>. It is not S(N); the speed-up and the efficiency are different quantities with different ceilings.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- src: ch17:146-193 (wr_xactor + proxy, abbreviated: port list regrouped, nothing elided
+     inside a construct); ch17:195-203 (the four load-bearing things) -->
+<!-- ============ 12. DRAWING THE BOUNDARY IN CODE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; The transactor boundary</p>
+  <h2>The mechanical change is small, local, and entirely about who owns the clock</h2>
+  <table class="cols"><tr><td style="width:57%">
+<pre class="mini">// Below the boundary: synthesised onto the platform.
+module wr_xactor #(parameter int ADDR_W = 40, parameter int DATA_W = 512)
+  (input  logic clk, rst_n, awready, wready,
+   output logic [ADDR_W-1:0] awaddr, output logic [7:0] awlen,
+   output logic [DATA_W-1:0] wdata,
+   output logic awvalid, wvalid, wlast);
+  logic [31:0] lfsr;
+  export "DPI-C" task do_write_burst;
+  task do_write_burst(input longint unsigned addr,
+                      input byte unsigned len, input int unsigned seed);
+    lfsr = seed;  @(posedge clk);  while (!rst_n) @(posedge clk);
+    awaddr &lt;= ADDR_W'(addr); awlen &lt;= len; awvalid &lt;= 1'b1;
+    do @(posedge clk); while (!awready);
+    awvalid &lt;= 1'b0;
+    for (int i = 0; i &lt;= int'(len); i++) begin
+      lfsr   = {lfsr[30:0], lfsr[31] ^ lfsr[21] ^ lfsr[1] ^ lfsr[0]};
+      wdata  &lt;= {(DATA_W/32){lfsr}};
+      wlast  &lt;= (i == int'(len)); wvalid &lt;= 1'b1;
+      do @(posedge clk); while (!wready);
+    end
+    wvalid &lt;= 1'b0; wlast &lt;= 1'b0;
+  endtask
+endmodule</pre>
+  </td><td>
+    <h3>Four load-bearing things</h3>
+    <ul class="small">
+      <li><strong>The task is timed; the call is not.</strong> Everything waiting on <code>clk</code> is inside the module. <em>Do not use clocks to synchronise with the testbench</em> &mdash; a driver that waits for an edge has re-created the pin-level case by another route.</li>
+      <li><strong>One call covers <code>len</code>+1 beats.</strong> At <code>awlen</code>'s maximum of 255, that is the <em>N</em>&nbsp;=&nbsp;256 row of the table for one host interaction.</li>
+      <li><strong>One source serves both engines.</strong> A simulator executes this directly, so a bug found on either platform reproduces on the other &mdash; as long as the two remain one source.</li>
+      <li><strong>The payload is manufactured on the platform.</strong> The host passes a 32-bit seed; the shift register makes the data. Shipping a 512-bit beat 256 times is 256 interactions again.</li>
+    </ul>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Above the boundary an interface imports the same task and the driver becomes one call. <strong>Anything the environment needs every cycle becomes hardware</strong> &mdash; that sentence predicts how much of a testbench has to be rewritten.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- src: ch17:207-213 (X does not travel; checking splits by where cost lands; AES-GCM digest scenario);
+     ch17:217 (granted or not, cit P14); ch17:225-231 (W_hw; the OS boot and DMA suite cases); ch17:237-244 (what earns time; plan images first) -->
+<!-- ============ 13. WHAT EARNS A SLOT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 17 &middot; Economics</p>
+  <h2>A licence pool degrades gracefully under contention. An emulator is granted, or it is not.</h2>
+  <p class="small"><em>N</em> runs cost <em>N&middot;s</em>/<em>W</em><sub>sim</sub> on the farm and <em>B</em>&nbsp;+&nbsp;<em>N&middot;r</em>/<em>W</em><sub>hw</sub> on hardware. The forgotten term is <em>W</em><sub>hw</sub>: <strong>hardware parallel width is capacity divided by design size</strong>, so a full-SoC image gives <em>W</em><sub>hw</sub>&nbsp;=&nbsp;1.</p>
+  <table class="compact">
+    <tr><th style="width:20%">Flagship workload</th><th>The arithmetic</th></tr>
+    <tr><td><strong>OS boot</strong></td><td><em>N</em> a handful per revision; <em>s</em> years; <em>r</em> a few hours; <em>B</em> hours to days. Break-even <strong>below one run</strong>: it does not need a business case, it needs a slot.</td></tr>
+    <tr><td><strong>DMA legalization suite</strong></td><td>4,800 runs, 30-minute mean, <strong>2,400 CPU-hours, ten hours of wall clock on 240 licences</strong>. Even at <em>r</em>&nbsp;&lt;&nbsp;2&nbsp;s, <em>W</em><sub>hw</sub>&nbsp;=&nbsp;1 gives about <strong>2.4 hours of machine time</strong> &mdash; then add <em>B</em>, paid <em>per design revision</em>. A nightly suite runs per revision, so it buys nothing.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:50%">
+    <ol class="small">
+      <li><strong>No simulation answer</strong>: boot, firmware, long soaks, NoC statistics.</li>
+      <li>Campaigns whose value is <strong>iteration count under one image</strong>, where the build amortises across the sweep.</li>
+      <li><strong>Reproductions of failures found downstream</strong>: the platform has the observability silicon lacks.</li>
+      <li><strong>Nothing a farm can do</strong> &mdash; the rule always broken.</li>
+    </ol>
+  </td><td>
+    <div class="ex">
+      <span class="tag">One extra vplan column &mdash; not the obvious one</span>
+      An emulation row must name <strong>which image it runs on</strong>. The image is the scheduling unit, so rows batch by image, not priority. <em>Plan the images first, then assign rows</em> &mdash; or discover, late, that the top-priority ones need five builds you have no calendar for.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Three claims earn a slot and one rule protects it. A University of Florida survey states the rationing outright: <strong>emulator capacity is often reserved for tape-out-critical functional regressions</strong>, so security and fault campaigns are cut to high-risk blocks or deferred.</p>
+  <p class="src">T. Rahman et al., <em>Emulation-based SoC Security Verification</em>, Univ. of Florida, arXiv&nbsp;2604.15073 &mdash; [P14, pp.&nbsp;8,&nbsp;17]. Qualitative; names no platform.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- ============ 14. DIVIDER 18 ============ -->
+<section class="slide divider">
+  <p class="chno">18</p>
+  <h1>FPGA Prototyping and<br>HW/SW Co-verification</h1>
+  <p class="sub">Pre-silicon in <em>time</em>; validation in <em>kind</em>. The first platform on which real software runs against real hardware &mdash; and the first on which the debug ergonomics of the lab decide what a bug costs.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- src: ch18:3-5 (four boards, forty seconds, fails twice in forty, nine days, the inherited
+     4 KB bug hidden by coherence); ch18:7 (the terminological line: validation = real hardware) -->
+<!-- ============ 15. NINE DAYS ON A BENCH ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 18 &middot; The opening</p>
+  <h2>The bug was not hard. The nine days were.</h2>
+  <p>Four FPGA boards in a rack. Nine months before tape-out the flagship boots an operating system, mounts a filesystem over Ethernet, reaches a shell &mdash; and works for about <strong>forty seconds</strong>. Then a compute-cluster benchmark returns a result whose last cache line is stale. Run it again: passes. Run it forty times: <strong>fails twice</strong>.</p>
+  <table class="cols"><tr><td style="width:52%">
+    <p class="small"><strong>What nobody schedules.</strong> Verification cannot reproduce it &mdash; their DMA and coherence tests pass and the failing workload is hundreds of millions of cycles long. Software's driver has run six months against a functional model without a failure. Available evidence: one console, a few LEDs, and a trace buffer configured for a different question three bitstreams ago.</p>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Nine days later</span>
+      The flagship's DMA mis-legalizing a 2D descriptor at a 4&nbsp;KB boundary &mdash; the reference SoC's canonical bug, inherited, and hidden one layer deeper by coherence, because the split's second half writes a line the host cluster holds Modified and the corruption stays invisible until the writeback.
+    </div>
+  </td></tr></table>
+  <div class="ex">
+    <span class="tag">The terminological line this chapter turns on</span>
+    <strong>Validation</strong> means checking a design on <em>real hardware</em> rather than on a model &mdash; post-silicon on fabricated parts, <em>or in the lab on a prototype</em>. So an FPGA prototype is <strong>pre-silicon in time and validation in kind</strong>. Not a faster simulator: a different <em>kind</em> of evidence, with the lab's debug economics attached.
+  </div>
+  <p class="note"><b>Say</b>Nine days of ownership argument, for a bug both teams already knew the shape of. Everything in this chapter is aimed at that number.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- src: ch18:19 (hardware-speed / real I/O / cycle-accurate, cit P14; 100-1000x cit P21);
+     ch18:21 (1,738-test suite, three classes; dual-core at 20 MHz boots Linux in 115 s, cit P25);
+     ch18:25 (few thousand signals, decided before the bitstream, cit P21; deep debug deferred cit P14);
+     ch18:29 (synthesis hours-to-days, probes are logic, cit P14; toolchain pushback cit D33) -->
+<!-- ============ 16. WHAT IT BUYS, AND THE VISIBILITY COLLAPSE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; A different instrument</p>
+  <h2>Three properties, all doing work &mdash; and one collapse that pays for them</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>What the prototype is for</h3>
+    <ul class="small">
+      <li><strong>Hardware speed</strong> &mdash; megahertz: roughly 100&ndash;1000&times; an RTL simulator, turning an OS boot from an impossibility into a few hours of runtime.</li>
+      <li><strong>Real I/O</strong> &mdash; the console is a real UART, the network a real PHY. The driver being exercised is <em>the</em> driver, not a testbench's idea of one.</li>
+      <li><strong>Cycle accuracy</strong> &mdash; no abstraction sits between the software and the design it programs.</li>
+    </ul>
+    <div class="ex good">
+      <span class="tag">The shape of what that buys</span>
+      A reported 2026 flow runs an <strong>FPGA test suite of 1,738 tests</strong> in three classes &mdash; RTL-against-platform integration, bare-metal benchmark and litmus, and OS-level driver and stack tests. Inside it, a full Linux boot of a dual-core design clocked at <strong>20&nbsp;MHz completes in 115 seconds</strong>. Two minutes, on a design far smaller than the flagship, for a boot RTL simulation would never finish.
+    </div>
+  </td><td>
+    <h3>The defining limitation is not speed or capacity</h3>
+    <p class="small">It is that <strong>you cannot see inside it.</strong> Observability is restricted to a few thousand internal signals; you must decide <em>which</em> before the bitstream is generated; and changing your mind means recompiling &mdash; several hours. Compare the simulator you left behind, where every net is visible for free, after the fact, without rerunning anything.</p>
+    <p class="small">So prototyping emphasises system-level execution and functional realism, and deep debug is performed selectively or <strong>deferred</strong> to a higher-visibility environment. <em>Deferred</em> is the word to notice: it means reproducing the failure in simulation or on an emulator &mdash; exactly what the opening scenario's teams could not do.</p>
+    <p class="small muted">Turnaround compounds it. Synthesis and partitioning take many hours or days, and probes are <em>logic</em>, competing for the same fabric and routing as the design. The loop that costs seconds in simulation &mdash; add a probe, rerun, look &mdash; costs a working day here.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>What you can see is decided before the run, and changing your mind is a compile. That one sentence explains every workflow difference in this chapter.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- src: ch18:33 (partition bridges/SerDes/sync logic, latency, lower bound with unknown gap, cit P25);
+     ch18:35 (the 4:1 survives, the 6,250:1 does not); ch18:37 (wake-cause bug, not this instrument);
+     ch18:41-43 (prototypability, substitution cit P25; LPDDR4 PHY exclusion) -->
+<!-- ============ 17. PARTITIONING AND CLOCK RATIOS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; Capacity and clocking</p>
+  <h2>Two distortions the platform introduces, and the one thing it cannot host at all</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>Partitioning inserts machinery the design does not have</h3>
+    <p class="small">Bridges between partitions, serialiser/deserialiser links across the board, synchronisation logic to hold the pieces together &mdash; at the cost of communication latency across FPGA boundaries. A crossbar or NoC path costs materially more cycles across a partition boundary than inside one device.</p>
+    <div class="ex warn">
+      <span class="tag">State this before anyone quotes a number</span>
+      Performance measured on a partitioned prototype is a <strong>lower bound with an unknown gap</strong>, never a projection. The arbitration and back-pressure behaviour you observe is not the behaviour silicon will have.
+    </div>
+  </td><td>
+    <h3>Clocking distorts selectively &mdash; derive it</h3>
+    <p class="small">The system clock drops by some factor to close timing in fabric, and the peripheral domain drops with it, so the reference SoC's <strong>4:1</strong> ratio (200&nbsp;MHz : 50&nbsp;MHz) <em>survives</em> &mdash; divide both by the same factor and the relationship holds. The always-on domain does not cooperate: its <strong>32&nbsp;kHz</strong> reference is a real crystal on the board, and a crystal does not scale. The <strong>6,250:1</strong> ratio becomes 6,250 divided by the system slowdown factor.</p>
+    <p class="small">The canonical wake-cause bug lives exactly there: a legal <code>3'b010&nbsp;&rarr;&nbsp;3'b100</code> transition briefly observed as the reserved code <code>3'b110</code>. Whether the prototype shows it depends on how many fast-domain sampling edges fall inside the slow domain's transition window &mdash; the very quantity you just changed. <strong>A prototype that never reproduces a crossing bug and one that reproduces it constantly can be the same design at two clock settings.</strong></p>
+  </td></tr></table>
+  <div class="ex">
+    <span class="tag">Write it in the plan as an explicit prototype-scope exclusion</span>
+    The flagship's LPDDR4 controller and PHY &mdash; whose training state machine is among the riskiest things on the chip &mdash; are exactly what <em>cannot</em> be prototyped: the PHY is analog and its timing is the point. On the board they are replaced by the platform's own memory controller. The prototype will run the OS beautifully and tell you <strong>nothing whatever</strong> about memory training.
+  </div>
+  <p class="note"><b>Say</b>Structural CDC analysis found the crossing bug in seconds. The prototype is not the instrument for it &mdash; in either direction.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- src: ch18:47-49 (the mental model, capacity threshold cit R2/P14); ch18:53-59 (three admission
+     conditions); ch18:61 (codec sequence scenario); ch18:63 (13 percent, cit R1) -->
+<!-- ============ 18. PROTOTYPE OR EMULATOR ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 18 &middot; What earns a place</p>
+  <h2>Not "cheap emulator" &mdash; one instrument on each side of the verification/validation line</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">The right mental model</span>
+      <strong>An emulator is a fast simulator with reduced visibility. A prototype is early silicon with more visibility than silicon.</strong><br>
+      Work you would do in a simulator, if only it were faster, belongs on an emulator. Work you would do in the lab, if only you had a chip, belongs on the prototype.
+    </div>
+    <h3>The admission test &mdash; all three must hold</h3>
+    <ol class="small">
+      <li><strong>It needs more cycles than simulation can deliver.</strong> If it fits in a simulation run, run it there, where debug is cheaper.</li>
+      <li><strong>It has an oracle that survives the visibility collapse.</strong> An offline bit-exact diff, self-checking firmware, an in-fabric monitor latching into a readable register. A workload whose only oracle was "the engineer watched the waveform" has no oracle at all here.</li>
+      <li><strong>Its failure is plausibly reproducible in a higher-visibility environment</strong> &mdash; because that is where it will be debugged.</li>
+    </ol>
+    <p class="small muted">Condition 2 is the one teams skip; condition 3 is the one that costs them.</p>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Scenario &middot; a workload that passes all three</span>
+      The video codec's encoder passes its block environment: bit-exact per macroblock, coverage closed on modes, quantiser steps, buffer-full. What nobody has run is a <em>sequence</em> &mdash; a thousand consecutive frames where rate control adapts across scene changes. <strong>Approach:</strong> run it on the prototype from a real clip, write the bitstream to storage, diff the whole output offline. <strong>Why it works:</strong> the cycles are genuinely needed; the oracle needs no visibility at all; and when frame 738 differs, the frame number and the encoder state are enough to build a simulation testcase. <em>That last property is what makes it worth doing &mdash; not the speed.</em>
+    </div>
+    <div class="ex warn">
+      <span class="tag">The counter-case</span>
+      In the FPGA-target segment, where teams routinely minimise pre-lab verification to reach the lab quickly, only <strong>13 percent</strong> of projects in the <strong>2024 Wilson Research Group FPGA study</strong> reported zero non-trivial escapes into production. <strong>Prototypes make bugs visible late; they do not make them findable.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Trading a controllable, observable, reproducible environment for an uncontrollable, unobservable, weakly reproducible one &mdash; and gaining only speed. The same 2024 study pair puts IC/ASIC first-silicon success at 14%.</p>
+  <p class="src">WRG&nbsp;/&nbsp;Siemens EDA 2024 trend reports &mdash; FPGA [R1, p.5]; IC/ASIC [R2, p.5]. Double-blind, &plusmn;4% at 95%.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- src: ch18:69-71 (coarse-grained checking, cit P21; instruction-accurate cit T1); ch18:75-77
+     (what it establishes; no arbitration/back-pressure/latency/coherence); ch18:81-84 (two traps;
+     the model becomes the spec); ch18:86 (GPU driver scenario); ch18:90-92 (approximately timed) -->
+<!-- ============ 19. VIRTUAL PLATFORMS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; Virtual platforms</p>
+  <h2>Fast, indispensable, and structurally blind to one entire class of bug</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <p class="small"><span class="pill ok">establishes</span> that the initialisation sequence sets the registers it means to, in an order the hardware accepts; that firmware's view of the memory map agrees with the architecture's; that handlers are wired to the sources they think; that device tree, linker script and boot ROM hand-off agree. On the flagship: four cores of OS bring-up, a driver stack and a filesystem, none of it waiting for RTL.</p>
+    <p class="small"><span class="pill no">absent</span> no arbitration &mdash; nothing to arbitrate. No back-pressure &mdash; a model that returns immediately never stalls. No latency &mdash; two operations the design will overlap are sequential. No coherence &mdash; a flat memory has nothing to be coherent with.</p>
+    <div class="ex warn">
+      <span class="tag">Absent, not undetected &mdash; which is worse</span>
+      The entire class of bugs that consists of <em>two things happening at once</em> is missing, and the platform reports success with complete confidence.
+    </div>
+  </td><td>
+    <h3>Two traps, both producing firmware that passes and then fails</h3>
+    <ul class="small">
+      <li><strong>Assumptions the model never charged for.</strong> A poll loop terminating on the first read against a model that completes instantly &mdash; so nobody notices it has no timeout and no memory barrier.</li>
+      <li><strong>Synchronisation the model made unnecessary.</strong> A buffer handed to DMA without cache maintenance works perfectly with no caches. It surfaces on the prototype looking exactly like a hardware coherence bug &mdash; and is argued about as one.</li>
+    </ul>
+    <div class="ex">
+      <span class="tag">Scenario &middot; the diagnostic signature</span>
+      A GPU driver, eight months green against a functional model, tears a frame once every few thousand submissions on the prototype. Do not start by suspecting the driver: ask <em>which of its assumptions the model was structurally unable to test</em>. The model had no concurrency to get wrong, so it could neither confirm nor deny the ordering between the command processor's descriptor read and the shader clusters' writes. It never posed the question. <strong>When a prototype failure looks like a race, ask first what the software's development platform could not model.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>A third trap: the model becomes the specification by default &mdash; neither it nor the RTL is golden. And the <em>approximately timed</em> middle setting is not silent about timing: it has <em>a</em> timing, plausible, quotable, and not the design's. It answers architecture questions, whose answer is a ratio; not verification questions, whose answer is a verdict.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- src: ch18:98 (industrial form, cit P14); ch18:121-127 (three reasons, the placement rule);
+     ch18:131-135 (what the boundary deletes; write it down; migration plan cit P14);
+     ch18:137 (sensor-hub scenario); ch18:141-143 (two generations, two answers) -->
+<!-- ============ 20. HYBRID ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; Hybrid co-simulation</p>
+  <h2>Where you put the boundary <em>is</em> the experiment</h2>
+  <table class="diag">
+    <tr>
+      <td><div class="db obs">Virtual platform on the host<span class="s">fast instruction-set models: what you are NOT verifying</span></div></td>
+      <td style="width:15%"><div class="db bus">TLM channel<span class="s">untimed hand-off</span></div></td>
+      <td><div class="db">Engine executing selected RTL<span class="s">cycle accurate: what you ARE verifying</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <h3>The placement rule &mdash; three things true at once</h3>
+    <ol class="small">
+      <li><strong>Already an architectural boundary with transaction semantics.</strong> A register interface, a bus port, a mailbox. A boundary drawn mid-microarchitecture &mdash; across a pipeline, a credit counter, a handshake &mdash; has no transaction to send.</li>
+      <li><strong>The virtual side is mature.</strong> You are trusting it, unverified, for the duration of every run. A model written last week to fill a hole in the partition is a second design with no test plan.</li>
+      <li><strong>Everything whose timing you care about is on the RTL side.</strong></li>
+    </ol>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">What the boundary deletes</span>
+      The channel is untimed, so <strong>every bug living in the timing relationship between the two sides is unreachable by construction.</strong> If the core and the DMA contend for one memory port and only the DMA is RTL, the contention is <em>gone</em> &mdash; not modelled coarsely, gone. That is not a defect in hybrid platforms; it is what they are. It is a defect only when nobody writes it down.
+    </div>
+    <p class="small"><strong>So write it down, on the plan row:</strong> <em>"cross-boundary timing between the host cluster and the compute island is out of scope on this platform; covered by block-level full-RTL simulation and by the prototype's system regression."</em> A written exclusion is a coverage decision; an unwritten one is a hole with a green dashboard over it.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Same problem, two scales, opposite answers: on the reference SoC full-RTL simulation of the whole chip is affordable and a hybrid channel buys nothing; on the flagship it is how the driver team runs real code against the real compute cluster in month four rather than month eleven.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- src: ch18:147-149 (84 percent of 2024 IC/ASIC projects with embedded processors, cit R2);
+     ch18:153-159 (initialisation ordering cit T1; register access races cit T1; error recovery;
+     integration wiring); ch18:161 (crypto key ladder + SPI precondition cit T1);
+     ch18:165-169 (what it cannot find; firmware is not an oracle) -->
+<!-- ============ 21. FIRMWARE-DRIVEN VERIFICATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; Firmware-driven verification</p>
+  <h2>Not a sequence that resembles what software will do &mdash; the binary that will ship</h2>
+  <p class="small">Constrained random asks <em>is every legal transaction handled correctly?</em> Firmware asks <em>does this sequence, in this order, from this reset state, achieve the effect the software needs?</em> &mdash; and answers for one trajectory. Orthogonal projections, and mainstream: in 2024, <strong>84 percent</strong> of IC/ASIC projects incorporated one or more embedded processors.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <ul class="small" style="margin-top:2px">
+      <li><strong>Initialisation ordering.</strong> Access constraints and preconditions are frequently <em>not documented</em>, and required nonetheless. The driver's sequence is what silicon sees for the rest of its life.</li>
+      <li><strong>Register access races.</strong> Three driver variants checked against each other: a missing side-effect annotation introduced a race that could make the device raise an interrupt incorrectly &mdash; and it had passed the simulation-based verification previously applied.</li>
+      <li><strong>Error-recovery paths.</strong> Timeouts, retries, channel resets. Nobody writes directed tests for these; running the driver runs them anyway.</li>
+      <li><strong>Integration wiring.</strong> The interrupt on the wrong input; the address the header and the decode logic disagree about. Block environments passed, the system regression passed, and it surfaced in the lab as a hang.</li>
+    </ul>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Two limits &mdash; the second is easy to miss</span>
+      <strong>Firmware is one path.</strong> It uses the burst lengths the driver chooses and the alignments the allocator produces. It will never issue the legal transaction the driver has no reason to issue, and never <em>varies</em> anything &mdash; a thin deep thread through a wide space. <strong>And firmware is not an oracle for the hardware.</strong> A driver checks that it achieved its own goal, not that the design behaved correctly. A hardware bug the retry logic silently absorbs is a passing boot with a defect in it.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The crypto key ladder: once per few hundred re-keys a session decrypts to garbage, because the driver writes the next key-slot register while the previous operation is still draining &mdash; a requirement on the <em>software</em>, discovered in the <em>hardware</em>, written down in neither. Firmware-only ships a design that works for the driver it grew up with; random-only ships one where every transaction is legal and the initialisation sequence deadlocks.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- src: ch18:176-182 (the canonical property, verbatim); ch18:184 (on the prototype that statement
+     does not exist); ch18:186-238 (dma_4kb_monitor -- first_len/first_size dropped whole to fit;
+     nothing elided inside a construct); ch18:240-242 (what it costs, what it keeps) -->
+<!-- ============ 22. THE TRANSLITERATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; The artifact</p>
+  <h2>On the prototype, that statement does not exist</h2>
+  <table class="cols"><tr><td style="width:60%">
+<pre class="mini">property p_no_4kb_crossing;
+  @(posedge clk) disable iff (!rst_n)
+  (awvalid &amp;&amp; awready &amp;&amp; (awburst == 2'b01)) |-&gt;
+    (16'(awaddr[11:0]) + ((16'(awlen) + 16'd1) &lt;&lt; awsize)) &lt;= 16'd4096;
+endproperty
+a_no_4kb_crossing : assert property (p_no_4kb_crossing);
+
+// The same expression, in fabric. first_len/first_size dropped whole.
+module dma_4kb_monitor #(parameter int unsigned ADDR_W = 40) (
+  input  logic clk, rst_n, awvalid, awready, input logic [7:0] awlen,
+  input  logic [ADDR_W-1:0] awaddr, input logic [2:0] awsize,
+  input  logic [1:0] awburst, output logic viol_seen,
+  output logic [15:0] viol_count, output logic [ADDR_W-1:0] first_addr);
+  logic viol;
+  always_comb viol = awvalid &amp;&amp; awready &amp;&amp; (awburst == 2'b01) &amp;&amp;
+    ((16'(awaddr[11:0]) + ((16'(awlen) + 16'd1) &lt;&lt; awsize)) &gt; 16'd4096);
+  always_ff @(posedge clk or negedge rst_n)
+    if (!rst_n) begin
+      viol_seen &lt;= 1'b0; viol_count &lt;= '0; first_addr &lt;= '0;
+    end else if (viol) begin
+      if (!viol_seen) begin viol_seen &lt;= 1'b1; first_addr &lt;= awaddr; end
+      if (viol_count != 16'hFFFF) viol_count &lt;= viol_count + 1'b1;
+    end
+endmodule</pre>
+  </td><td>
+    <p class="small">Concurrent assertions are a simulation and proof construct. There is no assertion engine in the fabric. The check must become <strong>logic that reports its verdict through a register the driver can read.</strong></p>
+    <h3>What it costs</h3>
+    <ul class="small">
+      <li><strong>The waveform.</strong> One address, one length, one size &mdash; and no picture of what the interconnect was doing around them.</li>
+      <li><strong>Every violation after the first</strong> &mdash; hence the counter. It separates <em>systematically illegal descriptors</em> from <em>one corner case fired once</em>.</li>
+      <li><strong>Fabric.</strong> Real logic, competing for the same routing as the design &mdash; the currency that buys debug probes.</li>
+    </ul>
+    <div class="ex good">
+      <span class="tag">What it keeps</span>
+      Evaluated at the instant of the violation, at full speed, on every burst of a workload no simulator will reach. Detection distance: <strong>zero cycles</strong> &mdash; though the distance to <em>your knowledge of it</em> is however long until the driver next polls.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Build the monitors before the bitstream. After it, they cost a compile.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- src: ch18:248-260 (four triage enablers; boot executed eight times, cit P25; divergence cit P14);
+     ch18:264-272 (three outcomes; software reset not implemented cit T1; UART baud 2^18 cit T1);
+     ch18:276 (radar Q2.14 vs Q1.15 scenario); ch18:278 (organisational consequence) -->
+<!-- ============ 23. WHO OWNS THE BUGS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 18 &middot; Who owns the bugs</p>
+  <h2>Run the triage against the specification, not against the two implementations</h2>
+  <table class="compact">
+    <tr><th style="width:26%">Triage outcome</th><th>Who owns it</th></tr>
+    <tr><td><span class="pill">spec says X, hw does X</span></td><td>Software is wrong. Fix the driver.</td></tr>
+    <tr><td><span class="pill">spec says X, hw does Y</span></td><td>Hardware is wrong. Fix the RTL, and add the test that should have caught it.</td></tr>
+    <tr><td><span class="pill no">the spec does not say</span></td><td><strong>Neither team owns it.</strong> A specification defect &mdash; and treating it as a firmware bug is the single most common triage error in hardware/software co-verification.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:50%">
+    <ol class="small" style="margin-top:2px">
+      <li><strong>A run you can repeat.</strong> A prototype run has no seed; the nearest equivalent is a manifest pinning RTL revision, bitstream hash, partitioning, clocks, image hashes, board, input data. <em>Repetition substitutes for replay</em>: the 2026 flow's indivisible OS boot is run <strong>eight times</strong> to show the result is stable.</li>
+      <li><strong>One timeline.</strong> Three records of time in three formats means guessing whether the driver's timeout preceded the DMA's error.</li>
+      <li><strong>A path back to visibility</strong> &mdash; a prototype failure's value is realised when it becomes a simulation testcase.</li>
+    </ol>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">The instance that inverts the reflex</span>
+      An open-source UART's baud counters run continuously. Reprogramming to a lower rate while the counter sits between the two leaves it un-reset until it wraps &mdash; unresponsive for up to <strong>2<sup>18</sup> clock cycles</strong> &mdash; and <strong>the software cannot avoid this</strong>, because nothing lets it infer the counter's value. <em>No correct driver exists.</em>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Arithmetic edition: a 16-bit "signed coefficient" the RTL reads as Q2.14 and the firmware computes as Q1.15. A spec defect filed as a firmware bug is closed by a driver patch &mdash; and the document stays wrong.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- ============ 24. DIVIDER 19 ============ -->
+<section class="slide divider">
+  <p class="chno">19</p>
+  <h1>Gate-Level, Timing and<br>Power-Aware Verification</h1>
+  <p class="sub">After synthesis the abstraction you trusted stops holding. RTL is optimistic about X where the netlist is pessimistic &mdash; and only here can a simulator model losing power.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- src: ch19:3-9 (the netlist arrives Tuesday; two results by Wednesday evening; nine hours of
+     debug; the event-unit escape that plain RTL simulation cannot represent) -->
+<!-- ============ 25. TWO RESULTS, SAME WEEK ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 19 &middot; The opening</p>
+  <h2>Same platform, same week, same engineers &mdash; one run was ritual, the other saved the tape-out</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">Result 1 &mdash; a boot test dies at time zero in a fog of unknowns</span>
+      Nine hours of debug establish: the netlist's <strong>scan-enable pin</strong> was never driven by a testbench written against RTL, where no such pin existed; a scoreboard comparison written with <code>!=</code> had been <strong>quietly reporting success on all-unknown data</strong> for two of those hours; and a white-box checker on the DMA's internal descriptor pointer has nothing left to bind to, because synthesis dissolved the register it watched.<br><br>
+      <em>Nothing has been learned about the design. A great deal has been learned about the testbench.</em>
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Result 2 &mdash; the one that saves the tape-out</span>
+      Run with the chip's <strong>power intent loaded</strong>, a sleep/wake test shows the event unit coming out of a power-down cycle with its interrupt-mask configuration destroyed.<br><br>
+      The canonical escape of Chapter 7 &mdash; <strong>a bug plain RTL simulation could not represent at all</strong>, because plain RTL simulation does not model losing power.
+    </div>
+  </td></tr></table>
+  <p class="lead" style="margin-top:6px">A chapter on verification after synthesis is really a chapter on telling those two apart &mdash; because gate-level simulation is expensive enough that <strong>running it out of habit is a decision with a price tag</strong>.</p>
+  <p class="note"><b>Say</b>Ask of every proposed gate-level run: which of these two is it going to be? You can usually tell in advance.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- src: ch19:23-29 (four arguments ranked; equivalence checking cit B2; STA cit D14; X and reset
+     cit D23; scan on the SECOND synchronizer flop erodes MTBF cit D14); ch19:35-39 (two sources,
+     one contradiction, cit R2 vs D14 -- and the thesis); ch19:41 (LPDDR4 row split); ch19:45 (residue) -->
+<!-- ============ 26. EXHIBIT VS SIGN OFF ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; What gate level is for</p>
+  <h2>Four arguments are made for gate-level simulation. You are owed the ranking, not the list.</h2>
+  <table class="compact">
+    <tr><th style="width:39%">The argument</th><th style="width:9%">Verdict</th><th>Why</th></tr>
+    <tr><td>"It checks that synthesis did not change the function"</td><td><span class="pill no">weakest</span></td><td>Logic equivalence checking is exhaustive over the transformation and needs no stimulus. If you run LEC after synthesis &mdash; and you should &mdash; this argument is spent.</td></tr>
+    <tr><td>"It checks timing"</td><td><span class="pill no">category error</span></td><td>STA examines <em>every</em> timing arc structurally, across corners, voltage, temperature and variation. A simulation samples one test's paths, at one corner.</td></tr>
+    <tr><td>"It finds X and reset problems the RTL hid"</td><td><span class="pill ok">strongest</span></td><td><code>if</code>, <code>case</code> and edge constructs resolve an ambiguous condition into a definite branch &mdash; and no longer exist in a netlist. A design that passed at RTL on a silently resolved unknown fails here, at reset.</td></tr>
+    <tr><td>"It exercises structures not in the RTL at all"</td><td><span class="pill ok">underweighted</span></td><td>Scan chains, test-mode multiplexers, self-test wrappers, debug fabric &mdash; inserted <em>after</em> sign-off, so the obligation has no earlier home.</td></tr>
+  </table>
+  <div class="ex">
+    <span class="tag">The thesis, in miniature</span>
+    GLS with timing can <strong>exhibit</strong> one instance: one path, one corner, one alignment of edges. It cannot <strong>cover</strong> the class, because whether that alignment occurs is an accident of the stimulus &mdash; sign-off needs the space, and a structural analysis gives that. <strong>Exhibiting a failure and signing off its absence are different jobs; GLS is qualified only for the first.</strong>
+  </div>
+  <p class="note"><b>Say</b>Scan insertion on the <em>second</em> flop of a two-flop synchronizer erodes MTBF where the first does not &mdash; a structural property of the implemented netlist that no simulation could have found.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- src: ch19:49 (optimism goes, pessimism worsens, cit D23; most first failures are not about the
+     design); ch19:51-65 (four families and their tells; radar FFT unreset datapath scenario;
+     white-box checkers cannot survive a netlist cit B2); ch19:91 (the order of operations) -->
+<!-- ============ 27. FOUR FAMILIES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; Reading a gate-level failure</p>
+  <h2>Most first gate-level failures are not about the design at all</h2>
+  <table class="compact">
+    <tr><th style="width:27%">Family</th><th style="width:38%">The tell</th><th>What to do</th></tr>
+    <tr><td><strong>Genuinely unreset state</strong></td><td>Present at time zero, survives reset de-assertion, traces back to a flip-flop with no reset pin</td><td>The class GLS exists for &mdash; but findable earlier, and completely, by formal reset analysis.</td></tr>
+    <tr><td><strong>Pins that exist only in the netlist</strong></td><td>The cone of influence starts at a top-level input with <em>no RTL counterpart</em></td><td>A missing harness nobody could have written earlier. Build one tie-off module; <em>review it as an artifact</em>.</td></tr>
+    <tr><td><strong>Environment that cannot survive a netlist</strong></td><td>The failure appears in the environment's own messages: elaboration error, null handle, back-door read returning unknowns</td><td>Synthesis dissolved, renamed or replicated the signal. What must survive is written against <em>ports</em>.</td></tr>
+    <tr><td><strong>Pessimism artifacts</strong></td><td>The unknown appears mid-logic with no source &mdash; an expression with partially unknown operands</td><td>Most debug time, least teaching. Clear the real sources first: each removal collapses a fan-out.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">Where judgment enters</span>
+      The radar FFT's butterfly registers are deliberately unreset &mdash; pure datapath, overwritten by the first frame. The first run floods the chain with unknowns and a junior engineer opens a bug. It is not a bug, but it is not <em>obviously</em> not one, and the difference must be <strong>argued</strong>: no control decision consumes those registers before the flush completes. Pin the argument with an assertion.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">The order of operations</span>
+      Timing annotation, power intent and netlist stage are <strong>three independent switches</strong>; teams turn them on together, then debug the interaction. Come up against a <em>zero-delay netlist, no power intent</em>, on the shortest reset-and-boot test, and add nothing until it is clean. <strong>The first clean zero-delay boot is a milestone worth naming.</strong>
+    </div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- src: ch19:69-83 (the scoreboard artifact, copied with its comment trimmed); ch19:85-87
+     (the language rule cit S8; what escapes; why the defect survives review) -->
+<!-- ============ 28. THE COMPARISON THAT STOPS COMPARING ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; The silent cousin</p>
+  <h2>An environment that does not fail &mdash; it quietly stops checking</h2>
+  <table class="cols"><tr><td style="width:52%">
+<pre class="tight">// `!==` is case inequality: its result is always 1'b0 or
+// 1'b1, so an unknown in `act` always reaches the report.
+// `!=` is logical inequality -- 1'bx when the relation is
+// ambiguous -- and `if (1'bx)` takes the false branch,
+// scoring the transaction as correct.
+always_comb begin
+  if ($isunknown(act))
+    $error("unknown in sampled data: %0b", act);
+  else if (act !== exp)
+    $error("mismatch: got %0h, expected %0h", act, exp);
+end</pre>
+    <p class="small muted">A 2-state variable holding that result would convert the <code>x</code> to <code>0</code> by a second route.</p>
+  </td><td>
+    <p class="small">The language rule is exact, and the exactness matters. For the <strong>logical</strong> equality and inequality operators, the result is <code>1'bx</code> only when unknown or high-impedance bits make the relation <em>ambiguous</em>. The <strong>case</strong> operators include those bits in the comparison and always yield a known result.</p>
+    <p class="small">So <code>!=</code> does not simply "miss unknowns". A value corrupted only in bits that already differ from the expectation is still reported, because the relation is not ambiguous. What escapes is <strong>the fully corrupted value</strong>, and the partially corrupted one whose unknowns sit precisely on the bits that would have carried the difference.</p>
+    <div class="ex warn">
+      <span class="tag">Why the defect survives review</span>
+      The checker works on most of the data most of the time, and fails exactly where the data is worst. It fails <strong>silently</strong> &mdash; the run is green, the coverage is collected, the plan row is discharged. <em>Audit this before a testbench is ever pointed at a netlist.</em> The cure is two lines: an explicit unknown check ahead of the comparison, so that "unknown" is its own verdict rather than a special case of "equal".
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>This one is worth a slow read. Two hours of a nine-hour debug went into a checker that was reporting success.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- src: ch19:95-97 (what back-annotation replaces cit B2; what SystemVerilog takes cit S8);
+     ch19:101-105 (the three quiet lies: un-annotated island, the corner nobody chose,
+     annotate-once cit S8/B2) -->
+<!-- ============ 29. THREE WAYS ANNOTATION LIES QUIETLY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; SDF back-annotation</p>
+  <h2>Three ways annotation lies quietly, and the artifact that catches each</h2>
+  <p class="small">RTL has no delays. A netlist has library delays &mdash; estimates for an average output load, while every instance of the same cell drives a different number of inputs over wires of different lengths. Back-annotation replaces them with per-instance values. What SystemVerilog takes from the file is <strong>precisely bounded</strong>: specify path delays, specparam values, timing-check constraint values, and interconnect delays. <em>Everything else in an SDF file is ignored.</em></p>
+  <table class="compact">
+    <tr><th style="width:22%">The lie</th><th style="width:44%">The mechanism</th><th>The defence</th></tr>
+    <tr><td><strong>The un-annotated island</strong></td><td>Any value the file does not supply retains its pre-annotation value, and the annotator need only <em>warn</em>. A mis-scoped read call leaves a whole subsystem on library defaults &mdash; frequently zero. <strong>Nothing fails.</strong> The run is fast, clean and meaningless for that block.</td><td>The annotation log is an <em>artifact to review</em>: each annotation produces an entry. Compare its instance count against the netlist's.</td></tr>
+    <tr><td><strong>The corner nobody chose</strong></td><td>Which member of each min/typ/max triple is annotated is a string argument whose default leaves the choice to the simulator. The one property deciding whether the run says anything about setup or about hold is <strong>a defaulted parameter of a system task</strong>, inherited from a script nobody has read in two years.</td><td>A run whose corner nobody selected is not evidence about any corner. <strong>Name it in the run manifest</strong>, beside the seed and the tool build.</td></tr>
+    <tr><td><strong>The cost that shapes the flow</strong></td><td>Millions of gates, millions of pin-to-pin connections, each needing annotation. Slow enough to be worth minimising.</td><td>Annotate <em>once</em> at compile time and run many tests against the same model &mdash; which is why the tier is a few long runs, and why it fights per-test randomisation.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>None of these three produces an error message. All three produce a green run that means nothing.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- src: ch19:109-143 (timing-check families cit S8; dff_udp + specify + notifier, abridged further:
+     one UDP row and the header comment trimmed, nothing elided inside a construct);
+     ch19:145 (resolve in time order); ch19:149-157 (STA authority cit D14; what GLS adds);
+     ch19:159 (neural accelerator multicycle scenario) -->
+<!-- ============ 30. WHAT A TIMING CHECK ASSERTS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; The notifier</p>
+  <h2>A timing check prints. The <em>notifier</em> is what makes a violation functional.</h2>
+  <table class="cols"><tr><td style="width:58%">
+<pre class="mini">// Abridged library flip-flop model. Rows handling unknown inputs
+// are elided; in a real cell they outnumber these, and they are
+// where gate-level pessimism comes from.
+primitive dff_udp (q, clk, d, notifier);
+  output q; reg q;  input clk, d, notifier;
+  table
+  // clk  d  ntf : state :  q
+       r  0   ?  :   ?   :  0 ;
+       r  1   ?  :   ?   :  1 ;
+       f  ?   ?  :   ?   :  - ;
+       ?  *   ?  :   ?   :  - ;
+       ?  ?   *  :   ?   :  x ;  // notifier event =&gt; q goes x
+  endtable
+endprimitive
+module dff_with_timing_check (output wire q, input wire clk,
+                              input wire d);
+  reg notifier;
+  dff_udp u_ff (q, clk, d, notifier);
+  specify
+    specparam tSU = 120, tHLD = 40;  // SDF overwrites per instance
+    $setuphold(posedge clk, d, tSU, tHLD, notifier);
+    (posedge clk =&gt; (q +: d)) = 90;
+  endspecify
+endmodule</pre>
+  </td><td>
+    <p class="small">Every timing check may take a notifier &mdash; a variable the check toggles on violation, so the model can make its behaviour a <em>function</em> of violations. The canonical use: drive the output to <code>x</code>.</p>
+    <div class="ex warn">
+      <span class="tag">Why gate-level debug feels the way it does</span>
+      A timing violation is not a message you note and move past. It <strong>injects an unknown into the datapath</strong>, which propagates and produces a functional failure somewhere else entirely, thousands of cycles later. "Twelve timing violations, all in one block, early in the run" is never benign &mdash; it is the <em>cause</em> of whatever the scoreboard reports at the end. <strong>Resolve timing-check output first, in time order.</strong>
+    </div>
+    <h3>STA is the authority; GLS samples</h3>
+    <p class="small">But the constraints file STA reads is <em>manually generated</em>, and every exception in it &mdash; false path, multicycle path, case analysis &mdash; is a human claim STA <strong>obeys rather than checks</strong>. A back-annotated run makes no such assumption: <strong>not a check on the timing, but a check that the constraints described the design you actually built.</strong></p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The multicycle path declared correct at 8-bit weights is single-cycle at 2-bit weights. STA reports timing met, because it was told not to look. Run the configurations the constraints assumed something about.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- src: ch19:165-167 (why power intent lives outside the design cit S10/D17; the five-word
+     vocabulary cit S10); ch19:171-175 (corruption is the checking mechanism cit D23/D17;
+     the simstate ladder cit S10) -->
+<!-- ============ 31. POWER-AWARE: CORRUPTION IS THE MECHANISM ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; Power-aware verification</p>
+  <h2>Nobody wrote those checks. The corruption <em>is</em> the checking mechanism.</h2>
+  <table class="diag">
+    <tr>
+      <td><div class="db chk">PD_AON &mdash; always on<span class="s">power controller, wake logic, 32 kHz</span></div></td>
+      <td style="width:16%"><div class="db">isolation<span class="s">clamp to a chosen value</span></div></td>
+      <td><div class="db off">PD_SYS &mdash; switched<span class="s">corrupted to X while powered down; retention registers restored on exit</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <p class="small">HDLs were built to capture what a design <em>computes</em>. They have no way to say how each element is <em>powered</em> &mdash; and the same RTL is instantiated into different power architectures by different integrators, so power intent must live outside the golden design description.</p>
+    <p class="small"><strong>Five words, pinned precisely.</strong> A <em>power domain</em> is instances grouped for power management, sharing a supply set. <em>Isolation</em> gives defined behaviour for a signal whose driver is not active, via an <em>isolation cell</em> that clamps to a specified value. A <em>level-shifter</em> translates between voltage swings. <em>Retention</em> lets selected sequential elements survive power-down. A <em>power state table</em> states the legal combinations.</p>
+  </td><td>
+    <div class="ex">
+      <span class="tag">What loading power intent changes</span>
+      Every logic node in a powered-down domain is <strong>corrupted to unknown</strong> and stays unknown until power returns. An isolation cell stops that unknown reaching powered-on logic. A retention register is corrupted like everything else, <em>except</em> that the value saved before entry is restored on exit.<br><br>
+      So a missing isolation cell is not diagnosed by a rule &mdash; it is diagnosed by <strong>the failure it now causes</strong>: the unknown appears on the crossing, and downstream logic starts misbehaving shortly after the driving domain goes down.
+    </div>
+    <p class="small"><strong>Simstate</strong> makes the level of corruption a declared property: <code>NORMAL</code> &rarr; <code>CORRUPT_STATE_ON_CHANGE</code> &rarr; <code>CORRUPT_STATE_ON_ACTIVITY</code> &rarr; <code>CORRUPT_ON_CHANGE</code> &rarr; <code>CORRUPT_ON_ACTIVITY</code> &rarr; <code>CORRUPT</code>. State <code>ON</code> carries <code>NORMAL</code>; <code>OFF</code> and <code>ERROR</code> both carry <code>CORRUPT</code>.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Read the simstate ladder as a question you are being made to answer about every state you designed: does logic still switch here, does it hold without switching, or can it not even hold?</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- src: ch19:211-219 (the two ordered sequences; three of the steps carry published failures, cit D17);
+     ch19:290-296 (2 domains / 128 combinations / the 2010 case: 40M gates, 30 domains, 8 software-
+     controlled, >2,000 lines, >4,000 legal states, cit D17 -- and what changes at each regime) -->
+<!-- ============ 32. THE ORDERING IS THE SPECIFICATION ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 19 &middot; Sequencing</p>
+  <h2>The ordering is not a convention. It is what the hardware requires.</h2>
+  <table class="cols"><tr><td style="width:52%">
+    <table class="compact">
+      <tr><th style="width:50%">Power-down</th><th>Power-up</th></tr>
+      <tr><td>1. Quiesce: no outstanding bus transactions</td><td>1. Assert the domain reset, <em>while power is still off</em></td></tr>
+      <tr><td>2. Gate the domain clock</td><td>2. Close the header switch; wait for supply-good</td></tr>
+      <tr><td>3. Assert <code>save</code>: retention captures state</td><td>3. Release reset, <em>then</em> assert <code>restore</code></td></tr>
+      <tr><td>4. Assert isolation: outputs clamp</td><td>4. Release isolation</td></tr>
+      <tr><td>5. Open the header switch: power off</td><td>5. Un-gate the clock</td></tr>
+    </table>
+    <div class="ex warn">
+      <span class="tag">Three of these steps carry published failures</span>
+      Isolation must be asserted <em>before</em> sleep enable and released <em>after</em> it &mdash; swap either and the always-on island samples an unknown for the overlap. Reset must already be asserted when the supply returns: a design asserting reset <em>after</em> sleep-enable de-asserted showed the register output corrupted for exactly the window between supply arriving and reset landing. And reset must be inactive at the restore edge &mdash; which is why step&nbsp;3 has an order <em>inside</em> it.
+    </div>
+  </td><td>
+    <h3>Where inspection stops working</h3>
+    <div class="bar"><span class="bl">2 states</span> &mdash; reference SoC: one switchable domain. One power-down sequence, one power-up sequence, reviewable by three people around a whiteboard in an afternoon. <em>The table is documentation; directed tests check the sequences.</em></div>
+    <div class="bar s2"><span class="bl">128 combinations</span> &mdash; flagship: six domains, DVFS giving the host cluster and the compute island four states each, the other three on or off. 4&nbsp;&times;&nbsp;4&nbsp;&times;&nbsp;2&nbsp;&times;&nbsp;2&nbsp;&times;&nbsp;2. <em>An upper bound, not a count of legal states</em> &mdash; but nobody reviews 128 by inspection, and nobody enumerates the <strong>transitions</strong>, which is where the sequencing bugs live. The table becomes machine-readable and the checks are <em>generated</em> from it.</div>
+    <div class="bar s3"><span class="bl">4,000+ legal states</span> &mdash; a published 2010 case at <strong>Samsung Electronics</strong>: 40 million gates, 30 power domains, eight software-controlled, more than 2,000 lines of power intent, power-state coverage named as a challenge with no satisfactory tooling answer. <em>Coverage of the state space stops being achievable: prove the controller only emits legal sequences, and verify domains against those sequences.</em></div>
+    <p class="src">Scale and the coverage challenge above; the three sequencing failures opposite: <em>Low Power Verification with UPF</em>, Samsung Electronics with Synopsys, DVCon&nbsp;2010 &mdash; [D17, pp.&nbsp;4, 5, 8]. Self-reported, and scale is all it measures &mdash; no before/after payoff, so nothing here says the checklist made anything faster. The two sequence columns are the reference SoC's, not Samsung's.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Two, 128, four thousand: the same discipline, three regimes &mdash; and the technique has to change at each step.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<!-- src: ch19:223-227 (the escape mechanism: restore-period condition cit S10, the fast-wake bypass);
+     ch19:231-268 (pd_sys_sequence_chk -- two of four properties shown, p_iso_after_power and
+     p_reset_before_power dropped whole); ch19:272 (formal target; runs unchanged at RTL);
+     ch19:278 (crypto key retention: two negative obligations); ch19:302-304 (power-aware optimism cit S10) -->
+<!-- ============ 33. THE ESCAPE AND THE ASSERTION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; The worked escape</p>
+  <h2>The assertion that would have caught it needs no stimulus at all</h2>
+  <table class="cols"><tr><td style="width:58%">
+<pre class="mini">// Bound in the always-on domain: every signal here is always-on, so the
+// checker runs while the switched domain has no power. 2 of 4 shown.
+module pd_sys_sequence_chk (
+  input wire clk_aon, rst_aon_n,  // 32 kHz clock, async reset
+  input wire iso_en,              // 1 = switched outputs clamped
+  input wire sleep_en,            // 1 = the power switch is open
+  input wire restore);            // retention restore, active high
+  // Power may be removed only from an already-isolated domain.
+  property p_iso_before_sleep;
+    @(posedge clk_aon) disable iff (!rst_aon_n) $rose(sleep_en) |-&gt; iso_en;
+  endproperty
+  a_iso_before_sleep : assert property (p_iso_before_sleep);
+  // The clamp must hold for the whole restore window: the retention
+  // strategy's restore-period condition, as an assertion.
+  property p_restore_isolated;
+    @(posedge clk_aon) disable iff (!rst_aon_n) restore |-&gt; iso_en;
+  endproperty
+  a_restore_isolated : assert property (p_restore_isolated);
+endmodule</pre>
+  </td><td>
+    <p class="small"><strong>The mechanism.</strong> The retention strategy carries a <em>restore-period condition</em> &mdash; "isolation still asserted" &mdash; and the standard is normative: it shall hold throughout the restore period, <em>otherwise the restore fails and the retention element is corrupted</em>. A fast-wake optimisation drops isolation the cycle a wake event arrives, once supply-good is asserted. The first wake cannot fire it: supply is still off. A <strong>second</strong> wake inside the restore window is qualified, so the bypass fires, the condition goes false mid-restore, and the interrupt mask is destroyed.</p>
+    <p class="small">Plain RTL simulation cannot represent this; power-aware simulation can, but needs stimulus that hits the race. <strong>An assertion needs neither</strong> &mdash; it watches the controller's <em>outputs</em>, so it runs unchanged at RTL and is an excellent formal target.</p>
+    <div class="ex warn">
+      <span class="tag">Power-aware simulation has its own optimism</span>
+      Results reflect the implemented hardware only so far as <strong>the declared simstate is correct</strong>. Some mismatches are conservative; others are optimistic, producing errors in the implemented design that the simulation showed working.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Retention is a default to be argued <em>against</em> as well as for. Retain the crypto key registers and the engine works <em>better</em> &mdash; and the entire security value of powering the domain down is gone.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">33</span>
+</section>
+
+<!-- src: ch19:312-316 (the arithmetic: 180 tests / 900 runs / 11 min / 165 CPU-h / 24 licences;
+     40x -> 7.3 h and 1,320 CPU-h and 55 h wall; 10x -> 330 CPU-h and 13.8 h; break-even ~7x;
+     fourteen tests = 102 CPU-h but ONE WAVE, wall clock 7.3 h, ten slots free);
+     ch19:322-328 (three axes table); ch19:334-342 (which fourteen; what does not belong);
+     ch19:286 (sensor hub post-layout always-on route scenario) -->
+<!-- ============ 34. THE BUDGET ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 19 &middot; What to run, and when</p>
+  <h2>Cost and calendar are different numbers &mdash; and the difference is the whole decision</h2>
+  <table class="cols"><tr><td style="width:47%">
+    <p class="small">Month nine: <strong>180 tests, 900 runs, 11-minute mean, 165 CPU-hours on 24 licences</strong>, inside a ten-hour night. The same 180 at gate level, at <strong>40&times;</strong>: 7.3&nbsp;h per run, <strong>1,320 CPU-hours, 55 hours of wall clock</strong>. At <strong>10&times;</strong>: 330 CPU-hours, <strong>13.8 hours</strong>, still outside the night. Break-even is around <strong>7&times;</strong> &mdash; dead across the plausible range.</p>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">The same ratio, fourteen tests &mdash; read this twice</span>
+      At 40&times;, a gate-level tier of fourteen tests costs <strong>102 CPU-hours</strong>. But <strong>fourteen runs into twenty-four licences is one wave</strong>, so the wall clock is a single run's <strong>7.3 hours</strong> and ten slots stay free. <em>Cost is not calendar</em>: divide CPU-hours by licences and you get a number that describes nothing.
+    </div>
+  </td></tr></table>
+  <table class="compact" style="margin-top:9px">
+    <tr><th style="width:26%">Three independent choices, not one dial</th><th style="width:44%">The question it answers</th><th>Where it belongs</th></tr>
+    <tr><td>RTL + power intent</td><td>Does the power sequence work? Every crossing protected?</td><td>Nightly, from the day the intent exists</td></tr>
+    <tr><td>Zero-delay netlist</td><td>Does it leave reset with no unknowns? Test structures inert in functional mode?</td><td>Weekend, from first netlist</td></tr>
+    <tr><td>Zero-delay + power intent</td><td>Does the <em>implemented</em> protection logic match the intent?</td><td>Weekend, once cells are inserted</td></tr>
+    <tr><td>SDF-annotated, named corner</td><td>Do the timing constraints describe the design that was built?</td><td>Campaign, per corner</td></tr>
+    <tr><td>Post-layout + power intent</td><td>Are the always-on routes really always-on?</td><td>Campaign, per netlist drop</td></tr>
+  </table>
+  <p class="note"><b>Say</b><strong>The first row is the one teams get wrong most expensively:</strong> power-aware verification is an RTL activity that <em>also</em> runs at gate level. What never belongs, whatever the budget, is the constrained-random regression &mdash; randomness pays in volume, and volume is what the slowdown removes.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">34</span>
+</section>
+
+<!-- ============ 35. DIVIDER 20 ============ -->
+<section class="slide divider">
+  <p class="chno">20</p>
+  <h1>Post-Silicon Validation</h1>
+  <p class="sub">Chapter 3's budget, exactly inverted. Pre-silicon you can see everything and run almost nothing; post-silicon you can run everything and see almost nothing.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">35</span>
+</section>
+
+<!-- src: ch20:5-7 (two bring-ups; the reference SoC's six weeks; the flagship's forty-minute hang;
+     40 min = order 10^12 cycles = 2,400 s across the 0.6-1.5 GHz DVFS band; buffer holds ~4,000);
+     ch20:9 (the decision taken fourteen months earlier) -->
+<!-- ============ 36. TWO BRING-UPS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; The opening</p>
+  <h2>Two silicon bring-ups, eleven months apart</h2>
+  <table class="cols"><tr><td style="width:47%">
+    <h3>Reference SoC &mdash; a part on a bench</h3>
+    <p class="small">One part, a JTAG probe, a scope on the 32&nbsp;kHz crystal, a serial terminal. Thursday: powers on, releases reset, boots from ROM, blinks a GPIO. The following Friday: the DMA has moved a 2D tile and the UART echoes at 115,200 baud. <strong>Two engineers, six weeks.</strong> When something misbehaves they halt the core, read <code>STATUS</code> through the debug module &mdash; and, with 512&nbsp;KB of SRAM and a handful of peripherals, usually guess right on the second try.</p>
+  </td><td>
+    <h3>Flagship &mdash; the failure that costs three weeks</h3>
+    <p class="small">Under one mixture of decode and live network traffic, <strong>roughly once every forty minutes, the system stops.</strong> No exception, no error interrupt, no kernel log. The host cluster is idle, two NoC queues are full, the DMA reports no error on any channel, and every configuration register reads back exactly what firmware wrote.</p>
+  </td></tr></table>
+  <div class="ex warn">
+    <span class="tag">The arithmetic that frames the whole chapter</span>
+    Forty minutes at target speed is <strong>of order 10<sup>12</sup> cycles</strong> &mdash; 2,400 seconds at any point on the flagship's <strong>0.6&ndash;1.5&nbsp;GHz</strong> DVFS band, so every operating point lands on the same order. The on-chip trace buffer holds about <strong>four thousand</strong> of them.
+  </div>
+  <p class="lead" style="margin-top:4px">What eventually closed it was not a debug technique. It was a decision taken <strong>fourteen months earlier</strong>, in a meeting nobody remembers, about which buses would get monitors, how deep the trace buffer would be, and whether those monitors would still be reachable when the compute island was power-gated.</p>
+  <p class="note"><b>Say</b>The uncomfortable centre of this chapter: the observability you have in the lab is the observability you designed in, months before you knew what would break.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">36</span>
+</section>
+
+<!-- src: ch20:21 (validation defined: real hardware, not an umbrella term); ch20:25-33 (the inversion
+     table; what only silicon sees; 2017 compatibility >12 OS flavours / >100 peripherals /
+     >500 applications cit P21); ch20:39-45 (three currencies; stepping; ~50 ppm gate cit P21) -->
+<!-- ============ 37. THE INVERSION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; What changes when the design becomes a part</p>
+  <h2>Validation begins when the thing under test is a physical object</h2>
+  <table class="compact">
+    <tr><th style="width:22%"></th><th style="width:39%">Pre-silicon (RTL simulation)</th><th>Post-silicon (a part)</th></tr>
+    <tr><td><strong>Cycles available</strong></td><td>~nothing. A boot that takes seconds on silicon takes years on an RTL simulator</td><td><strong>everything.</strong> Real workloads, real software stacks, indefinitely</td></tr>
+    <tr><td><strong>Internal state visible</strong></td><td><strong>all of it</strong>, any signal, any cycle</td><td>a few hundred signals, for a few thousand cycles, <em>chosen in advance</em></td></tr>
+    <tr><td><strong>Stimulus reachable</strong></td><td>anything the interface can express</td><td>whatever the running system and its configuration hooks can produce</td></tr>
+    <tr><td><strong>What a fix costs</strong></td><td>recompile</td><td>a new silicon <strong>stepping</strong></td></tr>
+    <tr><td><strong>What only this platform sees</strong></td><td>nothing physical</td><td>power, temperature, electrical margin, real signal integrity, real peripherals</td></tr>
+  </table>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">Read the first two rows together</span>
+      Their product is the whole subject. <strong>Pre-silicon you can see everything and run almost nothing; post-silicon you can run everything and see almost nothing.</strong> Every technique in this chapter buys back a little of the second row using the surplus in the first.
+    </div>
+  </td><td>
+    <p class="small"><strong>Three currencies, and the third reorganises the work.</strong> <em>Observability</em>: silicon exposes what DfD routes to a pin or a buffer, and nothing else. <em>Controllability</em>: exactly the number of configuration options the architecture defined &mdash; where a testbench has a <code>force</code>, the lab has a defeature bit, if someone put one in. <em>Fix latency</em>: a hardware fix needs a stepping, so debug runs <strong>in parallel, on a shared part, with a growing stack of workarounds underneath it</strong> &mdash; and each workaround must eliminate its bug's effect without masking the bugs still waiting to be found.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The outside world arrives for the first time: 2017 compatibility work on a large SoC routinely spanned more than a dozen OS flavours, over a hundred peripherals and more than five hundred applications. That space was never simulable.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">37</span>
+</section>
+
+<!-- src: ch20:47 (the goal is not root cause, cit P21); ch20:49 (video codec bisection scenario);
+     ch20:45 (calendar fixed years in advance; ~50 ppm production gate) -->
+<!-- ============ 38. THE DELIVERABLE IS A REPRODUCER ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 20 &middot; The reordering claim</p>
+  <h2>The goal of post-silicon debug is <em>not</em> to root-cause the bug</h2>
+  <p class="lead">The goal is to narrow an observed failure down to an error scenario that can be investigated <strong>in a pre-silicon environment</strong>: a stimulus short enough to simulate, on a scope small enough to load, with the failure still present. Root-causing then happens where you can see.</p>
+  <p><strong>Judge every technique in this chapter by how far it moves a failure toward that hand-off</strong> &mdash; not by how much it explains.</p>
+  <div class="ex">
+    <span class="tag">Scenario &middot; the lab does not try to explain the corruption. It reduces.</span>
+    The video codec passes every pre-silicon check, and a customer's live stream produces one corrupted macroblock roughly every two hours of playback. <strong>Approach:</strong> capture the stream to memory; replay from DRAM instead of from the network; bisect to a 40-frame segment that still fails; then to a single frame; then hand the frame plus the decoder's register configuration to the pre-silicon team, who reproduce it in RTL simulation. <strong>Why:</strong> the oracle already exists and is golden &mdash; the bit-exact reference model runs on the captured stream on a workstation, so the lab can decide <em>corrupt or not</em> with no internal visibility at all. What the lab supplies is not a diagnosis but a <strong>reproducer</strong>, and each bisection step is worth more than any amount of staring at the trace buffer.
+  </div>
+  <p class="note"><b>Say</b>And the calendar is fixed years in advance by market forecasts. Every technique here is judged first on how much calendar it saves.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">38</span>
+</section>
+
+<!-- src: ch20:53 (the DfD deadline; no incremental path, cit P21); ch20:55 (signals x cycles <= buffer;
+     64 KB = 524,288 bits -> 128x4,096 / 256x2,048 / 512x1,024; representative 128x2,048 cit P21;
+     ~1,000 cycles cit P9); ch20:57 (why a buffer at all); ch20:61-75 (instrument table; scan;
+     on-chip checkers cit P21; irritators cit P21/B2); ch20:79 (signal selection -- judgment only) -->
+<!-- ============ 39. THE RECTANGLE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; Design for debug</p>
+  <h2>One governing inequality: <em>signals &times; cycles &le; buffer</em></h2>
+  <p class="small">DfD is specified, sized, routed and taped out with everything else, <strong>months before the first failure exists</strong> &mdash; and adding it later requires a silicon spin. <em>There is no incremental path</em>: a prototype at least lets you re-select signals and rebuild at the cost of hours. The flagship's <strong>64&nbsp;KB</strong> buffer is 524,288 bits, so the choice is not <em>how much</em> to observe but <strong>width against depth on a fixed rectangle</strong>:</p>
+  <table class="cols3"><tr>
+    <td><div class="bar"><span class="bl">128 signals</span> &times; 4,096 cycles</div></td>
+    <td><div class="bar s2"><span class="bl">256 signals</span> &times; 2,048 cycles</div></td>
+    <td><div class="bar s2"><span class="bl">512 signals</span> &times; 1,024 cycles</div></td>
+  </tr></table>
+  <table class="compact">
+    <tr><th style="width:22%">Instrument</th><th style="width:34%">What it yields</th><th>What it costs</th></tr>
+    <tr><td>Scan chains, reused for debug</td><td>full internal state at one <em>stopped moment</em></td><td>already paid for by manufacturing test; needs a debug-usable stop</td></tr>
+    <tr><td>Signal trace into an on-chip buffer</td><td>a few hundred signals over a few thousand cycles, continuous</td><td>buffer area and power; routing congestion to the buffer</td></tr>
+    <tr><td>Processor trace</td><td>a core's instruction flow, compressed</td><td>modest per core; transport bandwidth</td></tr>
+    <tr><td>Bus and protocol monitors with triggers</td><td>transaction-level history at a chosen interface, on a condition</td><td>monitor logic plus a share of the same buffer</td></tr>
+    <tr><td>Hardware checkers in silicon</td><td>a stop <em>close to the bug's origin</em></td><td>area, power, timing pressure &mdash; the reason there are few</td></tr>
+    <tr><td>Irritators, non-functional modes</td><td><em>controllability</em>: forced corner conditions without the stimulus</td><td>area and power, plus a mode nobody may ever exercise</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Trace gives a short film of a few signals; scan a still photograph of nearly every flop &mdash; a lab that planned only one will find itself asking for the other. And why a buffer at all? The debug port runs at megahertz while the design runs far faster, so continuous export is arithmetically impossible.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">39</span>
+</section>
+
+<!-- src: ch20:87 (power management conflict cit P21 + sensor-hub scenario); ch20:89 (security:
+     DfD as a back door, authenticated unlock through the root of trust); ch20:93 (post-silicon
+     readiness is a pre-silicon workstream cit P21); ch20:79-82 (signal selection: the restoration
+     ratio, the "no known industrial report" finding, and the designer-experience question, in the note) -->
+<!-- ============ 40. THE TWO CONFLICTS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; Design for debug</p>
+  <h2>Two conflicts DfD must survive &mdash; both settled a year before the lab exists</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <h3>Power management</h3>
+    <p class="small">Debug data has to <em>travel</em>, and its route runs through logic power management may switch off. A block can be perfectly instrumented and still invisible because the path carrying its signals crosses an IP that is powered down at the moment of interest &mdash; <strong>an IP with no functional relationship to the one under debug.</strong> The reflexive fix, disabling power management during debug, destroys the ability to debug the power sequences themselves. The architectural fix is the flagship's: <strong>one debug access port per power domain</strong>.</p>
+    <div class="ex">
+      <span class="tag">Scenario &middot; the sensor hub's daily missed wake</span>
+      The DfD route from the always-on island to the trace buffer passes through the DSP island &mdash; power-gated precisely while the bug is armed. What makes the debug possible: a debug access port <em>inside</em> the always-on domain, plus a small always-on capture of the four signals that matter, sampled at 32&nbsp;kHz. <strong>Observability of a domain must be powered by that domain.</strong> A trace path that depends on a neighbour's power state is observability you own only when you do not need it.
+    </div>
+  </td><td>
+    <h3>Security</h3>
+    <p class="small">DfD is, by construction, <strong>a back door into the part's internal state</strong> &mdash; and much of it stays present on-field so deployed systems can be diagnosed. That makes it an obvious path to the assets it sits beside: keys, firmware, debug modes. Published system compromises have used post-silicon observability features to get in. The answer is authenticated debug unlock through the root of trust, with the fabric's reach reduced once the part leaves the lab; the knee-jerk alternative, cutting DfD, buys security by making lab validation of the part impossible.</p>
+    <div class="ex warn">
+      <span class="tag">Both are resolved by people who will not be in the lab</span>
+      <strong>Post-silicon readiness</strong> &mdash; DfD architecture, debug software, debug boards, post-silicon test plans &mdash; is a <em>pre-silicon workstream</em> that starts at product-functionality planning and runs the whole length of the design cycle. Treat it like the verification plan: it has owners, rows and review gates, or it does not exist.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>On <em>which</em> signals to trace: <strong>there is no known industrial report of the state-restoration ratio ever being used to select them.</strong> Selection rests on experience &mdash; for each block, ask what failure you would most fear and what you would need to see to separate its two likeliest causes.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">40</span>
+</section>
+
+<!-- src: ch20:99 (power-on debug; defeaturing; days to a week, several weeks to refeature, cit P21);
+     ch20:101-103 (the ordering principle; why the canonical order is what it is);
+     ch20:107-120 (bring-up plan excerpt B01-B10 -- five of ten rows shown; the "A pass rules out"
+     and "Exit criterion" columns folded into the note); ch20:122 (the contrast with the previous generation) -->
+<!-- ============ 41. BRING-UP ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; Bring-up</p>
+  <h2>In the testbench you can add a probe. Here you cannot &mdash; so the <em>order</em> becomes the argument.</h2>
+  <p class="small"><strong>Each check must be decidable using only what the checks before it established.</strong> A step whose verdict depends on machinery not yet proven is a coin flip with two failure modes and no way to tell them apart.</p>
+  <table class="compact">
+    <tr><th style="width:6%">#</th><th style="width:52%">Check</th><th>Oracle available <em>here</em> &mdash; the column that makes it a bring-up plan</th></tr>
+    <tr><td>B05</td><td>One host core runs a three-instruction loop from boot ROM, writing a heartbeat register</td><td>the heartbeat toggles</td></tr>
+    <tr><td>B06</td><td>L2: write-read-verify a walking pattern across four slices</td><td>data comparison</td></tr>
+    <tr><td>B08</td><td>First timer interrupt taken and acknowledged on one core</td><td>a handler-incremented counter</td></tr>
+    <tr><td>B09</td><td>DMA channel 0: 1D copy, L2 to L2, one NoC hop</td><td>data comparison and completion interrupt</td></tr>
+    <tr><td>B10</td><td>OS boots to a shell on one core, then on four</td><td>console output</td></tr>
+  </table>
+  <div class="ex">
+    <span class="tag">Why this order</span>
+    <strong>B05</strong> is the first row whose oracle lives <em>inside</em> the part, and deliberately the smallest available: a heartbeat that stops says the core stopped; a failing OS boot says almost nothing. <strong>B08 follows B06</strong> because a handler needs a stack and a stack needs memory. <strong>B09 depends on both at once</strong>, which is why it is late. <strong>B10 is one row, not ten</strong>: when the shell fails after every row above it passes, the search space is software.
+  </div>
+  <p class="note"><b>Say</b>Every row also carries an exit criterion &mdash; twenty consecutive reads, twenty consecutive boots &mdash; because a step closed by "it seems to be running" is closed by fatigue. Earlier rows check the rails on bench instruments alone, and before all of it comes power-on debug, with no DfD at all.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">41</span>
+</section>
+
+<!-- src: ch20:134 (localisation dominates; days/weeks/months cit P9); ch20:136-138 (error detection
+     latency; order 10^12 vs 4,096 = one part in 250 million; the trigger captures the symptom);
+     ch20:144-153 (the four named stages); ch20:157-161 (non-determinism; the weakened standard;
+     cycle-reproducible mode cit P21); ch20:163 (radar thermal-chamber scenario) -->
+<!-- ============ 42. LOCALISATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; Triage and localisation</p>
+  <h2>Detection is often free. Localisation is what costs the calendar.</h2>
+  <table class="cols"><tr><td style="width:46%">
+    <p class="small">The governing quantity is <strong>error detection latency</strong>: the time between a test activating a bug and that error becoming an observable failure. For difficult bugs it runs to <em>millions or even billions</em> of cycles.</p>
+    <div class="ex warn">
+      <span class="tag">Now put that next to the rectangle</span>
+      The run is of order <strong>10<sup>12</sup></strong> cycles; the buffer at 128 signals wide holds <strong>4,096</strong>. The trace covers roughly <strong>one part in 250 million</strong> of the execution &mdash; a figure deliberately conservative against the clock band. And placement is not free: even a perfect trigger capturing the last 4,096 cycles before the hang captures the <em>symptom</em>, while the activation sat millions of cycles earlier, outside the window <em>by construction</em>.<br><br>
+      <em>A checker tells you the answer is wrong. The trace buffer shows you four thousand cycles of a forty-minute film, and the interesting scene is not in them.</em>
+    </div>
+  </td><td>
+    <table class="compact">
+      <tr><th style="width:32%">Stage</th><th>What happens &rarr; exit</th></tr>
+      <tr><td><strong>Test execution</strong></td><td>run it; on failure, the obvious sanity checks &rarr; resolved, or a <em>pre-sighting</em></td></tr>
+      <tr><td><strong>Pre-sighting analysis</strong></td><td>make it repeatable under varied conditions &rarr; a <em>sighting</em></td></tr>
+      <tr><td><strong>Sighting disposition</strong></td><td>assign a team; agree a plan &rarr; an owned plan</td></tr>
+      <tr><td><strong>Bug resolution</strong></td><td>work around, group, localise, root-cause, prove the fix &rarr; a <em>bug</em>, resolved</td></tr>
+    </table>
+    <p class="small">The first classification question is one no pre-silicon triage rota ever asks: <strong>is this a silicon issue at all, or a logic error?</strong> <em>A failure that follows the part is manufacturing or marginality; one that follows the design is yours.</em></p>
+    <div class="ex">
+      <span class="tag">The weakened standard, and why it is a good trade</span>
+      Because silicon is fast, an error appearing reliably <strong>once in a few executions still counts as reproducible</strong>. A one-in-five rate is a flake in a nightly regression; in the lab it is a working recipe, because five runs cost minutes.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>"Cannot reproduce" almost never means non-deterministic &mdash; it usually means the recipe has a parameter nobody has varied. The radar's spurious detections appeared only above ~85&nbsp;&deg;C <em>and</em> only on parts calibrated in the lower third of the distribution: two conditions no bench at room temperature produces together.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">42</span>
+</section>
+
+<!-- src: ch20:167-169 (bisection in time; 28 halvings ~ 19 hours; two-dimensional; a trigger collapses
+     it); ch20:173-175 (configuration bisection + GPU scenario); ch20:179-183 (QED cit P21; 92 bug
+     scenarios in under 7 h, 6 orders of magnitude, 3-instruction trace in 2.5 h cit P9; ~20 flip-flops
+     of a million cit D24); ch20:189-195 (emulation hand-off; formal scoping, 25,000-gate scope in
+     3 person-days, 5 further manifestations, 5 person-days to prove the fix, 8 more bugs later cit D3) -->
+<!-- ============ 43. FOUR MOVES ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 20 &middot; Four moves</p>
+  <h2>Four ways to attack a window that is 250 million times too small</h2>
+  <table class="chain">
+    <tr>
+      <td style="width:23%"><div class="cbox">1 &middot; Bisect the configuration<span class="q">one run per question</span></div></td>
+      <td style="width:3%" class="arrowr">&rarr;</td>
+      <td style="width:23%"><div class="cbox">2 &middot; Bisect in time<span class="q">many forward runs, stitched</span></div></td>
+      <td style="width:3%" class="arrowr">&rarr;</td>
+      <td style="width:23%"><div class="cbox">3 &middot; Shorten the latency<span class="q">software-only transformation</span></div></td>
+      <td style="width:3%" class="arrowr">&rarr;</td>
+      <td style="width:22%"><div class="cbox out">4 &middot; Move to a platform that can see<span class="q">the hand-off</span></div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <p class="small"><strong>1. Configuration bisection is cheap, coarse and criminally under-used.</strong> If the failure needs four cores, does it need three? One run per question &mdash; and it decides where the expensive instruments point. The GPU: clusters {0,1} fail; {0,2}, {1,3}, {2,3} do not; {0,1} with the DMA idle does not. <strong>Five runs</strong> reduce "somewhere in the GPU" to "two clusters sharing a port into unified memory, plus DMA traffic".</p>
+    <div class="ex warn">
+      <span class="tag">2. Cost the time bisection honestly</span>
+      Narrowing an order-10<sup>12</sup> run to one 4,096-cycle window takes <strong>log<sub>2</sub>(10<sup>12</sup>/4,096) &asymp; 28 halvings</strong> &mdash; at forty minutes a run, <strong>about nineteen hours</strong> of pure execution, and over two days if it reproduces one run in three. And the search is <em>two-dimensional</em>. <strong>A buffer twice as deep removes one halving out of twenty-eight.</strong> What collapses the cost is a <em>trigger</em>.
+    </div>
+  </td><td>
+    <p class="small"><strong>3. Attack the latency, not the search.</strong> Quick error detection shortens the interval between activation and observable failure &mdash; a read after each write catches a wrong value at once &mdash; and the transformations are <em>software-only</em>. Bounded model checking on top turns detection into localisation: on the <strong>OpenSPARC T2</strong>, a 500-million-transistor open-source multicore SoC, difficult logic bugs were localised automatically in <strong>under seven hours</strong>, with activating counter-examples <strong>up to six orders of magnitude</strong> shorter.</p>
+    <div class="ex good">
+      <span class="tag">4. The formal hand-off, and why it is underrated</span>
+      Do not take the failing sub-system as the proof scope. Pick the <em>smallest block boundary at which you can still observe the property</em>; over-constrain everything that did not participate; leave the signals of interest under-constrained; load state from a waveform after initialisation. Reported at <strong>Intel</strong>: a post-silicon bridge failure reproduced and root-caused in a formal environment built from scratch in <strong>three person-days on a 25K-gate DUT</strong>, the fix validated in <strong>five person-days</strong> more, and the same environment reused on two later SoCs for <strong>eight further functional bugs</strong>.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The plan row a silicon escape indicts is, by revealed preference, the row that deserves formal sign-off in the next generation.</p>
+  <p class="src">3: Lin, Singh, Barrett, Mitra, Stanford/NYU, ITC&nbsp;2015 &mdash; [P9, pp.&nbsp;1&ndash;2]; no originating company is named for the T2. 4: Jain et al., Intel, DVCon &mdash; [D3, p.&nbsp;7]; no product named.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">43</span>
+</section>
+
+<!-- src: ch20:199-211 (every post-silicon bug is an escape; the three links table; the fourth break --
+     a wrong assumption); ch20:213-221 (the codec escape record, five questions);
+     ch20:225-231 (the escape bar cit P21; coverage one platform down; ~1 percent of all bugs 2017;
+     "we already found that one" must be earned) -->
+<!-- ============ 44. ESCAPES ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 20 &middot; Escape analysis</p>
+  <h2>The lab's bug list is an unfiltered report card, written by reality, arriving too late to argue with</h2>
+  <table class="compact">
+    <tr><th style="width:15%">Link that broke</th><th style="width:36%">What it means</th><th>The upstream change it owes</th></tr>
+    <tr><td><strong>Activation</strong></td><td>the stimulus never created the condition</td><td>a new plan row, and a cross that would have demanded it</td></tr>
+    <tr><td><strong>Propagation</strong></td><td>it happened but reached no observable &mdash; the platform did not model the mechanism</td><td>a platform change: a level, an engine, or an earlier scheduling</td></tr>
+    <tr><td><strong>Checking</strong></td><td>it happened, it was visible, nothing looked</td><td>a new checker, plus a test that proves the checker fires</td></tr>
+    <tr><td><strong>Assumption</strong></td><td>an <code>assume</code> that does not hold deletes traces <em>silently</em>; nothing reports it</td><td>not a checker or a bin &mdash; a written assumption promoted to a checked obligation</td></tr>
+  </table>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:36%">
+    <p class="small"><strong>Which question bites changes.</strong> Pre-silicon escapes are usually stimulus escapes. Post-silicon escapes concentrate in <em>"why did the metrics say we were done?"</em> &mdash; the dashboards were green. <strong>An escape analysis that cannot explain a green dashboard has not finished.</strong></p>
+  </td><td>
+    <div class="ex">
+      <span class="tag">The codec escape record</span>
+      <strong>Why no stimulus?</strong> The corpus has streams with unusual slice geometry and streams with frequent reference-list updates &mdash; <em>none with both</em>: it is organised by feature.<br>
+      <strong>Why were the metrics green?</strong> A coverpoint for slice geometry, one for reference-list update, both at 100%. <strong>No cross.</strong><br>
+      <strong>What changes:</strong> the cross; two synthesised streams; a plan-row family for stream-syntax <em>combinations</em>; and a stream <em>generator</em> wherever the oracle is free. <em>The first two fix the bug; the last two pay.</em>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The best-documented public programme sets the bar high enough to sting: on <strong>IBM POWER8</strong>, <strong>a bug first found by an OS-based test or by real software counted as an escape from the validation strategy</strong> &mdash; not a success. <strong>"We already found that one" is a claim the next generation must earn.</strong></p>
+  <p class="src">Mishra, Ray, Morad, Ziv, <em>Post-Silicon Validation in the SoC Era</em>, IEEE Design &amp; Test, 2017 &mdash; [P21, p.&nbsp;20]. Self-reported: two authors are IBM.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">44</span>
+</section>
+
+<!-- src: ch20:235-241 (the order of operations; the workaround constraint; patchability is a
+     pre-silicon property cit P21); ch20:249-255 (the disposition triad); ch20:257 (severity inputs;
+     6 days vs ~10 cit P21); ch20:259 (proving the fix belongs pre-silicon cit P21/D3);
+     ch20:261 (AES-GCM scenario); ch20:263 (what verification owes the room) -->
+<!-- ============ 45. DISPOSITION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 20 &middot; Disposition</p>
+  <h2>Pre-silicon: find &rarr; root-cause &rarr; fix &rarr; verify. Post-silicon, the workaround comes first.</h2>
+  <table class="chain">
+    <tr>
+      <td style="width:20%"><div class="cbox no">1 &middot; Work around it<span class="q">before it is understood</span></div></td>
+      <td style="width:2%" class="arrowr">&rarr;</td>
+      <td style="width:14%"><div class="cbox">2 &middot; Localise</div></td>
+      <td style="width:2%" class="arrowr">&rarr;</td>
+      <td style="width:15%"><div class="cbox">3 &middot; Root-cause</div></td>
+      <td style="width:2%" class="arrowr">&rarr;</td>
+      <td style="width:15%"><div class="cbox">4 &middot; Propose a fix</div></td>
+      <td style="width:2%" class="arrowr">&rarr;</td>
+      <td style="width:14%"><div class="cbox">5 &middot; Prove it <em>pre-silicon</em></div></td>
+      <td style="width:2%" class="arrowr">&rarr;</td>
+      <td style="width:12%"><div class="cbox out">6 &middot; Dispose</div></td>
+    </tr>
+  </table>
+  <table class="compact">
+    <tr><th style="width:20%">Option</th><th style="width:40%">When it wins</th><th>What it obliges</th></tr>
+    <tr><td><strong>New stepping</strong></td><td>no workaround exists or its cost is unacceptable; safety- or security-relevant; blocks a committed use case</td><td>the fix proven pre-silicon <em>before</em> the masks change</td></tr>
+    <tr><td><strong>Firmware workaround</strong></td><td>a configuration or code path can avoid the condition reliably</td><td>proof it covers <em>every</em> path to it, and a named owner</td></tr>
+    <tr><td><strong>Errata</strong></td><td>outside committed use cases, or the customer can avoid it</td><td>a named workaround, an owner, a decision with a real expiry</td></tr>
+  </table>
+  <table class="cols" style="margin-top:2px"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">The twin of the DfD section</span>
+      The workaround must eliminate the bug's effect <strong>without masking the bugs still waiting to be found</strong>. And patchability depends on configurability built in beforehand: <strong>DfD buys sight; design for configurability buys a way out.</strong>
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">What verification owes the room</span>
+      <strong>What the bug does. What conditions are necessary and sufficient to hit it. What the workaround does and does not cover.</strong> A team that supplies a severity label and a shrug has outsourced the one judgement it was qualified to make.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b><strong>Severity is not a property of the symptom</strong>: a hang may be one register bit from a free firmware workaround; a one-bit corruption may have none. The AES-GCM key-slot bug went to a stepping because a workaround depending on every future software author is not a workaround for a security property.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">45</span>
+</section>
+
+<!-- src: through-line across ch17-ch20; forward pointers ch17:71, ch18:43 (AMS, Chapter 21),
+     ch20:89 (unlock path, Chapter 23), ch19:45 (the shrinking residue) -->
+<!-- ============ 46. CLOSING ============ -->
+<section class="slide dense">
+  <p class="kicker">Part V &middot; Closing</p>
+  <h2>The through-line: every platform past RTL simulation trades sight for reach</h2>
+  <p class="small">Chapter 17 buys cycles and charges visibility, turnaround and debug ergonomics. Chapter 18 buys reality and charges nearly all the visibility left. Chapter 19 buys the netlist's truth and charges runtime. Chapter 20 buys everything and charges almost all of it.</p>
+  <table class="cols"><tr><td style="width:44%">
+    <table class="compact" style="table-layout:fixed">
+      <tr><td style="width:13%"><span class="pill">17</span></td><td>Acceleration and emulation &mdash; the boundary and what earns a slot</td></tr>
+      <tr><td><span class="pill">18</span></td><td>FPGA prototyping and co-verification &mdash; and who owns the bugs</td></tr>
+      <tr><td><span class="pill">19</span></td><td>Gate-level, timing, power-aware &mdash; exhibit, do not sign off</td></tr>
+      <tr><td><span class="pill">20</span></td><td>Post-silicon validation &mdash; the observability you designed in</td></tr>
+    </table>
+    <div class="ex warn">
+      <span class="tag">What Part V deliberately left open</span>
+      The analog and mixed-signal boundary neither a prototype nor an RTL model can host (Ch&nbsp;21). The debug-unlock path as an attack surface (Ch&nbsp;23). Manufacturing test itself. And the capital decision: what a machine is <em>for</em>, not whether to buy it.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Seven sentences worth leaving with</span>
+      <ul class="small">
+        <li>Is my problem the number of runs, or the length of one run?</li>
+        <li>Anything the environment needs every cycle becomes hardware.</li>
+        <li>A prototype is pre-silicon in time and validation in kind &mdash; what you see is decided before the run.</li>
+        <li>Exhibiting a failure and signing off its absence are different jobs.</li>
+        <li>A run whose corner nobody selected is not evidence about any corner.</li>
+        <li>Cost is not calendar: fourteen runs into twenty-four licences is <em>one wave</em>.</li>
+        <li>The observability you have in the lab is the one you designed in, before you knew what would break.</li>
+      </ul>
+    </div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">46</span>
+</section>
+

@@ -1,0 +1,778 @@
+/* ------------------------------------------------------------------
+   Hardware Verification: A Holistic Guide — book stylesheet
+   Targets WeasyPrint 52.5 (print) and a modern browser (screen).
+   Verified-unsupported in WeasyPrint 52.5, therefore not used:
+   inline <svg> layout, leader(), vh units, reliable named @page.
+   ------------------------------------------------------------------ */
+
+/* Palette (literals below: WeasyPrint 52.5 ignores var() in
+ * background and border-color, so custom properties are not used).
+ *   accent       #2c4f8c
+ *   accent-dark  #1e3663
+ *   accent-tint  #eef3fa
+ *   ink          #1b1f24
+ *   muted        #5b6672
+ *   rule         #d7dde5
+ *   rule-soft    #e6eaf0
+ *   code-bg      #f6f7f9
+ *   code-border  #e1e6ec
+ *   serif        "DejaVu Serif", "Nimbus Roman", "FreeSerif", serif
+ *   sans         "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif
+ *   mono         "DejaVu Sans Mono", "Liberation Mono", monospace
+ */
+
+/* ---------- page geometry ---------- */
+
+@page {
+  size: A4;
+  margin: 22mm 23mm 20mm 23mm;
+
+  @top-center {
+    content: string(runhead);
+    font-family: "Liberation Sans", "DejaVu Sans", sans-serif;
+    font-size: 8pt;
+    letter-spacing: 0.05em;
+    color: #5b6672;
+    margin-bottom: 5mm;
+  }
+  @bottom-center {
+    content: counter(page);
+    font-family: "Liberation Sans", "DejaVu Sans", sans-serif;
+    font-size: 9pt;
+    color: #5b6672;
+    margin-top: 5mm;
+  }
+}
+
+@page :first {
+  margin: 0;
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+}
+
+@page :blank {
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+}
+
+/* ---------- base ---------- */
+
+html { font-size: 10.7pt; }
+
+body {
+  font-family: "DejaVu Serif", "Nimbus Roman", "FreeSerif", serif;
+  font-size: 1rem;
+  line-height: 1.46;
+  color: #1b1f24;
+  margin: 0;
+  padding: 0;
+  text-align: justify;
+  hyphens: auto;
+  orphans: 2;
+  widows: 2;
+}
+
+.book { max-width: 190mm; margin: 0 auto; }
+
+p { margin: 0 0 0.62em 0; }
+p + p { text-indent: 0; }
+
+a { color: #2c4f8c; text-decoration: none; }
+
+em { font-style: italic; }
+strong { font-weight: bold; }
+
+hr {
+  border: 0;
+  border-top: 0.6pt solid #d7dde5;
+  margin: 1.4em 0;
+}
+
+/* ---------- title page ---------- */
+
+.title-page {
+  page-break-after: always;
+  break-after: page;
+  text-align: left;
+  hyphens: none;
+}
+
+.title-page .band {
+  height: 13mm;
+  background: #2c4f8c;
+}
+
+.title-page .tp-body { padding: 46mm 26mm 0 26mm; }
+
+.tp-title {
+  font-family: "DejaVu Serif", "Nimbus Roman", "FreeSerif", serif;
+  font-size: 33pt;
+  line-height: 1.1;
+  font-weight: bold;
+  color: #1b1f24;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.tp-title-sub {
+  font-family: "DejaVu Serif", "Nimbus Roman", "FreeSerif", serif;
+  font-size: 20pt;
+  font-style: italic;
+  color: #2c4f8c;
+  margin: 0.35em 0 0 0;
+}
+
+.tp-rule {
+  width: 52mm;
+  height: 2.4pt;
+  background: #2c4f8c;
+  margin: 9mm 0 7mm 0;
+}
+
+.tp-subtitle {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 12pt;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #5b6672;
+  margin: 0;
+}
+
+.tp-meta { margin-top: 62mm; }
+
+.tp-author {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 13pt;
+  color: #1b1f24;
+  margin: 0 0 1.5mm 0;
+}
+
+.tp-date {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 10pt;
+  color: #5b6672;
+  margin: 0;
+}
+
+.tp-note {
+  margin-top: 14mm;
+  padding: 3.5mm 5mm;
+  border-left: 2.4pt solid #2c4f8c;
+  background: #eef3fa;
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 9.5pt;
+  color: #1e3663;
+}
+
+/* ---------- table of contents ---------- */
+
+.toc {
+  page-break-before: always;
+  break-before: page;
+  hyphens: none;
+  text-align: left;
+}
+
+.toc h2 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 19pt;
+  color: #2c4f8c;
+  border: 0;
+  margin: 0 0 8mm 0;
+  padding: 0;
+}
+
+.toc ul { list-style: none; margin: 0; padding: 0; }
+
+.toc li { margin: 0; padding: 0; }
+
+/* display:flex here silently breaks target-counter in WeasyPrint 52.5
+   (every page number renders as 0) -- the float keeps it working. */
+.toc a {
+  display: block;
+  text-decoration: none;
+  color: #1b1f24;
+}
+
+.toc a::after {
+  content: target-counter(attr(href), page);
+  float: right;
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.86em;
+  color: #5b6672;
+  padding-left: 3mm;
+}
+
+.toc-part > a {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 1.02em;
+  font-weight: bold;
+  color: #2c4f8c;
+  margin-top: 6mm;
+  padding-bottom: 1mm;
+}
+.toc-part > a::after { color: #2c4f8c; }
+
+.toc-chapter > a {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.97em;
+  font-weight: bold;
+  margin-top: 3mm;
+}
+
+.toc-section > a {
+  font-size: 0.93em;
+  color: #333a42;
+  padding-left: 7mm;
+  margin-top: 0.9mm;
+}
+
+.toc-appendix > a {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.97em;
+  font-weight: bold;
+  margin-top: 6mm;
+}
+
+/* ---------- part dividers ---------- */
+
+.part-divider {
+  page-break-before: right;
+  break-before: right;
+  page-break-after: always;
+  break-after: page;
+  padding-top: 62mm;
+  text-align: left;
+  hyphens: none;
+}
+
+.part-divider .part-kicker {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 9.5pt;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5b6672;
+  margin: 0 0 4mm 0;
+}
+
+.part-divider h2 {
+  string-set: runhead "";
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 26pt;
+  line-height: 1.15;
+  color: #2c4f8c;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.part-divider .part-rule {
+  width: 42mm;
+  height: 2.4pt;
+  background: #2c4f8c;
+  margin: 7mm 0;
+}
+
+.part-divider .part-desc {
+  font-family: "DejaVu Serif", "Nimbus Roman", "FreeSerif", serif;
+  font-style: italic;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #3b444e;
+  max-width: 118mm;
+  margin: 0;
+}
+
+/* ---------- headings ---------- */
+
+/* Two-step running head: the <h1> clears it so the chapter's opening page
+   prints no header, and the marker right after it arms the following pages. */
+.runhead-marker {
+  string-set: runhead content();
+  font-size: 0;
+  line-height: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+h1.chapter-title {
+  string-set: runhead "";
+  page-break-before: always;
+  break-before: page;
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 23pt;
+  line-height: 1.16;
+  font-weight: bold;
+  color: #1b1f24;
+  border-top: 2.6pt solid #2c4f8c;
+  padding-top: 5mm;
+  margin: 0 0 8mm 0;
+  hyphens: none;
+  text-align: left;
+}
+
+h2 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 13.4pt;
+  line-height: 1.25;
+  font-weight: bold;
+  color: #1e3663;
+  margin: 1.9em 0 0.62em 0;
+  padding-bottom: 1.1mm;
+  border-bottom: 0.6pt solid #d7dde5;
+  hyphens: none;
+  text-align: left;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+h3 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 11.2pt;
+  line-height: 1.3;
+  font-weight: bold;
+  color: #1b1f24;
+  margin: 1.5em 0 0.5em 0;
+  hyphens: none;
+  text-align: left;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+h3.apparatus {
+  font-size: 10.4pt;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #2c4f8c;
+  border-top: 0.6pt solid #d7dde5;
+  padding-top: 3mm;
+  margin-top: 2.1em;
+}
+
+h4 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 10.4pt;
+  font-weight: bold;
+  color: #5b6672;
+  margin: 1.3em 0 0.4em 0;
+  text-align: left;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* ---------- lists ---------- */
+
+ul, ol { margin: 0 0 0.7em 0; padding-left: 6.5mm; }
+li { margin-bottom: 0.3em; }
+li > ul, li > ol { margin-top: 0.3em; }
+
+/* ---------- citations and references ---------- */
+
+sup.cit {
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;          /* keep dense paragraphs on an even leading */
+  color: #2c4f8c;
+  white-space: nowrap;
+}
+sup.cit a { color: #2c4f8c; text-decoration: none; }
+
+/* ---------- mathematical exponents ---------- */
+
+/* Exponents in prose. The chapters used to write these as `10^57` and `2^n`,
+   which is the plain-text convention and the one place this book's typography
+   fell back to ASCII — the same paragraphs already set ≈, ×, – and a Unicode
+   subscript ₂, and ch03 alternates between "2 to the 384th power" in words and
+   `2^384` in caret within a few lines of each other.
+
+   Selecting bare `sup` rather than a class keeps the source clean: a chapter
+   writes `10<sup>57</sup>` and nothing else. It cannot collide with the citation
+   rule above, which is `sup.cit` and therefore more specific.
+
+   `line-height: 0` for the same reason it is on `sup.cit`: without it a raised
+   digit adds to the line box and one paragraph in a justified column sits on a
+   different leading from its neighbours, which is visible on the page and hard
+   to attribute once printed. Exponents are also never a break opportunity —
+   `10^-31` split across a line turn reads as a range. */
+sup {
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;
+  white-space: nowrap;
+}
+
+ol.reflist {
+  font-size: 0.87em;
+  line-height: 1.38;
+  margin: 0.4em 0 0 0;
+  padding-left: 7mm;
+  text-align: left;
+  hyphens: none;
+}
+
+ol.reflist li {
+  margin-bottom: 0.34em;
+  color: #333a42;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+ol.reflist .ref-id {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.88em;
+  font-weight: bold;
+  color: #2c4f8c;
+  margin-right: 0.35em;
+}
+
+/* ---------- blockquote / scenario boxes ---------- */
+
+blockquote {
+  margin: 1em 0;
+  padding: 3.6mm 5mm 3.6mm 5mm;
+  border-left: 2.6pt solid #2c4f8c;
+  background: #eef3fa;
+  font-size: 0.955em;
+  line-height: 1.44;
+  page-break-inside: auto;
+}
+
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: #1e3663; }
+
+/* ---------- code ---------- */
+
+code, kbd, samp {
+  font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+  font-size: 0.87em;
+}
+
+p code, li code, td code, blockquote code, h2 code, h3 code {
+  background: #eef1f5;
+  border-radius: 2px;
+  padding: 0.04em 0.28em;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+pre, div.codehilite {
+  background: #f6f7f9;
+  border: 0.6pt solid #e1e6ec;
+  border-left: 2.2pt solid #c3cddc;
+  border-radius: 2px;
+  margin: 0.9em 0;
+}
+
+div.codehilite { padding: 0; }
+div.codehilite pre { border: 0; margin: 0; background: transparent; }
+
+pre {
+  padding: 3.2mm 4mm;
+  font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+  font-size: 8.4pt;
+  line-height: 1.36;
+  text-align: left;
+  hyphens: none;
+  white-space: pre-wrap;         /* 163-char source lines must not overflow */
+  overflow-wrap: break-word;
+  word-break: normal;
+  tab-size: 4;
+}
+
+pre code {
+  font-size: inherit;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* ---------- tables ---------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.83em;
+  line-height: 1.34;
+  text-align: left;
+  hyphens: none;
+  table-layout: auto;
+}
+
+thead { display: table-header-group; }
+
+th {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.95em;
+  font-weight: bold;
+  color: #1e3663;
+  text-align: left;
+  vertical-align: bottom;
+  padding: 1.6mm 2.4mm 1.6mm 0;
+  border-bottom: 1.1pt solid #2c4f8c;
+}
+
+/* No overflow-wrap here: WeasyPrint 52.5 applies break-word to any word that
+   does not fit the *remaining* line space, splitting ordinary prose
+   ("a|bsence") in narrow cells.  Long tokens live in <code>, handled above. */
+td {
+  padding: 1.5mm 2.4mm 1.5mm 0;
+  border-bottom: 0.5pt solid #e6eaf0;
+  vertical-align: top;
+  hyphens: none;
+}
+
+tr { page-break-inside: avoid; break-inside: avoid; }
+
+th:last-child, td:last-child { padding-right: 0; }
+
+/* ---------- diagrams ---------- */
+
+figure.diagram {
+  margin: 1.3em 0;
+  text-align: center;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Very wide flowcharts bleed into the page margins rather than being scaled
+   down to illegible label sizes inside the 164 mm text column. */
+figure.diagram.wide {
+  margin-left: -14mm;
+  margin-right: -14mm;
+}
+
+figure.diagram svg,
+figure.diagram img.diagram-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+figure.diagram figcaption {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.82em;
+  color: #5b6672;
+  margin-top: 2.5mm;
+  text-align: center;
+}
+
+.diagram-missing {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.85em;
+  color: #a33;
+}
+
+/* ---------- appendix / glossary ---------- */
+
+.appendix h1.chapter-title { border-top-color: #2c4f8c; }
+
+.glossary-note {
+  font-size: 0.93em;
+  color: #5b6672;
+  margin-bottom: 1.2em;
+}
+
+.appendix table { font-size: 0.79em; }
+.appendix td:first-child { font-weight: bold; width: 30%; }
+.appendix td:last-child {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.92em;
+  color: #5b6672;
+  width: 9%;
+}
+
+/* ---------- screen ---------- */
+
+@media screen {
+  body {
+    background: #fbfbfc;
+    padding: 26px 18px 60px 18px;
+  }
+  .book, .title-page {
+    background: #fff;
+    max-width: 210mm;
+    margin: 0 auto;
+    box-shadow: 0 1px 3px rgba(27, 31, 36, 0.09);
+    border: 1px solid #eceff3;
+    border-radius: 3px;
+  }
+  .book { padding: 0 26px; }
+  .title-page { margin-bottom: 26px; overflow: hidden; }
+  .toc a::after { content: none; }
+  figure.diagram.wide { margin-left: 0; margin-right: 0; }
+  .title-page .tp-body { padding: 30mm 14mm 16mm 14mm; }
+  .part-divider { padding-top: 22mm; }
+  a:hover { text-decoration: underline; }
+}
+
+/* ------------------------------------------------------------------
+   Float apparatus — captions, and the lists of figures and tables.
+   Captions are generated by tools/floats.py, which assigns the number;
+   no float number is written by hand anywhere in the sources.
+   ------------------------------------------------------------------ */
+
+.float-caption {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.82em;
+  line-height: 1.45;
+  color: #5b6672;
+  text-align: center;
+  margin: 2.5mm auto 1.3em auto;
+  max-width: 92%;
+  /* A caption separated from its figure by a page break is a production
+     defect, so the break is refused on the side the float sits. */
+  page-break-before: avoid;
+  break-before: avoid;
+}
+
+.float-caption strong {
+  color: #1e3663;
+  font-weight: 600;
+}
+
+/* Table captions sit ABOVE the table and read as a heading for it, so they
+   are left-aligned and refuse a break on the following side instead. */
+.float-caption.caption-above {
+  text-align: left;
+  margin: 1.3em 0 2mm 0;
+  max-width: 100%;
+  page-break-before: auto;
+  break-before: auto;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* ---------- lists of floats ---------- */
+
+.float-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 1.4em 0;
+  font-size: 0.9em;
+}
+
+.float-list li {
+  position: relative;
+  margin: 0 0 1.6mm 0;
+  padding-left: 24mm;
+  text-indent: -24mm;
+  line-height: 1.4;
+}
+
+.float-list .fl-num {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-weight: 600;
+  color: #1e3663;
+  display: inline-block;
+  width: 22mm;   /* fits "Figure 14.1"; at 20mm the two-digit chapters lost their column */
+  text-indent: 0;
+}
+
+/* display:flex silently zeroes target-counter in WeasyPrint 52.5, so the page
+   number cannot be laid out as a flex item and has to reach the right margin
+   some other way. It used to float there, which was wrong in a way that only
+   the printed page showed: a float is placed where it occurs in the flow, and
+   `::after` occurs at the end, so on any entry whose title wrapped, the number
+   was set at the right of the *last* line rather than the first. Entry titles
+   run to eighty or ninety characters and the column holds about seventy, so
+   wrapping is normal rather than exceptional — and in the last build the page
+   number of Table 19.2 landed inside the hyphenation break of "gate-level".
+
+   Taking the number out of flow removes the failure mode rather than making it
+   less likely. Absolute placement against the `li` pins it to the entry's first
+   line whatever the title does below, and the reserved `padding-right` keeps
+   the longest title from running underneath it. */
+.float-list a {
+  display: block;
+  padding-right: 10mm;
+  color: #1b1f24;
+  text-decoration: none;
+}
+
+.float-list a::after {
+  content: target-counter(attr(href), page);
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 0.86em;
+  color: #5b6672;
+  text-indent: 0;
+}
+
+/* ------------------------------------------------------------------
+   Front and back matter pages.
+   ------------------------------------------------------------------ */
+
+.frontmatter {
+  page-break-before: always;
+  break-before: page;
+}
+
+.frontmatter h1 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 1.5em;
+  color: #1e3663;
+  border-bottom: 1px solid #d7dde5;
+  padding-bottom: 2mm;
+  margin: 0 0 6mm 0;
+}
+
+.frontmatter h2 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 1.02em;
+  color: #1b1f24;
+  margin: 6mm 0 2mm 0;
+}
+
+/* The copyright page is set small, flush left, and low on the page, as a
+   verso page is. */
+.copyright-page {
+  page-break-before: always;
+  break-before: page;
+  font-size: 0.82em;
+  line-height: 1.55;
+  color: #1b1f24;
+}
+
+.copyright-page p { margin: 0 0 3.2mm 0; }
+.copyright-page .cp-rule { border: 0; border-top: 1px solid #d7dde5; margin: 5mm 0; }
+.copyright-page .cp-note { color: #5b6672; }
+
+.notation-table th { white-space: nowrap; }
+
+@media screen {
+  .frontmatter, .copyright-page { page-break-before: auto; }
+}
+
+/* Front-matter entries in the table of contents sit at chapter weight but
+   without a number, as contents, figures, tables, preface and notation do in a
+   printed book. */
+.toc li.toc-front { margin-top: 0.6mm; }
+.toc li.toc-front a { font-weight: 500; }
+
+/* The copyright page's title is styled through the heading itself. It was once
+   carried by a `{: .cp-title }` attribute line under the heading, which is
+   Kramdown syntax this build's Markdown does not implement: the class was never
+   applied, the rule below never matched, and the attribute line printed as
+   literal text on page 2 of the book. Selecting the element removes the need
+   for the source to name a class at all. */
+.copyright-page h1 {
+  font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
+  font-size: 1.15em;
+  font-weight: 600;
+  color: #1e3663;
+  border: 0;
+  margin: 0 0 4mm 0;
+  padding: 0;
+}
+
+@media screen {
+  .float-list a::after { content: none; }
+}

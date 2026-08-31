@@ -1,0 +1,1572 @@
+<meta charset="utf-8">
+<title>The Human and the Machine — Lecture Deck, Part VII</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<!-- =====================================================================
+     PART VII DECK -- WHAT WAS CUT, AND WHY
+     Three chapters, 45 slides, and the last deck in the series. Cut whole
+     topics, not slivers of every topic.
+
+     A note on how this deck converged, because it is the reusable part: the
+     first build ran 72 pages against 44 slides -- 20 slides overflowing, the
+     worst by 445 pt. Five rounds of PROSE trimming moved the page count by
+     almost nothing, exactly as DECK_NOTES warns. What actually converged it
+     was removing WHOLE elements: five .ex callouts deleted or demoted to
+     paragraphs, four table rows deleted, three speaker-note halves cut, and
+     ch26's profession section split into two slides (43 and 44). Every one of
+     those is recorded below or in the slide's own src comment.
+
+     1. ch24 SS24.5's "In practice" list in full -- roles assigned by
+        availability, review invitations expanding past usefulness, the
+        champion who gets promoted, onboarding deferred because it costs the
+        mentor more than the newcomer, the talent gap, the coding standard
+        nobody enforces mechanically. Six sharp observations, none of which
+        changes what an engineer does on Monday; the chapter's judgments
+        already land on slides 6, 10, 15 and 17. One clause -- every
+        champion's answers become entries in the self-help material --
+        survives in slide 15's speaker note.
+     2. ch24 SS24.4's organizational-asset paragraph (the reuse gap, the IP
+        domain knowledge gap, and the argument that a designer moving into
+        verification of the same block family is its cheapest closure). Cut
+        whole: it is an argument for the transition, and slide 14 is about
+        what the transition costs.
+     3. ch25 SS25.2's "Where the corpus is thin" obstacles -- long-range
+        dependencies, hardware description languages scarce in pretraining
+        data relative to mainstream software languages. Reduced to the
+        evidence table's last row plus a speaker note. The transferable half
+        (generated scaffolding pays where a mechanical check independent of
+        the generator can confirm it) survives on slide 34.
+     4. ch25 SS25.5's "What ages, and how to tell" as its own topic. Its
+        three questions are the same discipline slides 25-29 already teach,
+        applied to next year's paper instead of this year's; it survives as
+        two lines on slide 34 rather than a slide of its own.
+     5. ch26 SS26.3's radar front-end illustration inside "every practical
+        oracle is partial" -- the receive chain whose oracle becomes a band,
+        a window and a condition set. Part VI taught that at length and this
+        deck should not re-teach it; the durable claim stays on slide 41
+        without its worked instance.
+     6. ch26 SS26.4's "In practice" (re-derive inherited rows, keep a register
+        of what you are NOT verifying, fund the middle). Folded: the first
+        is already the teaching point of slide 36, the third of slide 40.
+        The second survives in slide 43's speaker note.
+
+     Demoted rather than cut, recorded here because a speaker note is not a
+     slide: ch24's mentoring and scaffolding material and the ladder's two
+     deliberate omissions (slide 15 note), ch24's process COST paragraph and
+     comment standard (slide 16 note), ch24's radar-front-end checklist
+     scenario (slide 17 note -- the four "cannot do" rows are the teaching
+     point and the scenario is their illustration), ch25's Gate 4 and the
+     five-iteration cap with the deadlooping / context-loss / tool-
+     hallucination taxonomy (slide 32 note), ch25's data-governance material
+     (slide 34 note), ch25's scaffolding/plan-drafting evidence row and the
+     89% ablation (slide 29 note -- the table would not hold seven rows),
+     ch26's CI and portable-stimulus material (slide 39 note), and two of the
+     four durability-audit rows (slide 42 note).
+
+     Deleted outright during the fit pass, and worth stating because each was
+     good material. ch25's collective-authority callout survives merged into
+     the throughput argument on slide 31 rather than as its own box, and
+     ch26's "what shift-right buys" box is now a clause of its paragraph on
+     slide 39 -- both survive. One does NOT: ch26:36's reuse reading of the
+     effort spread ("projects spending the least time TYPICALLY reuse
+     pre-verified IP -- not because its logic is simpler but because someone
+     has already worked out what to ask of it") was a fourth row on slide 38,
+     then its speaker note, and is now gone. It is the best single sentence
+     in the chapter for the knowing-what-to-check argument and it lost to the
+     frame; restore it first if slide 38 is ever split.
+     ===================================================================== -->
+
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Part VII -- The Human and the Machine (Chapters 24-26).
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid -- table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     House sheet carried verbatim from Part VI, including its
+     table-layout / box-sizing / td:first-child fixes. Diagram primitives are
+     per-deck: kept diag/db/stem and chain/cbox/arrowr (both used heavily
+     here -- the ramp-up ladder and the gate pipeline are both chains);
+     dropped Part VI's .db.strad and .rot, which belong to Chapter 23's
+     trust-boundary figure and have no claim to state in this Part. Two
+     additions: .cbox.num (a rung number above a chain box, for the ramp-up
+     ladder, whose ORDER is its teaching point) and .pill.arg is promoted
+     from decoration to a fixed token -- every claim this deck carries that
+     the book marks as the author's read rather than a corpus finding wears
+     one, so the hedge is greppable rather than remembered.
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+  pre.mini  { font-size: 10.5px; line-height: 1.36; padding: 7px 9px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  /* table-layout:fixed is load-bearing: several slides nest a full width:100%
+     table inside a column cell; without fixed layout the nested table's natural
+     minimum width inflates its parent column, squeezes the sibling to a ribbon
+     and pushes the slide onto a second page. */
+  table.cols, table.cols3 { width: 100%; table-layout: fixed; }
+  /* border-box is required once the layout is fixed: with content-box the
+     gutter is ADDED outside the declared percentage. */
+  table.cols td { border: none; padding: 0 16px 0 0; box-sizing: border-box; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; font-size: 13.5px; box-sizing: border-box; }
+  /* Default width on the FIRST cell only, never on every cell. Under fixed
+     layout a per-cell default of 50% would be ADDED to an inline 57% first
+     column, running the last column past the slide edge and clipping it. */
+  table.cols td:first-child { width: 50%; }
+  table.cols3 td:first-child { width: 33.3%; }
+  /* the last column has no neighbour to be separated from, and under border-box
+     its right gutter is subtracted from usable width rather than added outside. */
+  table.cols td:last-child, table.cols3 td:last-child { padding-right: 0; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+  /* Chapter 25's evidence table is the deck's widest artifact: five columns
+     whose last one carries a full sentence. Under table-layout:fixed a
+     content-box cell ADDS its padding to the declared percentage, so five
+     declared widths would sum to the frame PLUS five paddings and clip the
+     last column. border-box is what makes the five widths sum to the frame. */
+  table.evid { table-layout: fixed; }
+  table.evid td, table.evid th { box-sizing: border-box; font-size: 11px; line-height: 1.32; padding: 3px 7px 3px 0; }
+  table.evid td:last-child, table.evid th:last-child { padding-right: 0; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* One density step beyond .dense, for the three slides that carry a source
+     line on top of an already-full frame. Anchoring a claim to a named company
+     costs vertical space the layout had none of, and the alternative to a
+     further step is deleting the anchor — which is the one thing that must not
+     happen, since the source line is what makes the number checkable. Must
+     follow .dense: equal specificity, so source order decides. */
+  .denser h2  { margin-bottom: 6px; }
+  .denser h3  { margin: 5px 0 3px; font-size: 14px; }
+  .denser p   { margin-bottom: 4px; }
+  .denser li  { margin-bottom: 2px; font-size: 12.5px; line-height: 1.28; }
+  .denser td  { padding: 2px 7px 2px 0; font-size: 12px; }
+  .denser .ex { padding: 5px 9px; margin: 4px 0; font-size: 12px; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .pill.arg { background: #fbf0e0; color: #8a5a1c; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex.good { background: #eef7f1; border-left-color: #256b46; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .ex.good .tag { color: #256b46; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- block-diagram boxes (Part I / III / IV / V / VI lineage) ---- */
+  table.diag { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  table.diag td { padding: 0 3px; border: none; vertical-align: middle; }
+  .db {
+    text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.22;
+    border: 1.5px solid #2c4f8c; border-radius: 4px; padding: 7px 5px; background: #eef2f9;
+  }
+  .db .s { display: block; font-weight: 400; font-size: 10.5px; color: #566174; font-style: italic; margin-top: 2px; }
+  .db.bus { background: #2c4f8c; color: #ffffff; font-size: 13px; padding: 9px 6px; }
+  .db.bus .s { color: #c6d5ec; font-style: normal; }
+  .db.obs { background: #f7f9fc; border-style: dashed; border-color: #98a3b3; color: #566174; }
+  .db.chk { background: #e2f2e9; border-color: #256b46; }
+  .db.no  { background: #fbf3f1; border-color: #9c3a2a; color: #7a2e21; }
+  .db.no .s { color: #9c3a2a; }
+  tr.stem td { padding: 0; }
+  tr.stem i { display: block; width: 0; height: 11px; border-left: 2px solid #2c4f8c; margin: 0 auto; }
+  tr.stem i.dash { border-left-style: dashed; border-left-color: #98a3b3; }
+
+  /* ---- chain: stage -> stage -> stage ---- */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; font-style: italic; }
+  .cbox.out { background: #e2f2e9; border-color: #256b46; }
+  .cbox.no  { background: #fbf3f1; border-color: #9c3a2a; }
+  .cbox.mech { background: #f7f9fc; border-style: dashed; border-color: #98a3b3; }
+  /* rung number for the ramp-up ladder: the ORDER is the teaching point,
+     so the ordinal is chrome on the box rather than a word inside it. */
+  .cbox .num {
+    display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px;
+    font-weight: 600; letter-spacing: 1.2px; color: #7d9bd0; margin-bottom: 2px;
+  }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification: A Holistic Guide &middot; Part VII</p>
+  <h1>The Human&nbsp;and the Machine</h1>
+  <p class="sub">Chapters 24&ndash;26. Teams, process and ramp-up; machine learning and language models; and the road ahead.</p>
+  <p class="sub" style="margin-top:16px"><em>Twenty-three chapters built the machinery. These three are about what points it &mdash; an organisation of people, a machine that writes plausible code, and the one question neither of them can be relieved of.</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- src: ch24:11-15 (chapter objectives, condensed); ch25:19-23; ch26:13-16 -->
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part VII &middot; Orientation</p>
+  <h2>What you will be able to do</h2>
+  <ul>
+    <li>State a role's charge as an <em>outcome about the design</em>, and hear when it has been stated as an artifact instead.</li>
+    <li>Run each review rite for what it is actually for &mdash; and name the specific way each one dies.</li>
+    <li>Report a maturity stage the only way that means anything: <em>with its open checklist lines</em>.</li>
+    <li>Read a capability claim about a generated artifact &mdash; benchmark, pass criterion, baseline, underlying model &mdash; <em>before</em> reading its percentage.</li>
+    <li>Say which constraint binds on <em>your</em> block, and what would still be true if every engine got a thousand times better.</li>
+  </ul>
+  <div class="ex">
+    <span class="tag">The register shift</span>
+    Parts I&ndash;VI asked whether the evidence was enough, and built the instruments that produce it. Part VII asks who decided what the instruments were pointed at &mdash; and whether that decision can be delegated, to a process, to a junior engineer, or to a machine. It is the least mechanical material in the book, which makes it <em>more</em> exposed to confident folklore, not less.
+  </div>
+  <p class="note"><b>Say</b>Watch the hedges on these three chapters. Chapter 24 marks its own judgments as the author's read in six places; this deck keeps that marking visible, in amber, on every slide that carries one.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- src: ch24:5,7 (the outcome had no owner; fewer hard technical claims than any other chapter, so
+     more exposed to folklore); ch25:9-13 (both numbers real, only one is evidence about the thing
+     proposed; separate DEMONSTRATED from CLAIMED and date everything);
+     ch26:7,9 (the binding constraint was knowing what to ask -- the chapter's whole argument) -->
+<!-- ============ 3. THE MAP ============ -->
+<section class="slide dense">
+  <p class="kicker">Part VII &middot; The map</p>
+  <h2>Three chapters, one question: who decides what to ask?</h2>
+  <table class="diag">
+    <tr><td colspan="3"><div class="db bus">Twenty-three chapters of technique, all of them pointed by a decision no engine makes<span class="s">which claim to test &middot; who answers for it &middot; how to tell a demonstration from an assertion</span></div></td></tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db">24 &middot; The people<span class="s">an outcome needs an owner</span></div></td>
+      <td><div class="db">25 &middot; The machine<span class="s">plausible is not correct</span></div></td>
+      <td><div class="db">26 &middot; The argument<span class="s">the constraint has moved</span></div></td>
+    </tr>
+  </table>
+  <table class="compact" style="margin-top:8px">
+    <tr><td style="width:11%"><span class="pill">CH 24</span></td><td>Ownership stated as an <strong>artifact</strong> is discharged by the artifact being good. Ownership stated as an <strong>outcome</strong> is discharged only by evidence about the design &mdash; and after an escape, only the second one is still standing.</td></tr>
+    <tr><td><span class="pill">CH 25</span></td><td>A generated artifact is <strong>plausible by construction</strong>, because plausibility is what the technology optimises. Read every capability claim through its pass criterion, and never let a model-judged score stand in for a mechanically checked one.</td></tr>
+    <tr><td><span class="pill">CH 26</span></td><td>The binding constraint has migrated &mdash; cycles, then stimulus, then checking, now <strong>knowing what to check</strong>. Each generation of tooling dissolved one constraint and exposed the next.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>The three chapters answer the same question in three registers: an organisation answers it by assigning it, a machine cannot answer it at all, and the historical read says it is now the whole game. <b>Hedge</b>Chapter 26 states outright that the four-stage migration is the book's argument, not the corpus's &mdash; slide 37 carries that.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. DIVIDER 24 ============ -->
+<section class="slide divider">
+  <p class="chno">24</p>
+  <h1>Teams, Process<br>and Ramp-up</h1>
+  <p class="sub">How roles are drawn, how reviews are run, how progress is talked about, how people are brought into the discipline &mdash; and the point past which process substitutes for thought.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- src: ch24:3 (week 41, one wrong tensor in roughly four hundred inferences, the prefetcher mechanism,
+     the three conditions, signed off week 33 at 100% statement and branch coverage);
+     ch24:5 (the post-mortem: three people, everyone did their job, every artifact had a named owner,
+     the outcome had none) -->
+<!-- ============ 5. THE OPENING ESCAPE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 24 &middot; Where the boundaries fail</p>
+  <h2>Everybody did their job. The outcome had no owner.</h2>
+  <p class="small">Week 41 of the reference SoC. A system-level test running a quantized network on the neural accelerator, with both DMA channels streaming, produces <strong>one wrong output tensor in roughly four hundred inferences</strong>. The mechanism: the accelerator's weight prefetcher wraps its buffer pointer one entry early when the weight stream ends mid-beat under DMA contention. It reproduces only at 2-bit weight precision, only with a degenerate tensor geometry, and only when the other channel is moving traffic. <strong>The block signed off in week 33 at 100% statement and branch coverage.</strong></p>
+  <div class="ex warn">
+    <span class="tag">The post-mortem, and why nobody is wrong in it</span>
+    The accelerator's verifier: memory contention is a system-level concern &mdash; her environment drove the accelerator's ports directly, as the plan said, and she closed every quantization row. The SoC integration verifier: quantization corners are a block-level concern &mdash; his job was connectivity and system traffic, with no visibility into weight-buffer geometry. The DMA verifier was not invited, because the DMA was not at fault. <strong>Every artifact in the project had a named owner. The outcome the escape falsified &mdash; <em>is the accelerator demonstrably correct while something else is competing for memory?</em> &mdash; had none.</strong>
+  </div>
+  <p class="note"><b>Say</b>Nobody in that room can be told to do better next time, which is exactly the diagnosis. This is an ownership defect, not a diligence defect, and it is invisible until an escape reveals it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- src: ch24:21-23 (artifact ownership is the DEFAULT, arrives without anyone deciding it; the two
+     formulations disagree about who is at fault when the environment is excellent and the answer is
+     still unknown); ch24:25 (B2's designer analogue: responsibility is a working design, not RTL, which
+     is why the whole design team answers for the plan's completeness);
+     ch24:37 (the wrongness test -- flagged in the chapter as THE AUTHOR'S READ RATHER THAN A PUBLISHED
+     RULE, carried here as an amber pill) -->
+<!-- ============ 6. ARTIFACT VS OUTCOME ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Roles</p>
+  <h2>What is a role answerable <em>for</em>?</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">Ownership by artifact &mdash; the default</span>
+      &ldquo;She owns the block environment. He owns the SoC environment. That one owns the coverage model.&rdquo; Administratively convenient, maps cleanly onto repository directories, and <strong>arrives without anyone deciding it</strong>. Discharged by the artifact being good.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Ownership by outcome</span>
+      Not &ldquo;owns the accelerator testbench&rdquo; but <strong>&ldquo;owns whether the accelerator is demonstrably correct under every condition the system can present to it&rdquo;</strong>. Discharged only by evidence about the design.
+    </div>
+  </td></tr></table>
+  <p class="small">This is not a rhetorical upgrade of the same sentence. The two formulations <em>disagree</em> about who is at fault when the environment is excellent and the answer is still unknown. The book's vocabulary already contains the move one level down: an RTL designer's responsibility is not to write RTL &mdash; that is a means to an end &mdash; but to produce a working design, which is why the whole design team, not the verification team alone, contributes to the plan and answers for its completeness. Applied to verification roles, <strong>&ldquo;my rows are closed&rdquo; stops being a defence and becomes an admission</strong>: closed rows are an artifact statement.</p>
+  <div class="ex">
+    <span class="tag"><span class="pill arg">AUTHOR'S READ</span> &nbsp;The test that separates them</span>
+    Ask an owner to state <strong>what would have to be true for their answer to be wrong</strong>. An artifact owner describes a bug in the artifact; an outcome owner describes a condition of the design they have not yet reached. A project that cannot get the second answer for a feature does not have an owner for it &mdash; it has a directory.
+  </div>
+  <p class="note"><b>Say</b>The chapter flags that test as its own judgment, not a published rule &mdash; so teach it as a habit you are recommending, not as a finding. And hold on to its shape: slide 44 asks the same question about a whole sign-off.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- src: ch24:27-33 (the three seams). Hedges carried verbatim: ch24:29 "each block GENERALLY arrives
+     from its own team" and "neither the time nor the background"; ch24:31 "ON AVERAGE 49% ... IN 2024";
+     ch24:33 (an assumption is a row whose owner is a sentence) -->
+<!-- ============ 7. THE THREE SEAMS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Roles</p>
+  <h2>Boundaries do not fail in the middle of a block. They fail at three seams.</h2>
+  <table class="compact">
+    <tr><th style="width:19%">Seam</th><th style="width:41%">What actually goes wrong</th><th>What closes it</th></tr>
+    <tr><td><strong>Block&nbsp;&rarr;&nbsp;system</strong></td><td>At integration each block <em>generally</em> arrives from its own team, and the SoC verification team must debug and analyse the assembled system without knowledge of the IP internals &mdash; each block is a black box to that team, which has neither the time nor the background to understand the inner workings of several complex IPs at once. <strong>Structural, not a staffing failure.</strong></td><td>Name an owner for each <em>cross-block outcome</em> &mdash; &ldquo;the accelerator under memory contention&rdquo;, &ldquo;the flagship's DMA under a coherent writeback&rdquo; &mdash; and put that owner on the <em>block</em> side, where the internals are understood, obliged to state what system conditions the block environment did <em>not</em> present.</td></tr>
+    <tr><td><strong>Design&nbsp;&rarr;&nbsp;verification</strong></td><td>Not a wall at all. Design engineers spent, <strong>on average, 49% of their time</strong> on verification activities in 2024 &mdash; half a designer's working life is already inside this discipline.</td><td>Stop drawing it as a hand-over. A boundary drawn that way produces the familiar pathology: design-side checks written but never regressed, because they belong to no suite.</td></tr>
+    <tr><td><strong>Feature&nbsp;&rarr;&nbsp;nobody</strong></td><td>Rows whose evidence is expected from somewhere else &mdash; a protocol checked by purchased verification IP, a corner covered by the emulation run, a mode &ldquo;the software team exercises&rdquo;.</td><td><strong>An assumption is a row whose owner is a <em>sentence</em>. Give it a person or delete it.</strong></td></tr>
+  </table>
+  <p class="note"><b>Say</b>The first row is the one people argue with. It is not a criticism of integration engineers &mdash; it is a fact about what any integration team can know, which is why the fix moves the owner rather than the workload.</p>
+  <p class="src">The 49% in row&nbsp;2: 2024 Wilson Research Group IC/ASIC functional verification trend report, commissioned by Siemens&nbsp;EDA &mdash; [R2, p.&nbsp;7]. Double-blind study, &plusmn;4% at 95% confidence.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- src: ch24:35 (the video-codec C-model scenario, whole: Scenario / Approach / Why, abridged only by
+     dropping the sentence that names Chapter 3 as the source of the independence argument) -->
+<!-- ============ 8. THE MODEL THAT MOVED AN OUTCOME ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Roles</p>
+  <h2>Adopting an artifact can transfer an outcome nobody re-assigned</h2>
+  <div class="ex">
+    <span class="tag">Scenario &middot; the video codec's reference C model</span>
+    The codec's checking rests on a bit-exact C model. <strong>The design team wrote it first</strong>, to explore the entropy-coding trade-offs, and it is excellent &mdash; faster and better tested than anything the verification team would have produced in the time. So verification adopts it as its checking reference and compares the RTL against it frame by frame. Ownership by artifact says this is efficient: design owns the model, verification owns the comparison, nobody duplicates work.
+  </div>
+  <table class="cols"><tr><td style="width:52%">
+    <div class="ex good">
+      <span class="tag">Approach</span>
+      Keep the model, but be precise about what it is &mdash; <strong>a transfer function written by the design team, not a golden model</strong> &mdash; and move the <em>outcome</em>, &ldquo;the codec's output is what the standard requires&rdquo;, to the verification side. Discharge it with evidence the C model cannot produce: conformance streams from the standards body decoded against both, an independent reader written from the specification for the syntax layer, and a written record of every place the C model was tuned to match the RTL rather than the specification.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Why</span>
+      A model written by the design team encodes <strong>the design team's reading of the specification</strong>, so it is not the independent second interpretation a reference model has to be. Comparing RTL against it reconverges on that reading, and <strong>the comparison can stay green on a misread clause forever</strong>. The artifact is fine. What was wrong is that adopting it silently transferred an outcome nobody re-assigned.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Note the shape of the fix: nothing is thrown away and nobody is blamed. The change is one sentence about who answers for a claim &mdash; which is what makes it cheap enough to actually do.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- src: ch24:43 (plan review: completeness; roster reaches outside the team; designed to establish that
+     identified functional verification requirements are complete); ch24:45 (code review: intent vs
+     implementation; find what no automated tool can; explicitly not to ridicule the author);
+     ch24:47 (the verification-specific reason: temporary structures that bypass large sections of a
+     testcase, and nothing fails when they are left in); ch24:49 (coverage-model review: a coverage model
+     is a reflection of the plan, no automated way to establish either is complete; the designer must be
+     in the room because reachability BY CONSTRUCTION is a question about the RTL);
+     ch24:51 (sign-off: judges assembled evidence, arrives with no room to act);
+     ch24:59 (how each degenerates, all four) -->
+<!-- ============ 9. THE FOUR RITES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Reviews</p>
+  <h2>Four rites, four different purposes &mdash; and four different ways of dying</h2>
+  <table class="compact">
+    <tr><th style="width:16%">Rite</th><th style="width:42%">What it tests</th><th>How it degenerates</th></tr>
+    <tr><td><strong>Plan review</strong></td><td><strong>Completeness</strong> &mdash; a property no single perspective can check, which is why its roster deliberately reaches outside the project team.</td><td>Everyone present has a stake in the plan being adequate, so it becomes a <em>signing ceremony</em> whose output is a date rather than a list of holes.</td></tr>
+    <tr><td><strong>Code review</strong><br><span class="small muted">of the testbench</span></td><td><strong>Fidelity between intent and implementation</strong> &mdash; discrepancies no automated tool can find. The declared goal is explicitly <em>not</em> to ridicule the author.</td><td>Into style enforcement &mdash; the part a tool should already be doing &mdash; and it stops asking the question that needs a human: <em>does this environment implement the plan?</em></td></tr>
+    <tr><td><strong>Coverage-model review</strong></td><td><strong>Whether the measurement is honest.</strong> A coverage model is a reflection of the plan, and there is no automated way to establish that either is complete.</td><td>When the only attendees are the model's author and the lead who wants it closed. The project acquires a green number certifying <em>stimulus</em> rather than behaviour.</td></tr>
+    <tr><td><strong>Sign-off review</strong></td><td><strong>Judges assembled evidence and accepts what is left over.</strong></td><td>It arrives with no room to act: a hole found here is a risk to accept, not a defect to fix. Which is why the three above have to be real.</td></tr>
+  </table>
+  <div class="ex">
+    <span class="tag">The verification-specific reason code review matters &mdash; it has no equivalent on the design side</span>
+    A testbench routinely acquires temporary structures that <strong>bypass large sections of a testcase</strong> to speed up debugging, and <em>nothing fails</em> when those are left in &mdash; so the environment quietly stops implementing the tests it claims to contain. Peer review against the plan, plus review of the simulation log to confirm the run followed the specification it claims to execute, is the redundancy that catches it.
+  </div>
+  <p class="note"><b>Say</b>One roster constraint: the block's designer must be in the coverage-model review, because whether a cell is reachable <em>by construction</em> is a question about the RTL.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- src: ch24:53-55 (four mechanics; chapter states ONLY THE LAST IS DRAWN FROM THE CORPUS, the first
+     three being the author's read -- carried as an amber pill); ch24:57 (the fifth, about tone:
+     demand clear justification, accept it may be complex and need thoughtful review, do not tolerate or
+     encourage hand-waving); ch24:61 (the two-abstraction-level review: a deep dive is OFTEN required and
+     the time has to be allowed for) -->
+<!-- ============ 10. WHAT MAKES A REVIEW WORK ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Reviews</p>
+  <h2>Reviews fail politely far more often than they fail rudely</h2>
+  <table class="cols"><tr><td style="width:52%">
+    <p class="small"><span class="pill arg">AUTHOR'S READ</span> &nbsp;Three of the four mechanics below are the chapter's own judgment, offered because they are cheap and <em>their absence is diagnostic</em>. Only the fourth is drawn from the corpus.</p>
+    <ul class="small">
+      <li><strong>Circulate the artifact before the meeting</strong>, and open by asking whether people read it. A review where the author narrates the document aloud has already failed &mdash; narration is a presentation and the reviewers are an audience.</li>
+      <li><strong>Someone chairs who is not the author</strong>, so the author can answer questions instead of managing the clock.</li>
+      <li><strong>Every finding leaves as an action</strong> with a name and a date, closed <em>before</em> the next gate rather than at it.</li>
+      <li><strong>Attach the review record to the object it judged.</strong> Records linked directly to plan objects make the history retrievable during audits and quality reviews &mdash; the difference between a review that accumulates into institutional memory and one that evaporates into a meeting-notes folder.</li>
+    </ul>
+  </td><td>
+    <div class="ex">
+      <span class="tag">A fifth mechanic, about tone rather than procedure</span>
+      Demand clear justification of how each specification point is verified. Accept that the justification may be complex and needs thoughtful review. And <strong>do not tolerate, or encourage, hand-waving.</strong>
+    </div>
+    <div class="ex warn">
+      <span class="tag">The failure that is invisible from inside the meeting</span>
+      Where a review has to span two levels of abstraction &mdash; a formal property set against a coverage model, say &mdash; the mismatch makes the review process much harder, a deep dive into individual items is <em>often</em> required, and the time for it has to be allowed for. <strong>A one-hour slot for something needing a half-day does not produce a bad judgement. It produces no judgement, delivered on time.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>And the way every rite dies under schedule pressure is the same: the review happens <em>after</em> the decision it was meant to inform, so its findings can only be recorded as risks.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- src: ch24:67 (the coherent hub's plan review and the COUNTERPARTY RULE, whole; the D9 grounding:
+     unspoken and undocumented assumptions are how design features fall through the cracks, which is why
+     every assumption is reviewed with the designers face to face, USUALLY over several rounds);
+     ch24:63 (the crossbar coverage-model review: 7-bit subordinate ID = 4-bit manager ID + 3 bits to
+     distinguish 5 manager ports; the cell can never be hit BY CONSTRUCTION; the row is REPLACED, not
+     deleted, and the minutes record the reason) -->
+<!-- ============ 11. THE COUNTERPARTY RULE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Reviews</p>
+  <h2>An assumption naming a team is not closed until someone from that team names the row</h2>
+  <div class="ex warn">
+    <span class="tag">Scenario &middot; the coherent hub's plan review</span>
+    The hub's own rows are dense and well argued &mdash; MESI state transitions, directory occupancy, the livelock and starvation cases. In the assumptions section sits one line: <em>&ldquo;IO-coherent port behaviour under snoop-in is covered by the accelerator teams.&rdquo;</em> Two of the three accelerator plans contain the mirror-image sentence: <em>&ldquo;coherency is handled by the hub.&rdquo;</em> <strong>Nobody wrote a row.</strong>
+  </div>
+  <table class="cols"><tr><td style="width:52%">
+    <div class="ex good">
+      <span class="tag">The counterparty rule</span>
+      An assumption naming a team is not closed until <strong>someone from that team has read it <em>in this review</em> and named the row that discharges it</strong>. Here that produces two new rows on the hub's plan &mdash; snoop-in during an in-flight accelerator write, and snoop-in to a line the accelerator has just released &mdash; and one row on each mirroring accelerator plan.
+      <br><br><strong>Why:</strong> both sentences are individually reasonable and jointly fatal. Unspoken and undocumented assumptions are how design features fall through the cracks &mdash; which is why every assumption is reviewed with the designers face to face, <em>usually</em> over several rounds before alignment.
+    </div>
+  </td><td>
+    <div class="ex">
+      <span class="tag">The same discipline, one rite over &mdash; the crossbar's coverage-model review</span>
+      A proposed cross would stress ID handling at a subordinate port: two managers presenting the <em>same</em> manager-side ID with writes in flight to one subordinate. The designer kills it in a sentence. The interconnect appends source-identifying bits toward the subordinate, so the subordinate-side ID is <strong>7 bits</strong> &mdash; the 4-bit manager ID plus the 3 bits needed to distinguish 5 manager ports &mdash; and the two managers arrive with <em>different</em> IDs. <strong>The cell can never be hit, by construction.</strong> The row is not deleted, it is <strong>replaced</strong>, and the minutes record why.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>An unreachable cover point does not fail loudly. It sits at zero, absorbs stimulus effort when time is shortest, and is eventually excluded by an engineer who no longer remembers whether it was impossible or merely unreached &mdash; while the hazard it represented stays unmodelled.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- src: ch24:75 ("are you on track": a plan with too little detail communicates poorly, leaves other
+     teams confused about what has ACTUALLY been verified, costs the team their trust, pushes everyone
+     into proxies -- coverage percentages, test counts; a stage claim is auditable in an hour);
+     ch24:77 ("can I build on your block": comparability; one plan held centrally and kept in sync
+     becomes the verification contract across sites); ch24:79 ("who needs help" -- chapter marks this
+     as ON THE AUTHOR'S READ the one that pays for the whole apparatus; also "not yet" vs "nearly") -->
+<!-- ============ 12. STAGES AS A SHARED LANGUAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Maturity stages</p>
+  <h2>Three conversations that change shape &mdash; from confidence to evidence</h2>
+  <table class="compact">
+    <tr><th style="width:22%">The question</th><th style="width:36%">Answered without stages</th><th>Answered with them</th></tr>
+    <tr><td><strong>&ldquo;Are you on track?&rdquo;</strong></td><td>A percentage and a tone of voice, neither of which the asker can audit. A plan carrying too little detail communicates poorly with other teams, leaves them confused about what has <em>actually</em> been verified, costs the verification team their trust, and pushes everyone into proxies for progress &mdash; coverage percentages, test counts.</td><td>A stage claim is <strong>auditable in an hour by someone who does not work on the block</strong>, because every line of a stage checklist is a demonstration, not an estimate. The conversation stops being about whether the lead is an optimist.</td></tr>
+    <tr><td><strong>&ldquo;Can I build on your block?&rdquo;</strong></td><td>A per-team document, and a document-merge exercise that substitutes for agreement.</td><td>A <em>comparable</em> answer: stage 2 means the same thing for the crossbar and the DMA and the core. Where one plan is held centrally and every team's view of it stays in sync, that single plan becomes <strong>the verification contract across sites</strong>.</td></tr>
+    <tr><td><strong>&ldquo;Who needs help?&rdquo;</strong> <span class="pill arg">AUTHOR'S READ</span></td><td>&ldquo;85%&rdquo; asks for nothing, because there is nothing in the number a lead can act on.</td><td>&ldquo;Stage 2, four checklist lines open, two of them blocked on the formal proof of the ordering rules&rdquo; asks for a <strong>specific intervention</strong>. On the chapter's own read, this is the conversation that pays for the whole apparatus.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Stages also make it socially possible to say <em>not yet</em> without saying <em>we are behind</em> &mdash; the stage is a state, not a verdict. Teams that cannot say &ldquo;not yet&rdquo; say &ldquo;nearly&rdquo; instead, for months.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- src: ch24:83 (stage inflation: the signature is that the stage arrives WITHOUT its checklist; a
+     status word can be assigned by whoever wants it assigned, generally not the team; "stage 2, three
+     lines open" is a complete sentence and "stage 2" is a slogan);
+     ch24:81 (sensor hub scenario, whole: the three blank lines, accepted at stage 2 FOR THE FUNCTIONS
+     THE CHECKLIST COVERS, the trust question converted to an evidence question);
+     ch24:85 (a stage describes the maturity of the VERIFICATION, not the cleanliness of the design) -->
+<!-- ============ 13. STAGE INFLATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Maturity stages</p>
+  <h2>A stage claimed rather than demonstrated has become a status word</h2>
+  <p class="small">The signature distinguishes stage inflation from ordinary optimism: <strong>the stage arrives <em>without</em> its checklist</strong>. And a status word can be assigned by whoever wants it assigned &mdash; which is generally not the team. The conversational countermeasure belongs to every engineer, not just to leads: <strong>never report a stage without the open lines.</strong> &ldquo;Stage 2, three lines open&rdquo; is a complete sentence. &ldquo;Stage 2&rdquo; is a slogan.</p>
+  <div class="ex">
+    <span class="tag">Scenario &middot; the sensor hub arrives labelled &ldquo;verification mature&rdquo;</span>
+    Delivered by a partner team as a pre-verified block for the reference SoC's always-on island. <strong>The integration lead does not argue about the claim; he asks for the stage-2 checklist with its tick marks.</strong> It comes back with the stimulus, checker and regression lines ticked and three lines blank: retention behaviour across the hub's ultra-low-power modes, asynchronous wake events crossing into the system domain, and the functional coverage model for low-power mode transitions.
+  </div>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex good">
+      <span class="tag">Approach</span>
+      Accept the block <strong>at stage 2 for the functions the checklist covers</strong>. The three open lines become rows on the SoC plan, with the partner team named as owner and a date. Integration proceeds; the low-power sequencing tests are gated on those rows, not on goodwill.
+    </div>
+  </td><td>
+    <div class="ex">
+      <span class="tag">Why</span>
+      The claim &ldquo;verification mature&rdquo; was <strong>not false, it was unqualified</strong>. The checklist converted a trust question &mdash; <em>do we believe this team?</em> &mdash; into an evidence question both sides read the same way, and it did so <strong>without anyone having to allege anything</strong>. That is the whole social function of the vocabulary.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>One caution worth repeating in any status meeting: a stage describes the maturity of the <em>verification</em>, not the cleanliness of the design. A block at stage 2 with fifty open bugs is reporting that the machinery which finds bugs is working &mdash; which is exactly what stage 2 claims.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- src: ch24:89 (verification engineers OFTEN arrive from design, or oscillate over a career; the
+     mindset is USUALLY reached only through years of experience, mentoring and lessons learned the hard
+     way -- therefore slow, and taught rather than read); ch24:95 (what transfers, whole);
+     ch24:103-108 (the six reflexes; 103 is flagged as THE AUTHOR'S READ of the most-repeated
+     correction) -->
+<!-- ============ 14. DESIGNER TO VERIFIER ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 24 &middot; Ramp-up</p>
+  <h2>Verification engineers <em>often</em> arrive from design &mdash; and the reflexes come with them</h2>
+  <table class="cols"><tr><td style="width:31%">
+    <div class="ex good">
+      <span class="tag">What transfers, and it is a lot</span>
+      <strong>Reading RTL at speed</strong>, which decides how fast a failure gets localized. <strong>Micro-architectural intuition</strong> about where designs are fragile: which counters wrap, which FIFOs have a subtle almost-full, which handshakes have a reset hole. <strong>Knowing how the block was built.</strong> And <strong>standing with the design team</strong> when a verifier has to say a failure is a design bug.
+    </div>
+    <p class="small">The mindset is <em>usually</em> reached only through years of experience, mentoring and lessons learned the hard way. So the transition is <strong>slow</strong> &mdash; a two-day tool course is not a ramp-up &mdash; and it is <strong>taught, not read</strong>, so a wiki is not one either.</p>
+    <p class="src"><strong>Intel</strong>: 85 engineers trained on formal property verification in two weeks, then four weeks of onsite consultancy &mdash; <em>Making Formal Property Verification Mainstream: An Intel Graphics Experience</em>, DVCon &mdash; [D18, p.&nbsp;1]. Self-reported; a ramp onto one technique, not the mindset.</p>
+  </td><td>
+    <p class="small"><strong>What works against them.</strong> Reflexes, not deficiencies &mdash; each correct in the previous job, and several make a testbench <em>look</em> healthier while it checks less.</p>
+    <table class="compact">
+      <tr><td style="width:35%"><strong>Explaining before reproducing</strong> <span class="pill arg">AUTHOR'S READ</span></td><td>A verifier's first obligation is a failure that replays on demand. Hypothesis-first gives a diagnosis with no artifact behind it.</td></tr>
+      <tr><td><strong>Interoperating, not stressing</strong></td><td>The more tolerant the testbench, the less it checks. Recognizable form: <em>clock snooping</em>. Fewer failing tests, faster bring-up, masked clocking bugs.</td></tr>
+      <tr><td><strong>&ldquo;Invalid&rdquo; as a stimulus filter</strong></td><td>What matters is whether the scenario <em>can occur</em> &mdash; and if it can, the recovery from it is a feature.</td></tr>
+      <tr><td><strong>A testbench that recovers</strong></td><td>A testbench is closer to a mousetrap: once it has caught something, effort spent keeping it going is effort in the wrong place.</td></tr>
+      <tr><td><strong>Debugging in waveforms</strong></td><td>A verification component's work happens in zero time and in dynamic data structures. The <em>log</em> is where it gets debugged.</td></tr>
+      <tr><td><strong>Staying zoomed in</strong></td><td>The work requires switching deliberately between zoomed-in tasks and zoomed-out ones &mdash; where effort buys the most checking.</td></tr>
+    </table>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- src: ch24:122-165 (the DMA ramp-up ladder). The chapter's 38-line text block is re-rendered as a
+     four-box chain rather than abridged inside a <pre>: ch24:122 says THE ORDER IS THE POINT, and each
+     rung's stated Purpose is the .q sub-line. Nothing elided inside a rung; the mentor/escalation/review
+     header line and the full "Done when" wording are demoted to the boxes' second lines.
+     ch24:112 (THE SHAPE BELOW IS THE AUTHOR'S, but its load-bearing components are not) -- amber pill.
+     ch24:163 (assignment 3 gets four weeks; the six cells are dead because the solver budget caps a row
+     at 2048 bytes = 256 beats on the 64-bit path); ch24:165 (the two things it deliberately does not do);
+     ch24:116,118 (champion + escalation + self-help scaffolding) -> speaker note -->
+<!-- ============ 15. THE RAMP-UP LADDER ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Ramp-up</p>
+  <h2>Reproduce, extend, own, break &mdash; and the order is the point</h2>
+  <p class="small"><span class="pill arg">AUTHOR'S READ</span> &nbsp;The ladder's shape is the chapter's own; its load-bearing components are not. Four assignments for a designer joining DMA verification, each with an exit criterion stated as a <em>demonstration</em> rather than a duration.</p>
+  <table class="chain">
+    <tr>
+      <td style="width:24%"><div class="cbox"><span class="num">1 &middot; WEEKS 1-2</span>Reproduce<span class="q">kills the explain-before-reproduce reflex</span></div></td>
+      <td style="width:3%" class="arrowr">&rarr;</td>
+      <td style="width:24%"><div class="cbox"><span class="num">2 &middot; WEEKS 2-4</span>Extend a checker<span class="q">independence of judgment, at the smallest scale</span></div></td>
+      <td style="width:3%" class="arrowr">&rarr;</td>
+      <td style="width:24%"><div class="cbox"><span class="num">3 &middot; WEEKS 4-8</span>Own an outcome<span class="q">the difference between impossible and merely decided</span></div></td>
+      <td style="width:3%" class="arrowr">&rarr;</td>
+      <td><div class="cbox out"><span class="num">4 &middot; WEEKS 8-12</span>Break it on purpose<span class="q">the environment is a design, and it is under test too</span></div></td>
+    </tr>
+  </table>
+  <table class="compact" style="margin-top:6px">
+    <tr><td style="width:5%"><strong>1</strong></td><td>Replay 3 archived failing seeds from their run manifests; one bug report per failure at <em>mechanism</em> level. <strong>Done when</strong> all 3 reproduce on demand and the mentor cannot tell the new reports from the originals.</td></tr>
+    <tr><td><strong>2</strong></td><td>Add the per-channel error-report cross-check to the scoreboard, treating the DMA's own error report as an <em>output to be checked</em>, never as ground truth. <strong>Done when</strong> peer review is passed, the check fires on a deliberately broken error-report path, and is silent on 200 clean seeds.</td></tr>
+    <tr><td><strong>3</strong></td><td><code>DMA-F06a</code> (2D legalization at the 4&nbsp;KB boundary) end to end: implement <code>cg_2d_4kb</code>, drive it to closure, defend the exclusion. <strong>Done when</strong> the six excluded cells are a <em>waiver</em> naming <code>c_solver_budget</code> &mdash; not written off as geometry &mdash; with owner and expiry.</td></tr>
+    <tr><td><strong>4</strong></td><td>The <em>mentor</em> injects 3 undisclosed bugs into a private RTL copy; run the full regression; report which were caught, by what, and how long each took to localize. <strong>Done when</strong> any bug the environment missed becomes a plan row.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Two things the ladder deliberately does <em>not</em> do: it does not open with a course on the methodology library, because a newcomer with no failure to chase has no reason to remember any of it; and it does not open with new code, because <strong>the first artifact they produce is a bug report</strong> &mdash; the report, not the testbench, is what the rest of the project consumes. <b>Also</b>Assignment 3 gets four weeks because it teaches judgment: the six cells are dead because the solver budget caps a row at 2048 bytes &mdash; 256 beats on the 64-bit path &mdash; a team decision about solve time, not a property of the design. Around the ladder: a named <em>champion</em> per cluster, escalation to a central expertise team, and a library of verified checkers to adapt.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- src: ch24:173 (templates: crucial because a large project has many plan authors feeding one guide;
+     the real product is ten plans read without ten context switches);
+     ch24:175 (the guideline hierarchy: rules MUST be followed; recommendations, where the DETAIL IS
+     OFTEN EXPLICITLY UNIMPORTANT -- naming convention is the example given -- can be customized but
+     adherence within a team is strongly recommended; the comment standard is the one with content);
+     ch24:177 (cookie-cutter property templates for recurring modules; checklists as sediment);
+     ch24:179 (unless integrated into mainstream deliverables it will not be exercised);
+     ch24:181 (adherence charged continuously; wholesale adoption MAY be unaffordable; house-built flow
+     multiplies the bill; BKMs not in use ESTIMATED to cost ON THE ORDER OF 20%) -->
+<!-- ============ 16. PROCESS: WHAT IT BUYS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 24 &middot; Process</p>
+  <h2>Process is the accumulated answer to &ldquo;how do we not make that mistake again&rdquo;</h2>
+  <table class="compact">
+    <tr><th style="width:20%">Instrument</th><th>What it actually buys &mdash; which is usually narrower than teams claim</th></tr>
+    <tr><td><strong>Templates</strong></td><td>Consistency across authors. A plan template is called <em>crucial</em> because a large project has many plan authors feeding one guide. <strong>The real product is not the section headings: it is that ten plans can be read by one reviewer without ten context switches.</strong></td></tr>
+    <tr><td><strong>Coding standards</strong></td><td>One published hierarchy separates <em>rules</em> &mdash; which must be followed, because breaking them costs the productivity the methodology exists to provide &mdash; from <em>recommendations</em>, where the <strong>detail is often explicitly unimportant</strong> (a naming convention is the example given), but adherence within a team is strongly recommended. <strong>For a large class of standards the content is arbitrary and the agreement is everything.</strong></td></tr>
+    <tr><td><strong>Libraries and checklists</strong></td><td>A lower entry barrier and a memory. Cookie-cutter property templates for the modules that recur &mdash; arbiters, state machines, standard interfaces &mdash; so a novice meets a filled-in starting point rather than a blank file.</td></tr>
+    <tr><td><strong>A calendar slot</strong></td><td>Stated flatly: <strong>unless the practice is integrated into mainstream deliverables, it will not be exercised despite its benefits</strong> &mdash; which is why check-points analogous to the existing milestones were introduced. <em>A technique not on somebody's deliverable list does not happen.</em></td></tr>
+  </table>
+  <p class="note"><b>Say</b>What it costs is adherence and discipline, charged continuously rather than once. Wholesale adoption of a full methodology <strong>may</strong> simply be unaffordable for a real project with real people and schedules &mdash; an argument for adopting individual elements incrementally, not for adopting none. And the alternative is not free either: best-known methods simply not being in use is <em>estimated</em> to cost <em>on the order of</em> 20% of productivity on its own. <b>And</b>One coding standard genuinely has content: comments written for a reader who knows the language but not the design, and must maintain it without the original designer's help.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- src: ch24:185 (the line is between a checklist that makes a CLAIM AUDITABLE and one asked to make a
+     JUDGEMENT); ch24:187 (cannot decide whether its own line is true; the rule about naming an artifact
+     a skeptic could regenerate; tools supply some quality metrics but there is no substitute for smart
+     engineers thinking it through); ch24:189 (cannot see what is missing -- the opening escape would
+     have passed a stage-3 checklist unblemished); ch24:191 (cannot make a review honest; the
+     self-induced portion); ch24:193 (individual productivity ranges UP TO tenfold);
+     ch24:195 (too much detail too soon, and it communicates WORSE not better);
+     ch24:197 (radar front-end scenario, whole) -->
+<!-- ============ 17. WHAT A CHECKLIST CANNOT DO ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 24 &middot; The limits of process</p>
+  <h2>The line is not good process versus bad. It is auditable claim versus laundered judgement.</h2>
+  <table class="compact">
+    <tr><td style="width:23%"><strong>It cannot decide whether its own line is true</strong></td><td>&ldquo;Functional coverage model implemented and reporting in nightly regression&rdquo; is objectively true or false; anyone can go and look. &ldquo;Coverage is <em>adequate</em> for this feature&rdquo; is a judgement wearing a tick-box. <strong>Every line of a gating checklist must name an artifact a skeptic could regenerate</strong> &mdash; and a line that cannot be written that way belongs in a review discussion instead.</td></tr>
+    <tr><td><strong>It cannot see what is missing from the plan</strong></td><td>Every line audits a question somebody already thought to ask. <strong>This deck's opening escape would have passed a stage-3 checklist unblemished</strong>, because no line asked about the block under memory contention. Which is why escape analysis exists, and why its output is <em>new rows</em>.</td></tr>
+    <tr><td><strong>It cannot make a review honest</strong></td><td>It converts a judgement into a tick &mdash; useful for recall, useless against motive. If the room wants the gate passed, the checklist supplies a format for passing it.</td></tr>
+    <tr><td><strong>It cannot narrow the spread that matters most</strong></td><td>Individual productivity across engineers ranges <strong>up to</strong> tenfold. Process compresses variance in the mechanical parts &mdash; how a bug is filed, when a regression runs &mdash; and does approximately nothing to which corner someone thinks to chase, or whether an odd waveform is investigated at 5&nbsp;p.m. on a Friday.</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">The tell &mdash; a checklist line containing the word <em>adequate</em>, <em>sufficient</em> or <em>acceptable</em></span>
+    <strong>Split it.</strong> The auditable half stays on the checklist; the judgement becomes a named review item with a threshold agreed in advance.
+  </div>
+  <p class="src">The tenfold spread: Oracle Labs, <em>I created the Verification Gap</em>, DVCon&nbsp;U.S.&nbsp;2015 &mdash; [D16, slide&nbsp;7]. Practitioners' own figure, not a controlled study.</p>
+  <p class="note"><b>Say</b>The worked case is the radar front-end's precision sign-off: an inherited line, <em>&ldquo;quantization error characterized against the reference model across the operating range&rdquo;</em>, ticked on every project since. The characterization ran and the report exists &mdash; and nobody asks whether that error is <em>acceptable</em> for the CFAR stage downstream, whose false-alarm rate is what the customer actually buys. <b>And</b>There is a point past which process stops paying, with a recognizable shape: <em>too much detail too soon</em>, where the result communicates <em>worse</em>, not better.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- ============ 18. DIVIDER 25 ============ -->
+<section class="slide divider">
+  <p class="chno">25</p>
+  <h1>AI and ML<br>in Verification</h1>
+  <p class="sub">What has been <em>demonstrated</em>, what is <em>claimed</em>, and the discipline of telling them apart. Every figure below carries its year, its benchmark, its pass criterion, and &mdash; where it matters &mdash; the model underneath it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- src: ch25:3-11 (the two proposals: 88% agreement on a held-back month vs 40 assertions / 38 compile /
+     36 pass; "Both numbers are real. Only one of them is evidence about the thing being proposed.");
+     ch25:13 (two risks, managed by separating DEMONSTRATED from CLAIMED and dating everything; a vendor
+     demonstration is not evidence); ch25:15 (2025 review: MANY never reached mainstream adoption, and
+     the three reasons are about evidence rather than capability) -->
+<!-- ============ 19. TWO PROPOSALS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; How to read a number</p>
+  <h2>Both numbers are real. Only one is evidence about the thing being proposed.</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex good">
+      <span class="tag">Proposal 1 &middot; the video codec's triage classifier</span>
+      Trained on eighteen months of failure logs; it sorts each morning's failures into buckets and names a probable cause. <strong>On a held-back month of history it agreed with the human triage engineer 88% of the time.</strong>
+      <br><br>Measured against <em>a baseline the team owns</em>: yesterday's triage decisions, made by a person, written down, and available to disagree with. It can be re-measured next quarter on next quarter's failures &mdash; and if agreement falls, the team will see it fall.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Proposal 2 &middot; the crypto engine's assertion pilot</span>
+      A language model was given the engine's specification chapter and produced forty SystemVerilog assertions in about twenty minutes. <strong>Thirty-eight compile. Thirty-six pass a formal proof against the current RTL.</strong>
+      <br><br>This measures agreement between a generated property and <em>the design it was generated to check</em> &mdash; precisely what an assertion must not be judged by. A property whose antecedent this design never satisfies passes without ever having been evaluated. <strong>Thirty-six passing proofs is a statement about compilation and consistency. It is not a statement about intent</strong> &mdash; and intent is the only thing a specification-derived property exists to capture.
+    </div>
+  </td></tr></table>
+  <p class="small">The field's own reviewers say as much. A 2025 review of machine learning for micro-electronic design verification observes that although these techniques have been proposed since the late 1990s, <em>many</em> never reached mainstream adoption &mdash; and names three reasons that are about <strong>evidence rather than capability</strong>: withheld code and data make results hard to reproduce; techniques are evaluated on simple designs against random stimulus and little else; and research rarely asks whether a method generalises past the one application it was tried on.</p>
+  <p class="note"><b>Say</b>Two risks attend a subject like this &mdash; that it ages into embarrassment, and that an engineer promised a great deal and shown less reads it cynically and stops. Both are managed the same way: separate what has been <em>demonstrated</em> from what is <em>claimed</em>, and date everything. A vendor demonstration is not evidence.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- src: ch25:27 (three applications with a genuine track record; results span two decades; the value is
+     the SHAPE of the numbers -- each optimises something narrower than the goal, and each decays);
+     ch25:33 (2003 Bayesian network on the storage control element of a commercial mainframe: 5
+     attributes, 13,888 cross product, 1,968 legal tasks, 160 training test-cases each MORE THAN thirty
+     minutes, 1,745 covered, 223 remaining, all 223 within 250 further test-cases, expert directive file
+     TWO-THIRDS after MORE THAN 400); ch25:35 (read the second half first -- the baseline was a human
+     expert's tuned file, which is RARE; the 2025 review cautions that beating random says nothing about
+     generalisation; MORE THAN eighty hours before the first useful directive) -->
+<!-- ============ 20. CLASSICAL ML, WHERE THE RESULTS ARE REAL ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Classical machine learning</p>
+  <h2>The least glamorous techniques here are the most deployed &mdash; and each optimises something narrower than the goal</h2>
+  <p class="small">Three applications have a genuine track record: <strong>steering stimulus toward uncovered behaviour, sorting regression failures, and choosing which tests to run.</strong> Their published results span two decades rather than two years. The value in reading them now is not the numbers &mdash; it is the <em>shape</em> of the numbers.</p>
+  <table class="cols"><tr><td style="width:47%">
+    <div class="ex">
+      <span class="tag">The founding coverage-directed result, 2003</span>
+      A Bayesian network trained to direct stimulus at the storage control element of an <strong>IBM z-series</strong> system. The coverage model had five attributes with a cross product of <strong>13,888</strong> combinations, of which <strong>1,968</strong> were legal coverage tasks. Training used <strong>160</strong> test-cases, each taking <em>more than</em> thirty minutes to run, and covered <strong>1,745</strong> of them; <strong>223</strong> remained.
+      <br><br>The trained network covered all 223 within <strong>250</strong> further test-cases &mdash; where an expert-written directive file covered <em>two-thirds</em> of them after more than <strong>400</strong>.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Read the second half of that before the first</span>
+      <strong>The baseline was a human expert's tuned directive file, not uniform random stimulus.</strong> That is rare, and it is what makes the result mean something. The 2025 review notes that <em>random</em> is the most common baseline in this literature, and cautions that beating random says nothing about whether a technique generalises.
+    </div>
+    <div class="ex warn">
+      <span class="tag">And the cost is in the same figures</span>
+      160 training cases at more than thirty minutes each is <strong>more than eighty hours of simulation before the model produced its first useful directive</strong> &mdash; on top of building a coverage model precise enough to learn from.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The structural point from Chapter 6 is what makes all of this behave the way it does: every such technique learns the mapping from generator directives to achieved coverage and inverts it, which means it optimises the <em>derivative</em> rather than the goal.</p>
+  <p class="src">Cross product, legal tasks and both learning curves: Fine and Ziv, IBM Research Haifa, <em>Coverage Directed Test Generation for Functional Verification using Bayesian Networks</em>, DAC&nbsp;2003 &mdash; [P16, pp.&nbsp;5&ndash;6]. Self-reported. The per-test runtime, and the eighty-hour figure derived from it, are not among the figures checked on those pages.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- src: ch25:37 (2012 review: a limitation common to EVERY approach surveyed -- NONE could CONSISTENTLY
+     cover ALL the tasks; the adoption barrier: the AVERAGE verification engineer is not an expert and
+     cannot tune one, so a method needing customisation will not be supported);
+     ch25:39 (2023 DRL on a compression encoder: 133 of 136 hard functional bins, uniform-random plateaued
+     at 28; closure required MERGING two runs -- 500-episode reached 133, 750-episode reached 127, and the
+     second run's bins were NOT A SUBSET of the first's; "bought the hard bins, did not buy closure");
+     ch25:41 (2025 survey on a 2024 system: beats random on SIMPLE AND MEDIUM designs, degrades above
+     ROUGHLY sixty-four states; the survey reads it as an argument for COMBINING with structural
+     approaches); ch25:43 (the GPU shader clusters fit; the crypto key ladder does not) -->
+<!-- ============ 21. THE CEILING, AND WHERE IT FITS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Coverage-directed generation</p>
+  <h2>It buys the hard bins. It does not buy closure.</h2>
+  <table class="compact">
+    <tr><th style="width:9%">Year</th><th style="width:44%">What was reported</th><th>What it does not say</th></tr>
+    <tr><td><strong>2012</strong></td><td>A review of the whole literature found a limitation common to <em>every</em> approach it surveyed: <strong>none could consistently cover all the tasks in a coverage model.</strong></td><td>Its adoption barrier has aged well: the <em>average</em> verification engineer is not an expert in these techniques and cannot tune one, so a method needing customisation will not be supported. An approach fit for industry must produce results engineers can easily interpret.</td></tr>
+    <tr><td><strong>2023</strong></td><td>Deep reinforcement learning on a compression encoder: an agent reached <strong>133 of 136</strong> hard functional bins, where uniform-random stimulus plateaued at <strong>28</strong>.</td><td>Closure required <strong>merging the coverage of two separate training runs</strong>, because neither alone hit every bin &mdash; a 500-episode run reached 133, a 750-episode run reached 127, and the second run's bins were <em>not a subset</em> of the first's. <strong>A plan that had promised closure would have been wrong.</strong></td></tr>
+    <tr><td><strong>2024</strong><br><span class="small muted">via a 2025 survey</span></td><td>A system given the coverage report and the design under test and asked to propose stimulus <strong>beats random testing on simple and medium designs</strong>.</td><td>It <strong>degrades above roughly sixty-four states</strong> &mdash; which the survey reads as an argument for <em>combining</em> language models with structural approaches rather than replacing them.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <div class="ex good">
+      <span class="tag">A good target &mdash; the GPU's shader clusters</span>
+      Four clusters, a scheduler, and a coverage model whose interesting bins are combinations of occupancy, divergence and memory-request pattern that nobody wants to enumerate by hand. The fit is good because <strong>the space is large, the legal directives are many, and a bin is cheap to check.</strong>
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">A poor one &mdash; the crypto engine's key ladder</span>
+      The interesting states are few, reachable by a directed test in an afternoon, and defined by <strong>a security argument that no coverage bin expresses.</strong>
+    </div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- src: ch25:49 (2023 survey reporting a 2018 study on ONE feature set of 616 features from
+     semi-structured simulation logs: unsupervised clustering 0.543 and 0.593 adjusted mutual information
+     ACROSS THREE ALGORITHMS against an ideal of 1.0; supervised root-cause classification 90.7% accuracy
+     and F1 0.913 with a random forest); ch25:51 (the gap points the WRONG WAY; the three-rung ladder,
+     with MOST research on the first two and NO RESULTS AVAILABLE on the third);
+     ch25:53 (a TYPICAL ML project spending UP TO 70% of effort on preparing data; the codec's label
+     problem; the triage engineer's confirmation IS the training data, and only if recorded in a form a
+     model can read) -->
+<!-- ============ 22. FAILURE TRIAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Failure triage</p>
+  <h2>Two halves of one problem, on one feature set &mdash; and they behave completely differently</h2>
+  <table class="compact">
+    <tr><th style="width:26%">Task &middot; one 2018 study, 616 features from semi-structured simulation logs</th><th style="width:26%">Reported</th><th>What it needs, and what that implies</th></tr>
+    <tr><td><strong>Unsupervised clustering</strong> of failures</td><td><strong>0.543</strong> and <strong>0.593</strong> adjusted mutual information across three algorithms, against an ideal of 1.0</td><td>No labels &mdash; and it is weak.</td></tr>
+    <tr><td><strong>Supervised classification</strong> of the root cause</td><td><strong>90.7%</strong> accuracy, <strong>F1 0.913</strong> with a random forest</td><td>Strong &mdash; and it needs a <em>labelled history</em>: somebody must already have looked at hundreds of failures and written down what caused each.</td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">The gap points the wrong way for anyone hoping to buy their way out of triage</span>
+    The technique works best <strong>where a team already has years of curated triage decisions</strong>, and worst on a new project or a block's first tape-out &mdash; which is where triage hurts most. The same survey ladders the problem into three &mdash; cluster failures by cause, classify the cause, suggest the fix &mdash; and reports that <em>most</em> research addressed the first two, with <strong>no results available on the third</strong>.
+  </div>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">The economics</span>
+      That survey also reports a <em>typical</em> machine-learning project spending <strong>up to 70%</strong> of the team's effort on preparing data. On the video codec's nightly that is not hypothetical: the failure population is dominated by golden-model mismatches whose useful label is <em>a frame region and a coding tool</em> &mdash; and neither is in the log unless somebody puts it there.
+    </div>
+  </td><td>
+    <div class="ex good">
+      <span class="tag">Which is why Chapter 12's discipline is what makes this affordable</span>
+      <strong>The triage engineer's confirmation <em>is</em> the training data</strong> &mdash; and only if that confirmation is recorded in a form a model can read. A rota that closes buckets in a chat thread has spent the labour and thrown away the label.
+    </div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- src: ch25:59 (a ranking model optimises time-to-first-failure; a selection model optimises coverage
+     per simulation-second; NEITHER optimises discovery of new behaviour, and the industrial study behind
+     the ranking figures says a ranked regression simulates NO NEW SCENARIOS and is NOT RECOMMENDED for
+     exploring the random space or exposing new bugs);
+     ch25:61 (change-detection instrument vs bug-finding instrument; the honest deployment keeps both)
+     -- the published ranking/selection FIGURES live in ch12 and are deliberately not re-quoted here -->
+<!-- ============ 23. REGRESSION COMPRESSION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Test selection</p>
+  <h2>A compressed regression is a change-detection instrument, not a bug-finding one</h2>
+  <table class="cols3"><tr><td style="width:33%">
+    <div class="ex">
+      <span class="tag">A ranking model optimises</span>
+      <strong>Time-to-first-failure</strong> over a <em>known</em> suite &mdash; it reorders existing test-and-seed pairs so the runs most likely to fail go first.
+    </div>
+  </td><td style="width:33%">
+    <div class="ex">
+      <span class="tag">A selection model optimises</span>
+      <strong>Coverage per simulation-second</strong> &mdash; discarding runs whose contribution it predicts is redundant.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Neither optimises</span>
+      <strong>The discovery of new behaviour.</strong> The industrial study behind the ranking figures says so in its own words: a ranked regression <em>simulates no new scenarios</em> and is <em>not recommended</em> for exploring the random space or exposing new bugs.
+    </div>
+  </td></tr></table>
+  <p class="small">That is a constraint on where the technique can <em>sit</em>, not a caveat to file away. A ranked or compressed regression answers <em>&ldquo;did this commit break something the suite already knew how to catch?&rdquo;</em> quickly and cheaply. <strong>A program that replaces its full random regression with a compressed one has quietly converted its main source of new bugs into a fast regression check.</strong></p>
+  <div class="ex good">
+    <span class="tag">The honest deployment keeps both instruments</span>
+    A compressed suite per commit, <em>and</em> a full sweep with fresh seeds on a slower cadence &mdash; whose yield is tracked as a signal in its own right. The failure mode is quiet and arithmetic: regression runtime halves, and the bug discovery rate follows it down where nobody is plotting it.
+  </div>
+  <p class="note"><b>Say</b>This is the one entry on the adopt-now list that comes with a mandatory companion. If a team takes the compression and drops the sweep, the technique has made the programme worse while every dashboard improved.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- src: ch25:65-67 (the decay mode: a model trained on one design/quarter/release is a claim that
+     tomorrow resembles yesterday; 2025 review -- an example that was novel becomes unremarkable, so
+     regular retraining is needed, and once deployed the learner shapes the examples it will later be
+     retrained on, which CAN suppress exploration and make performance DECREASE over time; research
+     frames verification as a ONE-TIME learning problem while industrial designs change continuously;
+     if substantial effort goes into crafting fitness or reward functions the technique has MERELY
+     SHIFTED effort from writing tests to tuning models);
+     ch25:69 (retraining is a named, owned, scheduled task; the 90%-at-tape-out / 60%-two-derivatives-
+     later classifier is worse than none because the rota has stopped checking it);
+     ch25:71 (mis-steer vs bad oracle -- the reason the rest of the chapter is about generated checkers) -->
+<!-- ============ 24. THE STALE MODEL ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; The decay mode</p>
+  <h2>Every technique on the last four slides shares one failure &mdash; and it is why published results do not survive contact with a programme</h2>
+  <p class="small">A model trained on one design's coverage response, one quarter's failure logs, or one release's regression outcomes is <strong>a claim that tomorrow resembles yesterday</strong>. The 2025 review names this directly: an example that was novel becomes unremarkable once more examples have been seen, so the model needs regular retraining to stay relevant &mdash; and worse, once deployed, <strong>the learner shapes the examples it will later be retrained on</strong>, which <em>can</em> suppress exploration and make performance <em>decrease</em> over time. The same review observes that research usually frames verification as a one-time learning problem while industrial designs change continuously, and warns that if substantial effort goes into crafting fitness or reward functions, the technique has <em>merely shifted</em> effort from writing tests to tuning models.</p>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">Consequence 1 &middot; retraining is a task, not a maintenance detail</span>
+      It is named, owned, scheduled, and has a cost. <strong>A triage classifier 90% accurate at tape-out and 60% accurate two derivatives later is worse than none</strong>, because the rota has stopped checking it. Give it a measured agreement rate, re-measure on a fixed cadence against human decisions, and publish the number where the people relying on it can see it.
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">Consequence 2 &middot; a severity distinction the word &ldquo;model&rdquo; hides</span>
+      A <strong>stimulus</strong> model that goes stale <em>mis-steers</em>: you get worse coverage per run, and the coverage report tells you. A generated <strong>checker</strong> that goes stale is a <em>bad oracle</em> &mdash; it decides whether an observed response is correct &mdash; and <strong>a bad oracle does not announce itself in any report.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>That second box is the hinge of the whole chapter. Everything from here on is about generated <em>checkers</em>, because they are the artifacts whose failure is silent.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- src: ch25:79 (2024 framework: 89% of 56 generated properties correct BOTH syntactically and
+     functionally, on ONE serial-bus design of 23 signals; CORRECT = passed a formal proof against
+     known-good RTL, AFTER human engineers had removed generations referencing signals the tool could not
+     map); ch25:81 (the ablation: the underlying general-purpose model alone produced 71 candidates, 23
+     syntactically correct, 6 passed the proof = 8% BY THE SAME MEASURE; the surrounding engineering is
+     doing most of the work and does not transfer for free to a different house style);
+     ch25:83 (scope: connectivity properties ONLY for control signals; function properties ONLY where the
+     specification detailed register behaviour; a generator will not tell you which plan rows it left
+     untouched); ch25:132 (the ablation is reported BY THE FRAMEWORK'S OWN AUTHORS as their baseline) -->
+<!-- ============ 25. ASSERTIONS FROM A SPECIFICATION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Language models, with the evidence</p>
+  <h2>The number is 89%. Its four qualifiers are what it means.</h2>
+  <table class="compact">
+    <tr><td style="width:20%"><strong>The result</strong></td><td>A 2024 framework that reads a full natural-language specification and emits SystemVerilog assertions reported <strong>89% of 56 generated properties correct</strong> both syntactically and functionally.</td></tr>
+    <tr><td><strong>&hellip; on what</strong></td><td><strong>One</strong> serial-bus design, 23 signals.</td></tr>
+    <tr><td><strong>&hellip; where <em>correct</em> means</strong></td><td>The property <strong>passed a formal proof against known-good RTL</strong>.</td></tr>
+    <tr><td><strong>&hellip; after what</strong></td><td>After <strong>human engineers had removed the generations referencing signals the tool could not map</strong>. Those never entered the denominator.</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">The ablation &mdash; reported by the framework's own authors as their baseline</span>
+      Given the same specification files, the underlying general-purpose model <em>on its own</em> produced <strong>71</strong> candidate properties, of which <strong>23</strong> were syntactically correct and <strong>6</strong> passed the proof &mdash; <strong>8%</strong> by the same measure that gave the full framework 89%.
+      <br><br>So the engineering <em>around</em> the model &mdash; splitting the specification, mapping signal names, retrieving the right passage per property &mdash; is doing most of the work. <strong>It is also the part that does not transfer for free to a specification written in a different house style.</strong>
+    </div>
+  </td><td>
+    <div class="ex">
+      <span class="tag">The scope &mdash; what the generator could not reach</span>
+      Of the three property classes the framework generates, <strong>connectivity properties could be produced only for control signals</strong>, because the connectivity of data signals depends on internal RTL structure the specification does not describe. And <strong>function properties only where the specification detailed the register behaviour</strong>.
+      <br><br><strong>The reachable subset of a specification is narrower than the specification &mdash; and a generator will not tell you which rows of your plan it left untouched.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Ask the room which of the four qualifiers they would have heard in a hallway version of this result. Usually none of them, and the fourth one &mdash; the hand-removal before scoring &mdash; is the one that changes the number most.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- src: ch25:85 (2025 study on protocol formal specifications WITH TIMING DIAGRAMS; two-stage
+     grammar + SAT + model filter; SAT retains BETWEEN 5% AND 22% IN EVERY CASE; across six open-source
+     on-chip protocols, 53 of 58 manually derived targets covered -- FOR EVERY PROTOCOL BUT ONE, WHICH IS
+     EXCLUDED FROM THAT COUNT); ch25:87 (the head-to-head: MUST NOT BE READ AS A CURVE -- different task,
+     different artifact class, and the head-to-head RE-RAN the first framework itself UNDER TWO MODELS;
+     all 13 targets with no syntax errors vs 38 properties / 3 correct / 2 of 13 / 16 syntax errors /
+     11 non-existent signals UNDER ONE OF THEM; the eleven track the MODEL -- under the other, NONE);
+     ch25:89 (the four-way taxonomy; four hallucinated properties in one transaction section);
+     ch25:91 (the authors' own stated limits, all four) -->
+<!-- ============ 26. A DIFFERENT TARGET, AND WHY IT IS NOT A CURVE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Language models, with the evidence</p>
+  <h2>A framework built for one artifact class does not transfer to another</h2>
+  <p class="small">A 2025 study attacks a different target: <strong>protocol formal specifications &mdash; documents with timing diagrams</strong>. Its flow is two-stage: generate candidate properties from a grammar, check each against the timing diagram with a SAT solver, then use a language model to filter the survivors against the textual description. <strong>The SAT stage retains between 5% and 22% of the candidates in every case</strong> &mdash; the clearest available measure of how aggressively a mechanical filter can thin a candidate set before anyone reads it. Across six open-source on-chip protocols, the extracted properties covered <strong>53 of 58</strong> manually derived target properties &mdash; <em>for every protocol but one, which is excluded from that count</em>.</p>
+  <div class="ex warn">
+    <span class="tag">The head-to-head, and the reason it is not a curve</span>
+    That paper also runs the specification-driven framework of the previous slide on one of its own protocols. <strong>The two results must not be read as a curve.</strong> They differ in task and in artifact class, and the head-to-head <em>re-ran that framework itself</em>, reporting it under two underlying models. On that protocol the two-stage flow covered <strong>all 13</strong> manually derived properties with no syntax errors, while under <em>one of</em> those two models the specification-driven framework produced <strong>38</strong> properties of which <strong>3</strong> were judged correct and <strong>2 of the 13</strong> targets covered, with <strong>16</strong> syntax errors and <strong>11</strong> references to signals that do not exist. The conclusion is not that one framework is better than another by some ratio &mdash; and <strong>the eleven non-existent signals track the <em>model</em> rather than the framework: under the other model it produces none.</strong>
+  </div>
+  <table class="cols"><tr><td style="width:44%">
+    <div class="ex good">
+      <span class="tag">A taxonomy worth borrowing wholesale &mdash; it is the vocabulary a reviewer needs</span>
+      A generated property may be <strong>correct</strong> (unique or redundant), <strong>incorrect</strong>, <strong>unsure</strong>, or <strong>hallucinated</strong> &mdash; invented rather than drawn from the set it was given to filter. One protocol's transaction section produced <strong>four hallucinated properties</strong>.
+    </div>
+  </td><td>
+    <div class="ex">
+      <span class="tag">The authors' own limits, stated plainly</span>
+      The method <strong>depends on unambiguous timing diagrams</strong>. On the complex protocols the target set <em>does not cover the entire formal specification</em>. Models remain <strong>poor at reading figures</strong>, often getting a signal's value in a given cycle wrong. And <strong>experienced engineers are still better at inferring properties where the document has no text to work from.</strong>
+    </div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- src: ch25:95 (2025 industrial agentic formal flow, its five stages; headline: DOES NOT GUARANTEE a
+     result on every run, WORKS MOST OF THE TIME, at an OVERALL EFFICACY OF AROUND 40%);
+     ch25:97 (the study's FIRST-NAMED indicator is a SUCCESS RATE = runs that completed end-to-end
+     formal verification out of total runs -- whether the PIPELINE FINISHED, not whether the properties
+     were right); ch25:99 (observed failure modes, all four); ch25:101 (15 designs, three tiers, the
+     advanced tier's five blocks; a 40% figure should be read as 40% ON DESIGNS OF THAT SIZE);
+     ch25:103 (three models: 17.78 / 43.19 / 48.77 easiest, 4.33 / 9.00 / 41.43 hardest, and the
+     six-point sentence. Deliberately NOT tabulated: the source does not say WHICH easiest-tier figure
+     became which hardest-tier figure, and a model x tier table would force an assignment it never makes);
+     ch25:105 (the five-iteration hand-off: a DESIGNED hand-off point rather than a fallback) -->
+<!-- ============ 27. AGENTIC FLOWS ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 25 &middot; Language models, with the evidence</p>
+  <h2>&ldquo;Around 40%&rdquo; &mdash; and then read what was counted</h2>
+  <p class="small">The corpus contains one industrial report of an end-to-end agentic formal flow, from <strong>Infineon</strong> in 2025: a lead agent drafts a verification plan in natural language, a dispatcher delegates assertion generation, critic agents evaluate the results, properties are proven in a commercial model checker, counterexamples are analysed, and formal coverage is assessed for sign-off. Its headline is that <strong>the flow does not guarantee a result on every run and works most of the time, at an overall efficacy of around 40%.</strong></p>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex warn">
+      <span class="tag">What the 40% measures</span>
+      The study's <strong>first-named</strong> indicator is a <em>success rate</em>, defined as the number of runs that completed end-to-end formal verification out of the total runs &mdash; <strong>a measure of whether the pipeline finished, not of whether the properties it produced were the right ones.</strong>
+      <br><br>On this flow those are different questions. The authors list <strong>vacuous passes</strong> in formal properties among the failure modes they observed, alongside syntactically incorrect or semantically irrelevant assertions, assertions referencing signals absent from the specification, and truncation of large RTL against the model's context limit.
+    </div>
+  </td><td>
+    <div class="ex">
+      <span class="tag">What it was measured on</span>
+      Fifteen designs across three difficulty tiers, where the <em>advanced</em> tier holds a <strong>Booth multiplier, a pipelined adder, a small RISC-V core, a PID controller and a round-robin arbiter</strong>. These are block-scale exercises, and <strong>a 40% figure should be read as 40% on designs of that size.</strong>
+    </div>
+    <div class="ex warn">
+      <span class="tag">And it is a function of which model was underneath</span>
+      The same flow was run with three general-purpose language models. On the easiest tier they completed <strong>17.78%, 43.19% and 48.77%</strong> of runs end to end; on the hardest, <strong>4.33%, 9.00% and 41.43%</strong>. <strong>The two models within six points of each other on the easiest tier were the 9.00% and the 41.43% on the hardest.</strong> That is not a property of the technique but of the technique <em>paired with one model</em>.
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The flow's most transferable idea is not in its numbers. When two agents loop on generating and correcting an assertion without converging, it stops them at a threshold of five iterations and asks a human for the correct assertion &mdash; a <em>designed hand-off point</em> rather than a fallback. <b>Careful</b>Do not draw those six figures as a table of model against tier: the source never says which easiest-tier result belongs to which hardest-tier one, and a table would invent that pairing.</p>
+  <p class="src">The &ldquo;around 40%&rdquo;: <em>Saarthi: The First AI Formal Verification Engineer</em>, Infineon Technologies, DVCon&nbsp;2025 &mdash; [D25, p.&nbsp;12]; the advanced-tier design list and the named failure modes, p.&nbsp;11. Self-reported. The benchmark designs are exercises, <strong>not Infineon products</strong>. The six per-model completion percentages lie outside the pages checked here.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- src: ch25:109 (2025 causal-graph debug system; 38 real debugging challenges with human-verified
+     ground-truth fixes; 0.956 best-hypothesis quality; fixes resolved 71.1% first attempt, 86.8% within
+     five); ch25:111 (the two metric families and their difference, stated by the paper);
+     ch25:113 (the baseline table: 0.783 quality / 65.8% within five, and 0.474 -- THE WORST HYPOTHESIS
+     QUALITY IN THE TABLE -- / 81.6%. NOT "the best pass rate in the table": the full system's 86.8% is
+     higher, so the chapter's claim is that the two do not TRACK each other, per ch25:135 "does not order
+     configurations the same way");
+     ch25:115 (two counterexamples from a larger open-source application-class processor, one LSU failure
+     spanning 1,918 lines across seven files; quality falls to 0.713; NO Pass@k reported at all; the
+     authors call fix generation at that scale FUTURE WORK; the graph has 170 nodes) -->
+<!-- ============ 28. TWO FAMILIES OF METRIC ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 25 &middot; Debug and root cause</p>
+  <h2>A score awarded by a language model and a score checked by a machine do not rank the same alternatives the same way</h2>
+  <p class="small">A 2025 system from <strong>NVIDIA</strong> attacks counterexample debugging structurally: it converts the failure trace into a causal graph, scans for suspicious nodes, explores them agentically, and proposes an RTL fix. On <strong>38</strong> real debugging challenges with human-verified ground-truth fixes it scored <strong>0.956</strong> on best-hypothesis quality, and its fixes resolved the failure <strong>71.1%</strong> of the time first attempt, <strong>86.8%</strong> within five.</p>
+  <table class="compact">
+    <tr><th style="width:23%">Metric family</th><th style="width:30%">How it is produced</th><th>Configuration</th><th style="width:15%">Quality</th><th style="width:17%">Resolved within five</th></tr>
+    <tr><td><strong>Hypothesis quality</strong></td><td>Scored <strong>by a language model</strong> comparing the hypothesis against the ground truth</td><td>The full system</td><td>0.956</td><td>86.8%</td></tr>
+    <tr><td><strong>Pass@k</strong></td><td>Measured <strong>mechanically</strong> &mdash; the proposed fix applied to the RTL and the proof re-run in a model checker</td><td>One unstructured baseline</td><td>0.783</td><td>65.8%</td></tr>
+    <tr><td colspan="2" class="muted"><em>The paper is explicit about the difference. Its own baseline table shows the two do not track each other &rarr;</em></td><td>Another unstructured baseline</td><td><strong>0.474</strong> <span class="pill no">WORST IN TABLE</span></td><td><strong>81.6%</strong></td></tr>
+  </table>
+  <div class="ex warn" style="margin-top:4px">
+    <span class="tag">What that means for a proposal you are handed &mdash; and what happens on the harder designs</span>
+    <strong>A model-judged score measures how convincing an explanation <em>reads</em>.</strong> It is not a proxy for whether the fix works, and where a study reports only that kind, you have been told how <em>plausible</em> the output is. Taken to two counterexamples from a larger open-source application-class processor, best-hypothesis quality falls to <strong>0.713</strong> and <strong>no Pass@k is reported at all</strong>: the authors call automated fix generation at that scale future work.
+  </div>
+  <p class="src">0.956, 71.1% / 86.8% and the 0.783 / 65.8% baseline: <em>FVDebug</em>, NVIDIA, arXiv&nbsp;2510.15906 &mdash; [P22, p.&nbsp;7]; the 1,918-line LSU failure, p.&nbsp;8. Self-reported; NVIDIA names no product or design of its own &mdash; the harder pair is the open-source CVA6. The 0.474 / 81.6% baseline and the 0.713 fall are outside the checked pages.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- src: ch25:129-137 (the evidence table, all seven rows, carried with the fourth column intact --
+     ch25:127 says the fourth column is the one to read first and is where most summaries go wrong);
+     ch25:139 (two rows describe the same paper's system twice ON PURPOSE, and a merged row would be true
+     in both halves and wrong as a whole);
+     ch25:119 (the last row's grounding: no study in this corpus scores testbench scaffolding or a
+     drafted plan; the flows that draft a plan are graded only by downstream outcomes) -->
+<!-- ============ 29. THE EVIDENCE TABLE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; The evidence table</p>
+  <h2>Read the fourth column first &mdash; it is where most summaries of this field go wrong</h2>
+  <table class="evid">
+    <tr><th style="width:17%">Capability</th><th style="width:18%">Reported result, year</th><th style="width:15%">Measured on</th><th style="width:19%">What counted as success</th><th style="width:31%">Stated limits</th></tr>
+    <tr><td>Assertions from a specification document</td><td><strong>89% of 56</strong> properties correct, 2024</td><td>One serial-bus design, 23 signals</td><td>Passing a formal proof against known-good RTL</td><td>Unmappable generations removed by hand before scoring; connectivity properties limited to control signals</td></tr>
+    <tr><td>Properties from a protocol specification with timing diagrams</td><td><strong>53 of 58</strong> targets covered, 2025</td><td>Five of six open-source protocols; the sixth is outside that count</td><td>Covering a manually derived target, after a SAT check and a model filter</td><td>SAT retains 5&ndash;22% of candidates; on complex protocols the target set is not the whole specification</td></tr>
+    <tr><td>End-to-end agentic formal verification</td><td><strong>17.78&ndash;48.77%</strong> of runs completed on the easiest tier, <strong>4.33&ndash;41.43%</strong> on the hardest, 2025</td><td>15 block-scale designs, 3 tiers, 3 models</td><td>A run that <em>completed the flow</em> &mdash; not a property that was correct</td><td>Efficacy summarised at around 40%; failure modes include vacuous passes and context truncation</td></tr>
+    <tr><td>Root-cause hypotheses for a counterexample</td><td><strong>0.956</strong> best-hypothesis quality, 2025</td><td>38 challenges with verified fixes, one model</td><td>Similarity to the ground truth, <strong>scored by a language model</strong></td><td>Model-judged, and does not order configurations the same way the mechanical measure does</td></tr>
+    <tr><td>Fixes for a counterexample</td><td><strong>71.1%</strong> first attempt, <strong>86.8%</strong> within five, 2025</td><td>The same 38 challenges, the same model</td><td>The fix applied to the RTL and <strong>the proof re-run</strong></td><td>Not reported on the two application-class processor failures; called future work</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Rows four and five describe <em>the same paper's system</em>, twice, on purpose. A row that merged them &mdash; <em>root-cause analysis, 0.956 quality and 71.1% fix rate</em> &mdash; would be true in both halves and wrong as a whole, because it would hide that one number was awarded by a language model and the other by a model checker. <b>Also</b>Two rows this table cannot hold. That framework's own ablation: <strong>6 of 71</strong> candidates passing without the engineering around the model. And <strong>testbench scaffolding and plan drafting</strong>, for which this corpus contains <em>no measurement of artifact quality at all</em> &mdash; the flows that draft a plan are graded only by downstream outcomes.</p>
+  <p class="src">Row&nbsp;3: <em>Saarthi</em>, Infineon Technologies, DVCon&nbsp;2025 &mdash; [D25, pp.&nbsp;11&ndash;12]; its tier percentages lie outside those pages, the &ldquo;around 40%&rdquo; summary is on p.&nbsp;12. Rows&nbsp;4&ndash;5: <em>FVDebug</em>, NVIDIA, arXiv&nbsp;2510.15906 &mdash; [P22, pp.&nbsp;7&ndash;8]; NVIDIA names no design of its own. Both self-reported. Rows&nbsp;1&ndash;2 are not anchored to a named organisation.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- src: ch25:143 (plausibility is the objective function, correctness a frequent BY-PRODUCT);
+     ch25:145-171 (the crypto-engine specification sentence, the generated property and the corrected
+     one, VERBATIM including the strengthened antecedent cover; nothing elided inside a construct);
+     ch25:157-159 (wrong in TWO directions from one missing delay, both worked);
+     ch25:173 (a 2025 study opens with the same defect on a generic valid/ready interface, and notes
+     earlier machine-learning work made exactly that mistake);
+     ch25:175 (what a proof would say: it depends entirely on whether this pipeline happens to hold
+     key_sel steady for a cycle before a request rises);
+     ch25:177 (an assertion mined from the design's own traces has no independent reference -- and a
+     method reading the specification AND the RTL together inherits the same weakness) -->
+<!-- ============ 30. PLAUSIBLE BY CONSTRUCTION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Why a wrong one is expensive</p>
+  <h2>Correctness is not the objective function. Plausibility is.</h2>
+  <table class="cols"><tr><td style="width:50%">
+<pre class="mini">// Specification: "While the engine is holding a request
+// that the memory path has not accepted, the key slot
+// selector must not change."
+// GENERATED -- and wrong, in two directions.
+property p_keysel_stable_gen;
+  @(posedge clk) disable iff (!rst_n)
+  (req_valid &amp;&amp; !req_ready) |-&gt; $stable(key_sel);
+endproperty
+a_keysel_stable_gen : assert property (p_keysel_stable_gen);</pre>
+<pre class="mini">// CORRECT -- the obligation lands one tick later.
+property p_keysel_stable;
+  @(posedge clk) disable iff (!rst_n)
+  (req_valid &amp;&amp; !req_ready) |-&gt; ##1 $stable(key_sel);
+endproperty
+a_keysel_stable : assert property (p_keysel_stable);
+c_keysel_held   : cover property (@(posedge clk)
+                    disable iff (!rst_n)
+                    (req_valid &amp;&amp; !req_ready)[*2]);</pre>
+  </td><td>
+    <p class="small">The signals are right, the guard is present, the condition is the one the sentence describes, and the operator is the one <em>stable</em> suggests. <strong>It is wrong in two directions, from one missing delay.</strong></p>
+    <div class="ex warn">
+      <span class="tag">1 &middot; it forbids something legal</span>
+      <code>$stable</code> compares the current tick against the previous one, so at the <em>first</em> held cycle the property demands that <code>key_sel</code> already had its value one cycle <em>earlier</em> &mdash; before the request existed. A design that legally presents a fresh request with a new key slot right after a previous transfer fails a rule the specification never stated.
+    </div>
+    <div class="ex warn">
+      <span class="tag">2 &middot; it permits the damage</span>
+      On the <em>last</em> held cycle it says nothing about <code>key_sel</code> in the following cycle &mdash; the one in which the request is finally accepted, <strong>where a change would do actual damage.</strong>
+    </div>
+  </td></tr></table>
+  <p class="small"><strong>Now ask what a formal proof would say about the first version. It depends entirely on whether this pipeline happens to hold <code>key_sel</code> steady for a cycle before a request rises.</strong> If a register upstream loads the selector one cycle early, the wrong property is <em>proven</em> on RTL that is behaving correctly &mdash; and under a pass criterion of <em>proved against known-good RTL</em> it is scored correct and enters the suite. <strong>A proof engine's verdict on today's RTL is not a verdict about the property.</strong></p>
+  <p class="note"><b>Say</b>The defect is not invented: a 2025 study of property generation from protocol documents opens with it on a generic valid/ready interface, and notes that earlier machine-learning work made exactly the same mistake.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- src: ch25:179 (correlated errors: a human's mistakes are uncorrelated so a sample estimates a rate,
+     a generator's are systematic so a sample estimates NOTHING. Chapter states this is PRACTITIONER
+     JUDGMENT RATHER THAN A PUBLISHED RESULT and calls it the most consequential difference in review
+     practice it contains -- carried as an amber pill);
+     ch25:181 (collective authority; an empty slot in a plan is visible, a wrong property is invisible
+     and gets trusted; when scepticism runs out, ALL properties get skimmed);
+     ch25:238 (every referenced signal exists AND IS THE ONE INTENDED -- the eleven in a batch of 38, and
+     the human removal of unmappables; elaboration does not catch the wrong-but-existing signal);
+     ch25:239 (vacuous passes are a NAMED, OBSERVED failure mode in industrial use);
+     ch25:242 (the limit on throughput is reading, not generating; adopt where the mechanical filter is
+     strong and the batch is small enough to review whole) -->
+<!-- ============ 31. REVIEWING MACHINE-WRITTEN CODE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Review practice</p>
+  <h2>A generator's mistakes are systematic &mdash; so sampling a batch estimates nothing</h2>
+  <p class="small"><span class="pill arg">PRACTITIONER JUDGMENT</span> &nbsp;A human writing forty properties makes <em>idiosyncratic</em> mistakes, uncorrelated across the batch, so sampling five is defensible: <strong>the sample estimates a rate</strong>. A generator's mistakes are <em>systematic</em> &mdash; one misreading of one recurring pattern reproduces identically in every property derived from it, so a sample of five either catches the whole class or misses it entirely. The chapter offers this as its own judgment rather than a published result.</p>
+  <table class="compact">
+    <tr><th style="width:29%">What this review checks that an ordinary code review need not</th><th>Why it carries weight here that it does not carry when the author is a person</th></tr>
+    <tr><td><strong>Every referenced signal exists <em>and is the one intended</em></strong></td><td>Generated properties can name signals not in the design &mdash; the head-to-head counted <strong>eleven</strong> in a batch of thirty-eight. Elaboration catches those. <strong>It does not catch the <em>wrong-but-existing</em> signal</strong>, the common case where ports are similarly named.</td></tr>
+    <tr><td><strong>The artifact is in a position to fail</strong></td><td><strong>Vacuous passes are a named, observed failure mode</strong> in industrial use &mdash; which promotes Chapter 11's cover-with-every-implication rule from good habit to <em>admission criterion</em>.</td></tr>
+    <tr><td><strong>The batch, not the sample</strong></td><td>Because a generator's errors are correlated, <strong>a review covers every artifact in a batch or rejects the batch.</strong></td></tr>
+  </table>
+  <div class="ex warn">
+    <span class="tag">Which sets the real constraint on adoption &mdash; and it inverts the intuition the technology invites</span>
+    A verification suite has <strong>collective authority</strong>: engineers believe a passing regression because they believe its checkers were written by someone who understood the design. One careful-looking property encoding the wrong rule spends that credit, and <strong>when the reviewer's scepticism runs out the outcome is not that generated properties get rejected &mdash; it is that <em>all</em> properties get skimmed.</strong> So <strong>the limit on throughput is not how fast artifacts can be generated but how fast they can be read</strong>: a flow producing two hundred properties in an afternoon has saved nobody a week unless someone reviews two hundred. <em>A design constraint on the flow, not an attitude toward the technology.</em>
+  </div>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- src: ch25:185 (four named decision points, each with a question, an owner, the evidence, and the
+     damage of leaving it unowned); ch25:187-220 (the figure: four mechanical gates then three human
+     gates then admission -- rendered as a diagram table since weasyprint 52.5 cannot lay out inline SVG.
+     Gate 4 is NOT in the chapter's figure, only in its text, so it is drawn here as a callout beside the
+     figure rather than as a fourth box inside it); ch25:222 (the ORDER is the point: everything a
+     machine can decide is decided before a person spends attention -- what makes the human gates
+     affordable at all); ch25:224-230 (the four gates' text); ch25:232 (the fifth place is a BOUND rather
+     than a gate; the 2026 survey's deadlooping / context loss / tool hallucination) -->
+<!-- ============ 32. THE HUMAN GATES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Where a person belongs</p>
+  <h2>&ldquo;Keep a human in the loop&rdquo; has no operational content. Name the places instead.</h2>
+  <table class="diag">
+    <tr>
+      <td colspan="3"><div class="db obs">Compiles and elaborates</div></td>
+      <td colspan="3"><div class="db obs">Every signal resolves</div></td>
+      <td colspan="3"><div class="db obs">Antecedent cover is reachable</div></td>
+      <td colspan="3"><div class="db obs">Not a duplicate</div></td>
+    </tr>
+    <tr class="stem"><td colspan="3"><i class="dash"></i></td><td colspan="3"><i class="dash"></i></td><td colspan="3"><i class="dash"></i></td><td colspan="3"><i class="dash"></i></td></tr>
+    <tr>
+      <td colspan="4"><div class="db chk">H1 &middot; Intent<span class="s">does it mean what the specification means?</span></div></td>
+      <td colspan="4"><div class="db chk">H2 &middot; Admission<span class="s">which regression tier, on what evidence?</span></div></td>
+      <td colspan="4"><div class="db chk">H3 &middot; Ownership<span class="s">who answers when it fails?</span></div></td>
+    </tr>
+    <tr class="stem"><td colspan="12"><i></i></td></tr>
+    <tr><td colspan="12"><div class="db bus">Admitted, provenance recorded<span class="s">the mechanical gates cost no human time and run first &mdash; which is what makes the human gates affordable</span></div></td></tr>
+  </table>
+  <table class="compact" style="margin-top:5px">
+    <tr><td style="width:15%"><strong>H1 Intent</strong></td><td>Owner: <strong>whoever owns the plan row it discharges</strong>, not whoever ran the generator. Needs the specification sentence beside the artifact, and <em>a demonstration that the artifact can fail</em>. <strong>A passing proof is not evidence at this gate.</strong> Unowned: a wrong rule enters the suite and inherits its authority.</td></tr>
+    <tr><td><strong>H2 Admission</strong></td><td>Not &ldquo;does it fail at random?&rdquo; but <strong>&ldquo;does it fail on things that are not bugs?&rdquo;</strong> A generated check earns a gating tier by running clean across a window of known-good history, and <em>that window is the evidence</em>.</td></tr>
+    <tr><td><strong>H3 Ownership</strong></td><td>Named <em>at merge, in the file</em> &mdash; not discovered at the first failure. <strong>A component nobody wrote is a component nobody can reason about under time pressure.</strong> Require the accepting engineer to explain it without regenerating it.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>There is a fourth gate the figure does not draw: <strong>waiver authority</strong>. A model's proposed coverage exclusion is still a waiver in Chapter 7's sense, with the same five fields, and its origin does not change who signs it &mdash; <em>exclusion is where an optimising system will always push, because to a coverage metric excluding a bin is indistinguishable from covering it</em>. <b>And</b>A fifth place a person belongs is a <em>bound</em> rather than a gate: where two automated stages iterate against each other the loop needs a cap. A 2026 survey names the failure a cap prevents, <em>deadlooping</em>, alongside <em>context loss</em> and tool hallucination.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<!-- src: ch25:246 (the two-years-later escape analysis and the question the review cannot answer);
+     ch25:250-257 (the six provenance fields, verbatim in substance, including the 4.33-41.43 model-
+     identity argument); ch25:259 (a record of what a MACHINE produced is an audit trail of the machine;
+     a record of what a PERSON accepted is an audit trail of the DECISION, and the decision is what is
+     being reviewed); ch25:263 (sampling parameters are NOT a seed in Chapter 9's sense; the union-of-
+     three-runs practice and the design-dependent temperature -> speaker note);
+     ch25:265 (do not treat regeneration as re-checking; version the artifact rather than the recipe) -->
+<!-- ============ 33. THE PROVENANCE RECORD ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Governance</p>
+  <h2>Two years after tape-out, somebody asks where that property came from</h2>
+  <p class="small">A field failure triggers an escape analysis. Somebody asks how a behaviour was covered; the answer points at a property; the next question is where it came from. <strong>If the honest answer is <em>a model wrote it and someone approved it</em>, the review has nowhere to go.</strong></p>
+  <table class="compact">
+    <tr><th colspan="2">Attach to every generated artifact &mdash; in the repository, not in a wiki</th></tr>
+    <tr><td style="width:26%"><strong>What produced it</strong></td><td>System, version, and <strong>the identity and version of the model underneath</strong>. One flow varied from 4.33% to 41.43% end-to-end success on a single tier depending on which. <em>Model identity is a parameter of the result.</em></td></tr>
+    <tr><td><strong>What it was given</strong></td><td>Which document, <strong>which revision</strong>, which section, and the prompt version. Without the revision, nobody can tell whether the property predates the change that made it wrong.</td></tr>
+    <tr><td><strong>Sampling settings, and how many runs were kept</strong></td><td>Sampling parameters are <strong>not a seed in Chapter 9's sense</strong>: identical inputs can yield different outputs across runs. And <strong>regeneration is not re-checking</strong> &mdash; a second run agreeing with the first is not corroboration, since both come from the same process with the same blind spots.</td></tr>
+    <tr><td><strong>Which mechanical checks it passed</strong></td><td>And their versions: compilation, signal resolution, antecedent reachability, duplicate detection.</td></tr>
+    <tr><td><strong>Who accepted it at each gate, and against what text</strong></td><td>Not a signature on a batch: <strong>a name against an artifact, and the specification sentence they compared it to.</strong></td></tr>
+    <tr><td><strong>Whether it was edited after generation, and by whom</strong></td><td>A hand-edited generated property is a hand-written property with a misleading history.</td></tr>
+  </table>
+  <div class="ex good">
+    <span class="tag">The last two are the ones teams skip and the ones a defensible sign-off needs</span>
+    A record of what a <em>machine</em> produced is an audit trail of the machine. <strong>A record of what a <em>person</em> accepted is an audit trail of the decision &mdash; and the decision is what is being reviewed.</strong>
+  </div>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">33</span>
+</section>
+
+<!-- src: ch25:277-281 (the three deciding questions, verbatim in substance);
+     ch25:283 (adopt now: ranking and selection WITH the change-detection constraint carried in the same
+     breath; supervised triage WHERE a labelled history already exists; scaffolding WHEREVER a mechanical
+     diff decides correctness); ch25:285 (pilot in a non-gating tier, and why debug assistance is the
+     other good pilot); ch25:287 (wait; the 2026 survey: RL systems HAVE reached industrial tape-out and
+     NO language-model-driven autonomous agent has YET demonstrated a complete human-free tape-out; the
+     unit-test fallacy; every headline figure was measured on a block, a protocol or a curated benchmark
+     and NONE on an SoC); ch25:269-271 (data governance; what leaves the building, in writing);
+     ch25:295-297 (what ages, and the three questions to ask of next year's paper) -> speaker note;
+     ch25:291 (proof-carrying, available today without new tooling) -> speaker note -->
+<!-- ============ 34. ADOPT, PILOT, WAIT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 25 &middot; Deciding where to adopt</p>
+  <h2>Three questions, fifteen minutes, and a decision you can defend</h2>
+  <table class="cols3"><tr><td style="width:33%">
+    <p class="small"><strong>1.</strong> A check on the artifact that is <em>independent of what produced it</em>? <strong>A proof passed against the very design the artifact came from is not a check.</strong></p>
+  </td><td style="width:33%">
+    <p class="small"><strong>2.</strong> A <em>baseline you already own</em> and can re-measure on your own data? <strong>A vendor benchmark is not a baseline; your own last quarter is.</strong></p>
+  </td><td>
+    <p class="small"><strong>3.</strong> Does acceptance need a judgment about intent that <em>no run can settle</em>? Then <strong>the flow's throughput is that judgment's throughput</strong>.</p>
+  </td></tr></table>
+  <table class="compact">
+    <tr><td style="width:12%"><span class="pill ok">ADOPT NOW</span></td><td>Where the first two hold and the third does not. <strong>Regression ranking and selection</strong> &mdash; the baseline is your own runtime, the check your own coverage database &mdash; with slide 23's constraint in the same breath. <strong>Supervised triage classification</strong> where a labelled failure history already exists, with a published agreement rate re-measured on a schedule. <strong>Generated scaffolding</strong> wherever a mechanical diff against a machine-readable source decides correctness.</td></tr>
+    <tr><td><span class="pill arg">PILOT</span></td><td>In a <em>non-gating tier</em>. <strong>Property generation from a specification</strong>: on a block whose specification is unusually precise, with reviewing capacity budgeted first, and with a statistic of your own &mdash; <em>what fraction survived the intent gate</em> &mdash; from the first batch. <strong>Counterexample debug assistance</strong> is the other good pilot: its output is a hypothesis a human was going to form anyway, and its fix can be applied and the proof re-run, <em>a check the assistant does not control</em>.</td></tr>
+    <tr><td><span class="pill no">WAIT</span></td><td>On flows whose sign-off artifact is <strong>the flow's own report</strong>. As of a 2026 survey, reinforcement-learning systems have reached industrial tape-out, and <strong>no language-model-driven autonomous agent had yet demonstrated a complete, human-free tape-out of an industrial chip</strong>. The survey also names the reading error to avoid &mdash; <em>the unit-test fallacy</em>, reading module-level pass rates as evidence about system-level capability. <strong>Every headline figure here was measured on a block, a protocol or a curated benchmark. None on an SoC.</strong></td></tr>
+  </table>
+  <p class="note"><b>Say</b>One governance failure cannot be corrected afterwards. A 2023 survey put the industrial concerns under three headings &mdash; model generalisation, model scalability and <strong>data governance</strong> &mdash; and spelled the third out: an engineer who cannot send her data outside her organisation, and has no machine-learning infrastructure inside it, cannot use a model that requires training on her data. So before a pilot starts, establish <em>what leaves the building</em> &mdash; specification, RTL, failure logs, coverage database &mdash; in writing, from whoever owns the design's confidentiality rather than from the team running the pilot. </p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">34</span>
+</section>
+
+
+<!-- ============ 35. DIVIDER 26 ============ -->
+<section class="slide divider">
+  <p class="chno">26</p>
+  <h1>The Road Ahead</h1>
+  <p class="sub">Why the binding constraint has moved four times, what shift-left and shift-right genuinely buy, which properties of the problem survive any improvement in tooling &mdash; and what the discipline still handles badly.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">35</span>
+</section>
+
+<!-- src: ch26:3 (the flagship's eight-channel engine, 40-bit addressing, descriptor chaining, the same
+     frontend/midend/backend split and 4 KB legalization discipline; the programme is unrecognisable);
+     ch26:5 (week 31: negative-stride row across a 4 KB frontier, the second half writes a line the host
+     cluster holds Modified, the scoreboard sees nothing because the corrupted bytes never reach memory
+     during the check, found from a firmware symptom on the prototype);
+     ch26:7 (what decided the outcome BOTH times: 214 directed tests + the missing cross in 1284; a sound
+     proof about the PREVIOUS GENERATION'S backend inherited as a discharged row in the descendant;
+     "It was knowing what to ask"); ch26:9 (the one thing in the chapter worth carrying) -->
+<!-- ============ 36. THE DESCENDANT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; A generation later</p>
+  <h2>Everything about the programme improved. The bug got harder to find.</h2>
+  <p class="small">The flagship SoC's eight-channel DMA goes to tape-out: 40-bit physical addressing, descriptor chaining, the same frontend/midend/backend split and the same 4&nbsp;KB legalization discipline inherited from the reference SoC. <strong>The verification programme around it is unrecognisable.</strong> The 4&nbsp;KB rule exists as a formal property rather than only as a scoreboard check hoping to meet the right descriptor. The stimulus is a scenario space retargeted from simulation to the prototype instead of a constraint block written for one environment. Regressions gate on every commit, coverage merges across four platforms, and machine time is no longer what this block's team argues about.</p>
+  <div class="ex warn">
+    <span class="tag">Week 31 &middot; SOC-1284's descendant</span>
+    The midend mis-legalizes a negative-stride row across a 4&nbsp;KB frontier again &mdash; a different module, wider addresses, <strong>the same arithmetic mistake</strong> &mdash; and this time the second half of the split writes a line the host cluster holds Modified. The scoreboard that caught the original sees nothing, because the corrupted bytes never reach memory during the check; they surface at a writeback, later, somewhere else. The team finds it eventually, from a firmware symptom on the prototype: <strong>weeks of debug on a platform where the corrupted line is not visible, for a bug whose ancestor a scoreboard caught in one night.</strong>
+  </div>
+  <table class="cols"><tr><td style="width:50%">
+    <div class="ex">
+      <span class="tag">What decided the outcome in 1284</span>
+      Two hundred and fourteen directed tests passed <em>honestly</em>, and a constrained-random run stumbled into the combination. The escape analysis recorded that <strong>the functional coverage model had no cross of the three dimensions</strong>, so the hole was invisible to the team's own metrics.
+    </div>
+  </td><td>
+    <div class="ex">
+      <span class="tag">And in the descendant</span>
+      <strong>No engine was wrong.</strong> The proof was sound &mdash; and it was a proof about the <em>previous generation's</em> backend, inherited into the new plan as a row already discharged. Nobody wrote the row saying that <strong>a data-integrity check crossing into a coherent domain is a different claim needing different evidence.</strong>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Both times the binding constraint was the same, and it was not compute, not stimulus, and not checking. <strong>It was knowing what to ask.</strong> That is the argument of the chapter, and the one thing in it worth carrying.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">36</span>
+</section>
+
+<!-- src: ch26:20 (THE HISTORICAL ARGUMENT IN THIS SECTION IS OURS RATHER THAN THE CORPUS'S; the evidence
+     per stage is the corpus's, each measurement belongs to its own stage, and NONE OF IT COMPOSES --
+     drawing a trend line would be the same mistake as multiplying two speed-ups against different
+     baselines; the stages share a SHAPE, not a scale) -- carried as an amber pill AND as a callout;
+     ch26:22 (a constraint binds when it is what you would spend a doubled budget on);
+     ch26:24 (cycles: APPROXIMATELY a billion times slower, a hundred to a thousand times recovered by
+     hardware-assisted platforms; RELOCATED BY LEVEL, not disappeared; the 2024 mechanism -- as frequency
+     scaling plateaus, simulation struggles to keep pace, making acceleration essential FOR MANY DESIGNS
+     rather than a luxury; "they do not lift, they move down the hierarchy");
+     ch26:26 (stimulus: 2014, adoption SEEN TO BE levelling off, works well at IP block or subsystem
+     level and does not scale to the entire SoC integration level; a decade later constrained-random was
+     THE ONE EXCEPTION to a general stabilisation);
+     ch26:28 (checking: SVA predominant assertion language, UVM predominant methodology; the codec's
+     definitional oracle and exactly what it does NOT hand you) -->
+<!-- ============ 37. THE BOTTLENECK MOVES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; The historical read</p>
+  <h2>A constraint binds when it is what you would spend a doubled budget on</h2>
+  <table class="chain">
+    <tr>
+      <td style="width:22%"><div class="cbox">Cycles<span class="q">can we run enough?</span></div></td>
+      <td style="width:4%" class="arrowr">&rarr;</td>
+      <td style="width:22%"><div class="cbox">Stimulus<span class="q">what do we run in them?</span></div></td>
+      <td style="width:4%" class="arrowr">&rarr;</td>
+      <td style="width:22%"><div class="cbox">Checking<span class="q">how do we grade what came back?</span></div></td>
+      <td style="width:4%" class="arrowr">&rarr;</td>
+      <td><div class="cbox out">Knowing what to check<span class="q">which claim was worth testing?</span></div></td>
+    </tr>
+  </table>
+  <p class="small"><span class="pill arg">THE BOOK'S ARGUMENT</span> &nbsp;The four-stage migration is <strong>this book's historical read, not a published finding</strong>. The evidence attached to each stage <em>is</em> the corpus's, but each measurement belongs to its own stage and none of it composes: figures from different years, populations and instruments <strong>do not make a trend line</strong>. <em>The stages share a shape, not a scale.</em></p>
+  <table class="compact">
+    <tr><td style="width:13%"><strong>Cycles</strong></td><td>RTL simulation runs <em>approximately</em> a billion times slower than the target clock. <strong>The constraint has not disappeared; it has been <em>relocated by level</em>.</strong> On the reference SoC's DMA it has not bound for years. On a flagship firmware run it still does: as of the 2024 data, as frequency scaling plateaus, simulation struggles to keep pace with growing complexity &mdash; making acceleration essential <em>for many designs</em> rather than a luxury.</td></tr>
+    <tr><td><strong>Stimulus</strong></td><td>Hand-enumerated tests stop scaling in the low hundreds; the answer was replacing enumeration with <em>description</em>. The tell that this dissolved is the diagnosis attached to its own limits: in 2014, with constrained-random adoption <em>seen to be</em> levelling off, the reason offered was scaling &mdash; it works well at IP block or subsystem level and does not scale to the entire SoC integration level. <strong>A complaint about a level at which deciding <em>what</em> to generate has become the hard part.</strong></td></tr>
+    <tr><td><strong>Checking</strong></td><td>Generating traffic you cannot grade is a waveform generator, not a testbench. Completion shows in the adoption data as <em>standardisation</em>: SystemVerilog Assertions the predominant assertion language, UVM the predominant methodology. The video codec shows where &ldquo;dissolved&rdquo; stops: a bit-exact reference decoder hands you the oracle, but <strong>not rate control, latency, or line-buffer back-pressure.</strong></td></tr>
+  </table>
+  <p class="note"><b>Say</b>The first row is the discipline's first lesson about its own constraints: <em>they do not lift, they move down the hierarchy and wait for you at the next level up.</em></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">37</span>
+</section>
+
+<!-- src: ch26:30 (the evidence is INDIRECT BY NATURE, because a question nobody asked leaves no trace);
+     ch26:32 (14% in 2024, lowest in twenty years, declining trend from 2012; ABOUT 30 percent a decade
+     earlier, a SEPARATE source; the FPGA 87% is A DIFFERENT POPULATION, A DIFFERENT METRIC, AND NOT A
+     POINT ON THE SAME CURVE -- the two DO NOT COMBINE);
+     ch26:34 (not gates, REQUIREMENTS: clocking, security, safety, hardware-software interaction, which
+     did not exist years ago; design errors lead; specification problems REMAIN A COMMON CONCERN);
+     ch26:36 (the reuse reading of the effort spread); ch26:38 (debug named the major bottleneck in 2024;
+     automatic formal applications 8.7% CAGR vs 5.8% for property checking; Bormann's criterion and
+     MULTIPLE COMMERCIAL PROJECTS REPORTING NO FURTHER BUGS FOUND in modules verified to it);
+     ch26:40 (the accelerator's small version: 100 percent code coverage, and no engine chooses axes) and
+     ch26:42 (per-level, not universal) -> speaker note -->
+<!-- ============ 38. KNOWING WHAT TO CHECK ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 26 &middot; The constraint that binds now</p>
+  <h2>The evidence is indirect by nature &mdash; a question nobody asked leaves no trace in any tool's output</h2>
+  <table class="compact">
+    <tr><th style="width:17%">Signal</th><th>What was measured, and what it rules out</th></tr>
+    <tr><td><strong>The industry outcome</strong></td><td>IC/ASIC first-silicon success stood at <strong>14 percent in 2024</strong> &mdash; the lowest value recorded in twenty years, and the low point of a declining trend. Separately, on the FPGA side &mdash; <strong>a different population, a different metric, and not a point on the same curve</strong> &mdash; 87 percent of projects reported non-trivial bugs escaping into production in 2024. <strong>Jointly they rule out the comfortable story that better engines produce better outcomes on their own.</strong> The engines got better; adoption climbed; both effectiveness metrics are bad.</td></tr>
+    <tr><td><strong>What is growing</strong></td><td>Not gates: <em>requirements</em>. Complexity growth comes from <strong>new layers of design requirements beyond basic functionality</strong> &mdash; clocking, security, safety and hardware-software interaction, which did not exist years ago. Each layer is a category of question somebody must think to ask before any engine can answer it. <strong>A specification defect is precisely a case where the checking machinery was pointed at the wrong claim.</strong></td></tr>
+    <tr><td><strong>Three corroborating reads</strong></td><td><strong>Debug</strong> took more of a verification engineer's time than any other activity in 2024. <strong>The fastest-growing corner of formal is the <em>applications</em></strong> &mdash; 8.7 percent compound annual rate against 5.8 percent for property checking &mdash; and an application supplies its own properties from a register description or a connectivity table. And <strong>the completeness question has a rigorous answer whose existence makes the point</strong>: a property set cannot tell you whether it is enough, so Bormann's criterion asks instead whether the properties pin the design down.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>The accelerator's prefetcher bug escaped 100 percent code coverage <em>entirely</em>: only a cross of weight precision &times; tensor width class &times; contention demands the scenario, and that cross exists only if somebody chose those axes. <strong>No engine chooses axes.</strong></p>
+  <p class="src">WRG / Siemens&nbsp;EDA 2024 trend reports &mdash; IC/ASIC 14% [R2, p.&nbsp;5], debug p.&nbsp;7, the 8.7% / 5.8% CAGRs p.&nbsp;11; FPGA 87% [R1, p.&nbsp;1]. Double-blind, &plusmn;4% at 95%.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">38</span>
+</section>
+
+<!-- src: ch26:46 (shift-left: CDC tools identify domain issues directly on an RTL model at EARLIER
+     STAGES because the metastability class CANNOT be demonstrated on an RTL model in simulation at all;
+     virtual platforms -- far more controllability and observability than a debug port, and SOMETIMES the
+     only option available; portable stimulus; CI, and the 2026 research-programme account -> note);
+     ch26:48 (what it genuinely buys is earlier SPECIFICATION finding, not earlier bug-finding);
+     ch26:50 (the sensor hub: architectural decisions made and reviewed long before the RTL; what it
+     CANNOT reach -- the event-unit retention escape, which surfaced in power-aware gate-level simulation
+     AFTER RTL sign-off; shift-left moves the CLAIMS earlier, not the evidence);
+     ch26:52 (validation is a planned stage, not a fallback; IN SOME modern SoCs OVER 20 percent of the
+     design real estate; the flagship's kit);
+     ch26:54 (signals x cycles <= buffer: 64 KB buys 128 signals for 4,096 cycles or 256 for 2,048, fixed
+     at tape-out; the deliverable is a pre-silicon reproducer) -->
+<!-- ============ 39. SHIFT-LEFT AND SHIFT-RIGHT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; Both ends of the flow</p>
+  <h2>Each buys exactly one thing the other cannot</h2>
+  <table class="cols"><tr><td style="width:50%">
+    <p class="small"><strong>Shift-left</strong> means verification starting earlier, against something other than finished RTL. Clock-domain-crossing tools identify domain issues directly on an RTL model at earlier stages, <em>because the metastability bugs they target cannot be demonstrated on an RTL model in simulation at all</em>. Virtual platforms let firmware run against functional models before the hardware exists, and are <em>sometimes</em> the only option available.</p>
+    <p class="small">What it genuinely buys is not earlier bug-finding: it is <strong>earlier <em>specification</em> finding</strong>. The most valuable thing that happens when you write an assertion against a document rather than a design is that <strong>the document turns out not to say what everyone assumed.</strong></p>
+    <div class="ex warn">
+      <span class="tag">Its limit &mdash; the sensor hub</span>
+      Its always-on 32&nbsp;kHz island, wake sources and retention list are architectural decisions, made and reviewed long before the RTL. Real work, done early, and <em>not simulation of anything</em>. What it cannot reach is the reference SoC's event-unit escape &mdash; a retention register losing its configuration when a wake event races the release of isolation &mdash; which surfaced in power-aware gate-level simulation <em>after</em> RTL sign-off. <strong>Shift-left moves the claims earlier. It does not move the evidence with them.</strong>
+    </div>
+  </td><td>
+    <p class="small"><strong>Shift-right</strong> means the design continues to be checked after tape-out. Checking real hardware rather than a model is <em>not a fallback for what verification missed</em>: it is a planned stage with its own instruments, and the industry pays for it in silicon &mdash; in <em>some</em> modern SoCs <strong>over 20 percent of the design real estate</strong> goes to silicon validation. What it buys is the one thing no pre-silicon platform has: <strong>the real device, at real speed, running real software for real durations.</strong></p>
+    <div class="ex warn">
+      <span class="tag">What it cannot buy &mdash; and the constraint is arithmetic, not cultural</span>
+      <strong>Observability.</strong> Every mechanism writes into a fixed store, so <strong>signals &times; cycles &le; buffer</strong>: the flagship's 64&nbsp;KB trace buffer buys 128 traced signals for 4,096 cycles, or 256 for 2,048 &mdash; and <em>the rectangle is fixed at tape-out</em>. Which is why the deliverable of a post-silicon debug is not an explanation but <strong>a pre-silicon reproducer</strong>. <em>Shift-right, done properly, is a machine for moving problems back into the middle of the flow.</em>
+    </div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Two more shift-left instruments belong here: portable stimulus, which describes a scenario space once and retargets it; and continuous integration &mdash; one 2026 research-programme account reports that running UVM-based verification and FPGA-based checks inside CI increased productivity by making the verification flow transparent from RTL development.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">39</span>
+</section>
+
+<!-- src: ch26:56 (THE OBSERVATION THIS SECTION CLOSES ON IS JUDGMENT RATHER THAN A FINDING -- carried as
+     an amber pill; the block-level RTL environment is the only place with BOTH full observability and a
+     real design; both movements are correct in their own terms; the failure mode is an excellent early
+     plan, an excellent lab, and a thin layer between);
+     ch26:58 (the crossbar scenario, whole: the lead accepts the first argument and refuses the second;
+     arbitration under sustained back-pressure across two managers is proven ONLY UP TO A BOUND and
+     reachable in the lab but NOT DIAGNOSABLE there inside the trace buffer);
+     ch26:123 (pitfall 3: cut middle-of-the-flow work row by row with a retirement argument, never by
+     percentage) -->
+<!-- ============ 40. THE MIDDLE UNDER STRAIN ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; What both movements do to the middle</p>
+  <h2>A discipline pulling in both directions is one whose middle is under strain</h2>
+  <table class="diag">
+    <tr>
+      <td style="width:30%"><div class="db obs">Shift-left<span class="s">claims move onto models that cannot carry the evidence</span></div></td>
+      <td style="width:6%" class="arrowr">&rarr;</td>
+      <td style="width:28%"><div class="db chk">The block-level RTL environment<span class="s">the only place with BOTH full observability and a real design</span></div></td>
+      <td style="width:6%" class="arrowr">&larr;</td>
+      <td><div class="db obs">Shift-right<span class="s">whatever is left is caught where the trace buffer is a fixed rectangle</span></div></td>
+    </tr>
+  </table>
+  <p class="small"><span class="pill arg">JUDGMENT, NOT A FINDING</span> &nbsp;Both movements are correct in their own terms. <strong>The failure mode of doing both enthusiastically is a project with an excellent early plan, an excellent lab, and a thin layer of actual verification between them</strong> &mdash; the layer where evidence is cheapest to produce and easiest to trust.</p>
+  <div class="ex">
+    <span class="tag">Scenario &middot; the flagship proposes halving the crossbar's block-level regression</span>
+    The argument offered has two halves: its protocol properties are <em>formally proven</em>, and its integration behaviour <em>will be covered in the lab</em>. <strong>Approach.</strong> The verification lead accepts the first and refuses the second. The proven properties genuinely do retire the protocol rows, so those runs no longer earn their place and go. The rows they do <em>not</em> retire are the ones about <strong>arbitration under sustained back-pressure across two managers</strong> &mdash; proven only up to a bound, and reachable in the lab but not <em>diagnosable</em> there inside the trace buffer. Those seeds stay.
+    <br><br><strong>Why.</strong> The two ends of the flow retired one class of evidence, and neither of them retired the other. <strong>Cutting by argument row by row is a different act from cutting by percentage &mdash; and only the first one can tell you which half you kept.</strong>
+  </div>
+  <p class="note"><b>Say</b>The symptom to watch for in a team, not a plan: strong architectural modelling, a well-equipped lab, and block environments staffed by whoever is free. The middle is where both other skills are eventually cashed in &mdash; a pre-silicon reproducer is useless to a team that cannot run one.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">40</span>
+</section>
+
+<!-- src: ch26:62 (the thousandfold test); ch26:66 (192 bits -> 2^192 ~ 10^57; a thousandfold faster
+     engine buys TEN BITS; the coherent hub's two-caches-one-address abstraction IS THE TECHNIQUE, not a
+     workaround awaiting capacity); ch26:68 (presence, never absence -- a statement about SAMPLING);
+     ch26:70 (every practical oracle is partial; the craft is combining them so blind spots do not
+     overlap -- the radar receive-chain illustration is CUT, see the cut list);
+     ch26:72 (a proof is about a MODEL, under ASSUMPTIONS, sometimes to a DEPTH; "formal doesn't scale"
+     is a TOOLING fact and will date, the three qualifiers will not);
+     ch26:74 (recording that a situation occurred and judging whether the design behaved correctly are
+     two separate aspects drawing on the same monitors, with fidelities traded off against one another;
+     "100 percent" is a statement about your model's own EXTENT, not its fidelity);
+     ch26:76 (activation, propagation, checking; observability is a rectangle rather than a dial) -->
+<!-- ============ 41. WHAT DOES NOT CHANGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; The durable list</p>
+  <h2>Would this still be true if every tool got a thousand times better?</h2>
+  <p class="small">Properties of the <em>problem</em> survive that test. Properties of the <em>tooling</em> do not &mdash; and a closing chapter that mixes them ages badly, because a reader ten years out will find half of it quaint and will not know which half. <strong>Six things pass.</strong></p>
+  <table class="compact">
+    <tr><td style="width:30%"><strong>1. The state space is exponential in the number of state bits, and abstraction is the only reply</strong></td><td>One DMA channel's 192 bits of architecturally visible state make 2<sup>192</sup> &mdash; about 10<sup>57</sup> &mdash; configurations. <strong>A thousandfold faster engine buys you ten bits.</strong> The coherent hub makes it permanent: the MESI state of every line in every cache is a product space no tool will enumerate, so the proof runs against a model cut to two caches and one address. <em>Not a workaround awaiting better capacity &mdash; it is the technique.</em></td></tr>
+    <tr><td><strong>2. Simulation shows the presence of bugs, never their absence</strong></td><td>A statement about <em>sampling</em>. No improvement in sampling rate converts a sample into a census.</td></tr>
+    <tr><td><strong>3. Every practical oracle is partial</strong></td><td>Each checks a <em>projection</em> of correctness rather than correctness, and the craft is combining them so their blind spots do not overlap.</td></tr>
+    <tr><td><strong>4. A proof is a statement about a model, under assumptions, sometimes to a depth</strong></td><td>&ldquo;Formally verified&rdquo; without those three qualifiers is not a claim. This is the durable form of <em>&ldquo;formal doesn't scale&rdquo;</em> &mdash; which is a tooling fact and will date. The qualifiers will not.</td></tr>
+    <tr><td><strong>5. A plan is a set of claims, and coverage is a sample of a model you wrote</strong></td><td>Recording that a situation <em>occurred</em> and judging whether the design behaved <em>correctly</em> in it are two separate aspects of an environment: they draw on the same monitors, and their fidelities are traded off against one another. So <strong>&ldquo;100 percent&rdquo; is a statement about your model's own extent that says nothing about its fidelity.</strong></td></tr>
+    <tr><td><strong>6. Activation, propagation and checking are three independent conditions</strong></td><td>A bug found requires all three, and each can fail alone; controllability and observability bound the first two. <em>Which is why observability is designed in a year before it is needed, and why it is a rectangle rather than a dial.</em></td></tr>
+  </table>
+  <p class="note"><b>Say</b>Item 5 carries into Chapter 25 unchanged: a <em>drafted</em> plan is still a set of claims somebody's judgment shaped, and it still cannot see what it cannot represent.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">41</span>
+</section>
+
+<!-- src: ch26:78 (the three that FEEL durable and are not: debug's share is a MEASURED SHARE in 2014 and
+     again in 2024, "A ROBUST EMPIRICAL REGULARITY OF THE CURRENT PRACTICE, NOT A PROPERTY OF THE
+     PROBLEM, AND THE MOST PLAUSIBLE THING ON THIS PAGE FOR AUTOMATION TO CHANGE -- WHICH WOULD MOVE THE
+     CONSTRAINT ... RATHER THAN RETIRE IT"; formal's capacity limit is a statement about engines; the
+     billion-times ratio is a measurement of today's tools rather than a law);
+     ch26:80-89 (the durability audit of four DMA vplan rows, all four rows verbatim in substance;
+     ch26:89 -- note where the chapter's opening bug landed: the LEFT column of F06b) -->
+<!-- ============ 42. WHAT ONLY FEELS DURABLE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; Sorting the list</p>
+  <h2>Three that feel permanent and are not &mdash; sorting them is what makes the other six worth trusting</h2>
+  <table class="compact">
+    <tr><td style="width:26%"><strong>&ldquo;Debug dominates verification time&rdquo;</strong></td><td>A <em>measured share</em> in 2014 and again in 2024 &mdash; <strong>a robust empirical regularity of the current practice, not a property of the problem</strong>, and the most plausible thing on that list for automation to change. Which would <strong>move</strong> the constraint named fourth <strong>rather than retire it</strong>: an engine that explains a failure in seconds still does not decide which questions were worth asking.</td></tr>
+    <tr><td><strong>&ldquo;Formal is capacity-limited to small blocks&rdquo;</strong></td><td>A statement about <strong>engines</strong>. The durable form is item 4 on the previous slide &mdash; model, assumptions, depth &mdash; and those qualifiers survive any capacity improvement.</td></tr>
+    <tr><td><strong>&ldquo;Simulation is a billion times slower than silicon&rdquo;</strong></td><td>A <strong>measurement of today's tools</strong> rather than a law &mdash; and treating it as one is how a chapter becomes a period piece.</td></tr>
+  </table>
+  <table class="compact">
+    <tr><th style="width:21%">Durability audit &middot; two DMA plan rows</th><th style="width:37%">Durable</th><th>Contingent on today's tooling</th></tr>
+    <tr><td><code>DMA-F06a</code> &mdash; 2D legalization cross at 100%</td><td>That the cross is a <em>chosen</em> set of equivalence classes, and that &ldquo;100%&rdquo; measures its <em>extent</em>, not its fidelity</td><td>That it has four axes and 72 cells; that a solver budget forecloses the maximum-length straddle; that a human wrote the bins</td></tr>
+    <tr><td><code>DMA-F06b</code> &mdash; <code>p_no_4kb_crossing</code> proven unbounded</td><td>That the proof is about a <em>model</em>, under assumptions, at a binding point somebody chose</td><td>That it converges unboundedly on this block at this size; that the property text is hand-written</td></tr>
+  </table>
+  <p class="note"><b>Say</b>Read the right-hand column as the part of your methodology with an expiry date, and the left as the part that outlives it. Then note where this chapter's opening bug landed: <strong>the left column of F06b</strong> &mdash; <em>the proof is about a model</em>, and the model was the previous generation's backend.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">42</span>
+</section>
+
+<!-- src: ch26:95 (headcount: 12.5 percent CAGR against 3.7 percent THROUGH 2014, by which point the MEAN
+     PEAK number of verification engineers already exceeded the design count; growth rates have SINCE
+     CONVERGED, but from that inverted baseline; IN SOME market segments -- processors among them -- a
+     five-to-one ratio IS NOT UNUSUAL); ch26:97 (49 percent ON AVERAGE in 2024);
+     ch26:99 (the apparatus: six standards, the last AS OF MARCH 2026 -- named by function only, since
+     the decks cite by year and artifact rather than by organisation); ch26:101 (theory);
+     ch26:103 (the honest pitch, and independence of judgment as a DUTY rather than a personality trait);
+     ch26:105-113 (four things the field handles badly, all four; ch26:105 marks these as JUDGMENT, NOT
+     PESSIMISM); ch26:109 (three quarters behind schedule in 2024 against a historical average of ABOUT
+     two thirds); ch26:111 (mutation runs on a small fraction of blocks IN PRACTICE);
+     ch26:117 (the register of what a programme is NOT verifying) -> speaker note -->
+<!-- ============ 43. VERIFICATION AS A PROFESSION ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; The discipline</p>
+  <h2>A profession, on four independent readings</h2>
+  <table class="compact">
+    <tr><td style="width:15%"><strong>Headcount</strong></td><td>Demand for verification engineers has outgrown demand for design engineers since at least 2007 &mdash; a <strong>12.5 percent</strong> compound annual rate against <strong>3.7 percent</strong> through 2014, by which point the <em>mean peak</em> number of verification engineers on a project already exceeded the design count. The growth rates have since converged, but from that inverted baseline &mdash; and in <em>some</em> market segments, processors among them, a five-to-one ratio is <em>not unusual</em>.</td></tr>
+    <tr><td><strong>Boundary</strong></td><td>No longer organisational. In 2024, design engineers spent <em>on average</em> <strong>49 percent</strong> of their time on verification activities. <strong>The profession is defined by the activity rather than by the org chart.</strong></td></tr>
+    <tr><td><strong>Apparatus</strong></td><td>Its own standards: an assertion language, a testbench methodology, a stimulus description language, a coverage interchange format, a power-intent format &mdash; and, as of March 2026, a standard for describing an IP's clock- and reset-domain-crossing interface so that different teams' tools can exchange collateral about it. <strong>What a field standardises tells you where its work actually is</strong>: that list is not about running simulations faster, it is about <em>making claims portable between people</em>.</td></tr>
+    <tr><td><strong>Theory</strong></td><td>State-space arguments, the oracle problem, coverage as sampling, proofs qualified by model and assumption and depth &mdash; a body of reasoning that is genuinely its own, and that a good verification engineer uses daily whether or not they can name it.</td></tr>
+  </table>
+  <div class="ex good">
+    <span class="tag">The honest pitch, for someone choosing it</span>
+    Narrow and strong: <strong>the product is judgment</strong> &mdash; and judgment is what the tooling has been least able to absorb through four generations of trying. The work is intellectually severe in a specific way: you spend your time reasoning about what <em>could</em> be true rather than about what is. It also carries an unusual professional obligation, <strong>independence of judgment</strong>, which comes down to a willingness to say <em>&ldquo;no, this is not the way to do it&rdquo;</em> to a designer with more years on the block, or to a schedule that wants the block closed. <strong>A duty rather than a personality trait &mdash; and the day it is inconvenient is the day it counts.</strong>
+  </div>
+  <p class="src">The 49%: 2024 Wilson Research Group IC/ASIC trend report &mdash; [R2, p.&nbsp;7]. The clock- and reset-domain-crossing standard is Accellera's <em>Standard for IP Abstraction for Clock and Reset Domain Crossing Integration</em>, v1.0, March&nbsp;2026 &mdash; [S12, pp.&nbsp;7&ndash;8]; its working group ran to 154 members from 24 companies &mdash; [D36, slide&nbsp;58]. The 12.5% / 3.7% headcount growth rates are not from these sources.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">43</span>
+</section>
+
+<!-- src: ch26:105-113 (four things the field still handles badly, all four; ch26:105 marks these as
+     JUDGMENT, NOT PESSIMISM and as places where an individual can be visibly better than the average);
+     ch26:109 (three quarters behind schedule in 2024 against a historical average of ABOUT two thirds;
+     planning from the previous project's data is A STATED MANAGEMENT PROBLEM, NOT A SOLVED ONE);
+     ch26:111 (mutation runs on a small fraction of blocks IN PRACTICE);
+     ch26:113 (three incommensurable sign-off languages at one review -- AN OPEN PROBLEM, NOT A SOLVED
+     ONE PRESENTED BADLY); ch26:117 (the register of what a programme is NOT verifying) -> speaker note -->
+<!-- ============ 44. FOUR THINGS IT HANDLES BADLY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 26 &middot; The discipline</p>
+  <h2>&hellip; and four things it still handles badly</h2>
+  <p class="small"><span class="pill arg">JUDGMENT, NOT PESSIMISM</span> &nbsp;Every one of the four is a place where an individual can be visibly better than the average.</p>
+  <table class="compact">
+    <tr><td style="width:21%"><strong>It does not learn from its escapes</strong></td><td>Escape analysis, where it happens at all, is usually a post-mortem slide rather than <em>a change to the next plan and the next sign-off checklist</em>. <strong>The mechanism for compounding organisational knowledge exists, is cheap, and is skipped.</strong></td></tr>
+    <tr><td><strong>It cannot estimate</strong></td><td>Debug takes more time than anything else, is unpredictable, and varies significantly between projects &mdash; which makes planning a project's effort from the previous project's data <em>a stated management problem, not a solved one</em>. In practice, teams estimate that way regardless. <strong>Three quarters of IC/ASIC projects were behind their original schedule in 2024</strong>, against a historical average of about two thirds.</td></tr>
+    <tr><td><strong>It rarely measures its own environments</strong></td><td>Every instrument in this book measures the design. Mutation is the one technique that answers <em>&ldquo;would this check have caught a change?&rdquo;</em> &mdash; and <em>in practice</em> it runs on a small fraction of blocks. <strong>A checker nobody has seen fail is a decoration</strong>, and that is true at the scale of a whole environment, not just of a single assertion.</td></tr>
+    <tr><td><strong>It has no common language for &ldquo;how verified is this?&rdquo;</strong></td><td>A functional sign-off aggregates coverage and plan rows. A safety argument aggregates fault classification against per-level metric thresholds. A security result is a list of named claims and named gaps <em>with no percentage available at all</em>, and there will not be one soon. <strong>The three are not commensurable, they arrive at the same tape-out review, and the discipline has no accepted way to state a combined position.</strong> An open problem, not a solved one presented badly.</td></tr>
+  </table>
+  <p class="note"><b>Say</b>The cheap countermeasure to the first item and the fourth: keep an explicit register of what the current programme is <em>not</em> verifying &mdash; the gaps, not just the waivers &mdash; because a named gap is reviewable and an unnamed one is a surprise. It has no metric attached, which is why it loses its budget argument to things that do.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">44</span>
+</section>
+
+<!-- src: ch26:144-152 (the post-rule coda, in its own order and almost entirely in its own words:
+     verification produces A TRUE SENTENCE ABOUT A DESIGN; sign-off is the moment it is spoken aloud and
+     somebody's name goes under it; the seven pieces of machinery; SOC-1284 as what a false sentence
+     looks like from the inside -- 214 directed tests, a green dashboard, a coverage report accurate
+     about everything it measured, eleven days of margin and one constrained-random seed; and the closing
+     question). Paired with ch24:37, which asks the SAME question of a person that ch26:152 asks of a
+     project -- ch24:37 is the author's read, so the pairing is drawn on the ch24 side only. -->
+<!-- ============ 45. CLOSING ============ -->
+<section class="slide dense">
+  <p class="kicker">Part VII &middot; One idea to carry out of twenty-six chapters</p>
+  <h2>Verification does not produce a correct design. It produces a <em>true sentence about</em> one.</h2>
+  <p class="small">What it produces is this: <strong><em>this is what we established, by this method, under these assumptions, and here is what we did not establish.</em></strong> Sign-off is the moment that sentence is spoken aloud and somebody's name goes under it.</p>
+  <table class="cols"><tr><td style="width:47%">
+    <div class="ex good">
+      <span class="tag">Everything in this book is machinery for making that sentence mean more</span>
+      <table class="compact" style="table-layout:fixed">
+        <tr><td style="width:33%"><strong>A plan</strong></td><td>the sentence written down in advance</td></tr>
+        <tr><td><strong>Coverage</strong></td><td>evidence that the sentence's scope was actually visited</td></tr>
+        <tr><td><strong>A scoreboard</strong></td><td>the part that could have made it false</td></tr>
+        <tr><td><strong>An assertion</strong></td><td>a clause of it, checked continuously</td></tr>
+        <tr><td><strong>A waiver</strong></td><td>the sentence being honest about its own edges</td></tr>
+        <tr><td><strong>A proof</strong></td><td>a clause with no exceptions inside a named model</td></tr>
+        <tr><td><strong>An escape analysis</strong></td><td>the sentence being repaired after it turned out to be too generous</td></tr>
+      </table>
+    </div>
+  </td><td>
+    <div class="ex warn">
+      <span class="tag">SOC-1284 is what a false sentence looks like from the inside</span>
+      Two hundred and fourteen directed tests passed, honestly. The dashboard was green. The coverage report was accurate about everything it measured. <strong>The sentence all of that supported was <em>the DMA's 2D legalization is verified</em> &mdash; which was not true, and no instrument in the project could say so.</strong>
+    </div>
+    <p class="lead" style="margin-top:10px">The question to bring to every review, every plan and every green regression for the rest of your career is not <em>are we done?</em> <strong>It is: what exactly are we claiming, and what would have to be true for that claim to be false?</strong></p>
+    <p class="big"><strong>If you can answer the second half, you are verifying. If you cannot, you are counting.</strong></p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Close the loop to slide 6: Chapter 24 asks an <em>owner</em> to state what would have to be true for their answer to be wrong &mdash; offered there as the author's read rather than a published rule &mdash; and Chapter 26 asks the same thing of a whole sign-off.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">45</span>
+</section>
+

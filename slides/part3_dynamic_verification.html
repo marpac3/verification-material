@@ -1,0 +1,1424 @@
+<title>Dynamic Verification — Lecture Deck, Part III</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid — table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+  pre.mini  { font-size: 10.5px; line-height: 1.36; padding: 7px 9px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  table.cols, table.cols3 { width: 100%; }
+  table.cols td { border: none; padding: 0 16px 0 0; width: 50%; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; width: 33.3%; font-size: 13.5px; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* One density step beyond .dense, for the slides that carry a source line
+     on top of an already-full frame. Anchoring a claim to a named company costs
+     vertical space the layout had none of, and the alternative to a further step
+     is deleting the anchor — which is the one thing that must not happen, since
+     the source line is what makes the number checkable. Must follow .dense:
+     equal specificity, so source order decides. */
+  .denser h2  { margin-bottom: 6px; }
+  .denser h3  { margin: 5px 0 3px; font-size: 14px; }
+  .denser p   { margin-bottom: 4px; }
+  .denser li  { margin-bottom: 2px; font-size: 12.5px; line-height: 1.28; }
+  .denser td  { padding: 2px 7px 2px 0; font-size: 12px; }
+  .denser .ex { padding: 5px 9px; margin: 4px 0; font-size: 12px; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .pill.mid { background: #f6efdc; color: #8a6516; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex.good { background: #eef7f1; border-left-color: #256b46; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .ex.good .tag { color: #256b46; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- diagram primitives (CSS boxes: no external assets) ---- */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  table.chain td.annot { padding: 5px 7px 0; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; font-style: italic; }
+  .cbox.out { background: #e2f2e9; border-color: #256b46; }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+  .annot {
+    font-size: 11px; color: #6b7686; line-height: 1.3; padding: 5px 4px 0;
+    border-top: 1px dashed #c6cedd; margin-top: 5px;
+  }
+
+  /* ---- the coverage cross grid ---- */
+  table.cross { border-collapse: collapse; width: auto; margin: 5px 0 3px; }
+  table.cross td {
+    border: 1px solid #b9c6dc; padding: 0; width: 27px;
+    background: #dfe7f3; font-size: 9px; line-height: 1.7; text-align: center;
+  }
+  table.cross td.bug { background: #9c3a2a; border-color: #7d2e21; }
+  /* Already excluded under the generator's solver budget: with num_bytes capped,
+     every straddle row is split into bursts shorter than cp_len's {256} bin.
+     ch09 is explicit that this is policy, not geometry -- lift the budget and
+     the cell is reachable -- so the slide says "solver budget", not "geometry".
+     Greyed, not empty: an empty cell would read as "not yet covered", which is
+     the opposite of the teaching point. */
+  table.cross td.unr {
+    background: #eceef1; border-color: #d3d8e0; color: #9aa3b0; font-weight: 600;
+  }
+  .lg {
+    display: inline-block; width: 15px; height: 9px; border: 1px solid #b9c6dc;
+    background: #dfe7f3; vertical-align: -1px; margin: 0 1px 0 5px;
+  }
+  .lg.bug { background: #9c3a2a; border-color: #7d2e21; }
+  .lg.unr { background: #eceef1; border-color: #d3d8e0; }
+  table.cross th {
+    font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 500;
+    letter-spacing: 0; text-transform: none; color: #566174; text-align: center;
+    padding: 2px 3px; border: 1px solid #ccd5e4; border-bottom-width: 1px;
+    background: #f7f9fc; vertical-align: middle;
+  }
+  table.cross th.rl {
+    text-align: right; padding: 1px 8px 1px 0; border: none;
+    background: transparent; white-space: nowrap;
+  }
+  table.cross th.rl.hot { color: #9c3a2a; font-weight: 600; }
+
+  /* ---- bug-rate bar charts ----
+     Explicit pixel width, not 100%: a nested auto-width table inside a
+     .cols cell inflates the parent column and the two charts collide. */
+  table.chart { border-collapse: collapse; table-layout: fixed; width: 396px; margin: 6px 0 0; }
+  table.chart td { vertical-align: bottom; padding: 0 1px; border: none; border-bottom: 1.5px solid #98a3b3; width: 6.25%; }
+  table.chart .b { background: #2c4f8c; display: block; }
+  table.chart .b.tail { background: #a9bcda; }
+  .axis { font-size: 10px; color: #98a3b3; font-family: "IBM Plex Mono", monospace; margin: 2px 0 0; }
+
+
+  /* ---- block-diagram boxes (Part I lineage) ---- */
+  table.diag { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  table.diag td { padding: 0 3px; border: none; vertical-align: middle; }
+  .db {
+    text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.22;
+    border: 1.5px solid #2c4f8c; border-radius: 4px; padding: 7px 5px; background: #eef2f9;
+  }
+  .db .s { display: block; font-weight: 400; font-size: 10.5px; color: #566174; font-style: italic; margin-top: 2px; }
+  .db.bus { background: #2c4f8c; color: #ffffff; font-size: 13px; padding: 9px 6px; }
+  .db.bus .s { color: #c6d5ec; font-style: normal; }
+  .db.obs { background: #f7f9fc; border-style: dashed; border-color: #98a3b3; color: #566174; }
+  .db.chk { background: #e2f2e9; border-color: #256b46; }
+  tr.stem td { padding: 0; }
+  tr.stem i { display: block; width: 0; height: 11px; border-left: 2px solid #2c4f8c; margin: 0 auto; }
+  tr.stem i.dash { border-left-style: dashed; border-left-color: #98a3b3; }
+
+  /* ---- layered stack: signal/transaction/sequence, and the four SVA layers ---- */
+  table.stack { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 3px; }
+  table.stack td { border: none; padding: 0; }
+  .layer {
+    border: 1.5px solid #2c4f8c; background: #eef2f9; margin-bottom: 4px;
+    padding: 7px 13px; font-size: 14px; font-weight: 600; border-radius: 3px;
+  }
+  .layer .d { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; }
+  .layer.top { background: #2c4f8c; color: #ffffff; }
+  .layer.top .d { color: #c6d5ec; }
+
+  /* ---- nested regions: universal / legal / corners ---- */
+  .nest {
+    border: 1.5px solid #98a3b3; background: #f7f9fc; padding: 10px 12px 12px;
+    border-radius: 4px; font-size: 12.5px; color: #566174;
+  }
+  .nest .lab {
+    font-family: "IBM Plex Mono", monospace; font-size: 9.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; display: block; margin-bottom: 5px; font-weight: 600;
+  }
+  .nest.n2 { border-color: #2c4f8c; background: #eef2f9; color: #2c4f8c; }
+  .nest.n3 { border-color: #9c3a2a; background: #fbf3f1; color: #9c3a2a; margin-bottom: 0; }
+
+  /* ---- triage funnel ---- */
+  table.funnel { width: 100%; border-collapse: collapse; margin: 6px 0 2px; }
+  table.funnel td { border: none; padding: 1px 0; text-align: center; }
+  .fbar {
+    background: #eef2f9; border: 1.5px solid #2c4f8c; border-radius: 3px;
+    padding: 5px 8px; font-size: 12.5px; line-height: 1.34; margin: 0 auto;
+  }
+  .fbar .n { font-family: "IBM Plex Mono", monospace; font-weight: 600; color: #2c4f8c; }
+  .fbar.out { background: #e2f2e9; border-color: #256b46; }
+  .fbar.out .n { color: #256b46; }
+  .fbar.warn { background: #fbf3f1; border-color: #9c3a2a; }
+  .fbar.warn .n { color: #9c3a2a; }
+
+  /* Deleted by the week-4 over-constraint: amber, kept visually distinct from
+     the grey "already excluded" cells so the two exclusions never read as one. */
+  table.cross td.del { background: #f6e9cf; border-color: #ddc79a; }
+  .lg.del { background: #f6e9cf; border-color: #ddc79a; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification &middot; A Holistic Guide &middot; Part III</p>
+  <h1>Dynamic Verification</h1>
+  <p class="sub">Testbench architecture, stimulus, UVM, assertions and regression &mdash; the simulation core of the discipline, built as one argument.</p>
+  <p class="src">Lecture companion to Chapters 8&ndash;12.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part III &middot; The arc</p>
+  <h2>Five chapters, one claim</h2>
+  <p class="lead">A testbench is an <strong>architecture with a checking contract</strong> &mdash; not a pile of components.</p>
+  <ul>
+    <li><strong>Why five responsibilities stay apart</strong>, and what specific capability you delete each time you merge two of them.</li>
+    <li><strong>How stimulus grew up</strong>: from writing tests to writing rules &mdash; and the new failure mode that arrives with them, in which the stimulus looks busy and covers nothing.</li>
+    <li><strong>What a standard library buys</strong>, and the exact currency it is paid for in: indirection, spent at debug time.</li>
+    <li><strong>How checking grew up</strong>: a specification sentence, written so a tool can evaluate it, sitting on the port where it applies.</li>
+    <li><strong>How to run all of it every night</strong> without losing the one failure that matters.</li>
+  </ul>
+  <p class="note"><b>Say</b>Part I asked why verification is hard. Part II asked what to measure. Part III is where the instruments get built.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- ============ 3. THE MAP ============ -->
+<section class="slide">
+  <p class="kicker">Part III &middot; The map</p>
+  <h2>Chapter 8 separates three jobs. The rest of the book grows them up.</h2>
+  <table class="diag">
+    <tr>
+      <td colspan="3"><div class="db bus">Chapter 8 &mdash; testbench architecture<span class="s">stimulus, checking and coverage separated so each can be reasoned about alone</span></div></td>
+    </tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i></i></td></tr>
+    <tr>
+      <td><div class="db">STIMULUS<span class="s">what should happen next?</span></div></td>
+      <td><div class="db">CHECKING<span class="s">was it right?</span></div></td>
+      <td><div class="db obs">COVERAGE<span class="s">what did we exercise?</span></div></td>
+    </tr>
+    <tr class="stem"><td><i></i></td><td><i></i></td><td><i class="dash"></i></td></tr>
+    <tr>
+      <td><div class="db chk">Chapter 9 &mdash; stimulus grown up<span class="s">directed &rarr; constrained random &rarr; portable</span></div></td>
+      <td><div class="db chk">Chapter 11 &mdash; checking grown up<span class="s">assertion-based verification</span></div></td>
+      <td><div class="db obs">grew up in Part II<span class="s">Chapter 6 &mdash; coverage</span></div></td>
+    </tr>
+  </table>
+  <table class="cols"><tr>
+    <td><p class="small" style="margin-top:6px"><strong>Chapter 10 &mdash; UVM.</strong> The library that standardizes the wiring, so a component survives a change of level, of project, of company.</p></td>
+    <td><p class="small" style="margin-top:6px"><strong>Chapter 12 &mdash; regression.</strong> The factory that turns commits into evidence, every night, at a cost you can defend.</p></td>
+  </tr></table>
+  <p class="note"><b>Say</b>Ten and twelve are the infrastructure either side of the argument: one holds the environment together, the other runs it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. DIVIDER CH8 ============ -->
+<section class="slide divider">
+  <p class="chno">08</p>
+  <h1>Testbench Architecture</h1>
+  <p class="sub">Five responsibilities, not one program &mdash; and why that is not bureaucracy.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- ============ 5. THE 2,400-LINE TESTBENCH ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 8 &middot; The opening scenario</p>
+  <h2>It works. It has found four bugs. Then one week happens.</h2>
+  <p>Six weeks into crossbar bring-up: <strong>one file, 2,400 lines</strong>. It drives all five manager ports, samples the four subordinate ports, computes what the memory should return, and collects coverage &mdash; in the same forever loop, over the same variables.</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">Monday &mdash; a mismatch nobody can read</span>A read-data mismatch fires at 41&nbsp;&micro;s. The crossbar may have returned two responses in a legal order; the checker may have assumed an order the protocol never promised; the driver's back-pressure model may have drifted. <strong>All three hypotheses share state, so no experiment separates them.</strong></div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Thursday &mdash; a checker that cannot move</span>The DMA team asks to reuse the AXI checking. It cannot be lifted out: the checker reads variables the driver writes, so it knows only what the driver <em>intended</em> to send &mdash; never what appeared on the wires.</div>
+    </td>
+  </tr></table>
+  <p class="ex"><span class="tag">One root, and it is not a coding error</span>Five distinct responsibilities were implemented as one program. Two days in a waveform viewer later, the ticket closes as <em>&ldquo;testbench issue&rdquo;</em> &mdash; the phrase that means <strong>we never found out</strong>.</p>
+  <p class="note"><b>Say</b>Ask the room which of the two failures they have personally shipped. Both hands go up.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- ============ 6. FIVE RESPONSIBILITIES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 8 &middot; The decomposition that survived</p>
+  <h2>Five responsibilities. Each earns its own box.</h2>
+  <table>
+    <tr><th>Responsibility</th><th>Answers</th><th>Must not know</th></tr>
+    <tr><td><strong>Stimulus generation</strong></td><td><em>What</em> scenario should happen next?</td><td>How the protocol wiggles pins</td></tr>
+    <tr><td><strong>Driving</strong></td><td><em>How</em> is this transaction expressed on the interface?</td><td>What the correct response is</td></tr>
+    <tr><td><strong>Monitoring</strong></td><td>What <em>did</em> appear on the interface?</td><td>What was intended</td></tr>
+    <tr><td><strong>Checking</strong></td><td>Was it <em>right</em>?</td><td>Which test is running</td></tr>
+    <tr><td><strong>Coverage</strong></td><td>What have we <em>exercised</em>?</td><td>Whether the test passed</td></tr>
+  </table>
+  <p class="small">Read the third column first: each box is defined as much by what it is denied as by what it does. And the separation is not a modern refinement &mdash; by 2001 a language built specifically for functional verification already had a data model, a test generator, a reference model, a checker split into data and temporal halves, and coverage tied back to a plan.</p>
+  <p class="note"><b>Say</b>The structure came first; the tooling followed. Anyone who tells you this is UVM ceremony has the history backwards.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- ============ 7. MERGE TWO, DELETE A CAPABILITY ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 8 &middot; What merging costs</p>
+  <h2>Merge any two and you silently delete a capability</h2>
+  <table class="cols3"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">Checking inside the driver</span><strong>Destroys the oracle.</strong> The checker now compares the design against the stimulus generator's <em>intentions</em>. Every bug in which the driver itself misbehaves becomes invisible &mdash; both sides of the comparison move together.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Monitoring inside the driver</span><strong>Destroys reuse.</strong> If observation is a side effect of driving, you can never watch an interface you are not driving &mdash; which forecloses passive reuse at system level, and the best debug configuration there is.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Coverage inside the checker</span><strong>Destroys honesty.</strong> Sample where the verdict is computed and you sample only paths the checker reached. Holes then look like missing stimulus when they are missing <em>observation</em>.</div>
+    </td>
+  </tr></table>
+  <div class="ex good"><span class="tag">The rule that generalizes &mdash; and the scenario that proves it</span>A reviewer asks what happens if the driver mis-encodes <code>awsize</code>. With the split, the monitor reconstructs what the crossbar actually received and the read-back check fails. Without it, the driver's mistake propagates identically into both the design and the expectation, and <strong>the test passes</strong>. Hence: <strong>predict from what was observed, never from what was requested.</strong></div>
+  <p class="note"><b>Say</b>This is Chapter 3's common-mode error, promoted from a risk to an architectural guarantee.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- ============ 8. LAYERING + COMMUNICATION ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 8 &middot; Layering, and two shapes of communication</p>
+  <h2>Signal, transaction, sequence &mdash; and never let observation block</h2>
+  <table class="cols"><tr>
+    <td>
+      <table class="stack">
+        <tr><td><div class="layer top">SEQUENCE<span class="d">scenarios: ordered, constrained collections that express intent &mdash; Chapter 9's subject</span></div></td></tr>
+        <tr><td><div class="layer">TRANSACTION<span class="d">the unit of meaning: injected into the running simulation, terminated later by an observed result</span></div></td></tr>
+        <tr><td><div class="layer">SIGNAL<span class="d">pins, edges, handshakes</span></div></td></tr>
+      </table>
+      <p class="small">The <strong>transactor</strong> converts between the bottom two: every physical-level operation of one interface encapsulated in one place. Everything above it speaks transactions; only it speaks pins.</p>
+      <p class="small"><strong>Layer by protocol, not by pin bundle.</strong> What is a transaction at block level is not one at system level &mdash; for a network interface block, a frame; for the system that reassembles and routes, a packet.</p>
+    </td>
+    <td>
+      <table class="compact">
+        <tr><th></th><th>Operational</th><th>Observational</th></tr>
+        <tr><td><strong>Shape</strong></td><td>point-to-point</td><td>broadcast</td></tr>
+        <tr><td><strong>Blocking</strong></td><td>yes &mdash; and back-pressure is meaningful</td><td><strong>never</strong></td></tr>
+        <tr><td><strong>Subscribers</strong></td><td>one</td><td>zero, one, or many</td></tr>
+      </table>
+      <div class="ex"><span class="tag">Why the asymmetry is the whole point</span>A monitor must never be slowed by the things watching it, <strong>or the act of measuring changes the timing of the measurement.</strong> It also makes observers pluggable: coverage collector, protocol checker and scoreboard subscribe to one stream, and a fourth costs nothing structurally.</div>
+      <div class="ex warn"><span class="tag">The obligation everyone violates once</span>Every subscriber receives a handle to the <em>same</em> object, and a subscriber's write shall not modify it. A coverage collector that normalizes an address in place corrupts the scoreboard's expectation &mdash; and it will look like a design bug for as long as you let it.</div>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- ============ 9. SCOREBOARD LEDGER + STREAM KEY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 8 &middot; Scoreboard patterns</p>
+  <h2>Three patterns, and a ledger you pay in ordering checks</h2>
+  <table class="compact">
+    <tr><th>Design behavior</th><th>Structure</th><th>Lookup</th><th>Cost to the checker</th></tr>
+    <tr><td>Preserves order</td><td>one queue</td><td>front only, O(1)</td><td>cheapest; any reorder = failure</td></tr>
+    <tr><td>Per-stream order only</td><td>queue per stream key</td><td>front of one queue</td><td>must <strong>name</strong> the stream key correctly</td></tr>
+    <tr><td>Reorders freely</td><td>associative index on a content key</td><td>hash, O(1) amortized</td><td>ordering is no longer checked at all</td></tr>
+  </table>
+  <p class="small">Read the last column as a ledger: <strong>every step down buys tolerance of legal reordering and pays for it by giving up an ordering check.</strong></p>
+  <h3>Naming the crossbar's stream key</h3>
+  <p class="small">A key acquires <strong>one dimension per independent source of concurrency</strong>. Here there are three: five managers issuing at once, two independent ID spaces, and per-ID ordering within one port and one direction.</p>
+  <table class="chain" style="width:78%">
+    <tr>
+      <td style="width:31%"><div class="cbox">manager port<span class="q">0&hellip;4</span></div></td>
+      <td style="width:3.5%" class="arrowr">&times;</td>
+      <td style="width:31%"><div class="cbox">direction<span class="q">read and write IDs are independent spaces</span></div></td>
+      <td style="width:3.5%" class="arrowr">&times;</td>
+      <td style="width:31%"><div class="cbox">manager-side ID<span class="q">as the manager issued it</span></div></td>
+    </tr>
+  </table>
+  <div class="ex warn"><span class="tag">Why the tempting two-coordinate key fails</span><code>(subordinate, ID)</code> merges two managers that both have ID&nbsp;3 outstanding &mdash; a mismatch that <em>disappears on a seed change</em>; it merges the read and write ID spaces, so a read expectation can be popped by a write response; and it misreads the protocol, since an interconnect must <strong>widen</strong> the ID toward the subordinate. Five managers need &lceil;log&#8322;5&rceil; = 3 manager-identifying bits, so a <strong>4-bit</strong> manager ID arrives at a subordinate port as a <strong>7-bit</strong> one.</div>
+  <p class="note"><b>Say</b>The constraint that decides it: a key must be <strong>computable from what the observer sees</strong>. Key on the manager side and you never model the design's ID-remap policy at all.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- ============ 10. THE SCOREBOARD'S LOAD-BEARING LINES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 8 &middot; The lines that carry weight</p>
+  <h2>Four details, each of which has cost someone a week</h2>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">// Called by the routing PREDICTOR, fed by a monitor.
+// Never by a driver. (Section 8.1's rule, in code.)
+function void predict(xbar_exp_t e);
+  if ($isunknown(e.id)) begin
+    $error("xbar_sb: X/Z in a request ID, mgr %0d", e.mgr);
+    return;              // else int'(id) files it under key 0
+  end
+  pending[stream_key(e.mgr, e.dir, e.id)].push_back(e);
+endfunction
+
+// Called by a MANAGER-side monitor, so what is checked is
+// the crossbar's return path -- not our own responder.
+head = pending[k].pop_front();
+if (head.beats !== beats) begin   // !== , never !=
+  n_mismatch++;
+  ...
+end
+
+function int unsigned leftover();   // end of test
+  foreach (pending[k]) n += pending[k].size();
+endfunction</pre>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">1 &middot; <code>!==</code>, not <code>!=</code></span>Logical inequality on operands containing x or z yields <code>1'bx</code>, which <code>if</code> reads as <strong>false</strong>. With <code>!=</code>, a single undriven beat scores as <em>matched</em> &mdash; a green result from a comparison that could not go red.</div>
+      <div class="ex warn"><span class="tag">2 &middot; the <code>$isunknown</code> guards</span><code>int'(id)</code> is a two-state cast: it collapses an unknown ID to <code>0</code> and files a corrupt transaction under a real key.</div>
+      <div class="ex"><span class="tag">3 &middot; <code>leftover()</code></span>The interesting failure is usually <strong>silence</strong>. A response that never arrives produces no mismatch &mdash; only a queue that never empties.</div>
+      <div class="ex"><span class="tag">4 &middot; zero-delay entry points</span>Both are functions, so a checker can never back-pressure a monitor. And every record carries its manager, decoded subordinate, capture index and prediction time &mdash; the cost is four fields, the saving is the opening scenario's two days.</div>
+    </td>
+  </tr></table>
+  <p class="note"><b>Facilitation</b>&ldquo;A silent scoreboard is a broken scoreboard.&rdquo; Ask what a report line with four counters &mdash; matched, orphan, mismatch, leftover &mdash; would have said on their last project.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- ============ 11. MODELS: THREE SPECIES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 8 &middot; Reference models</p>
+  <h2>A predictor you wrote is not golden</h2>
+  <div class="ex warn"><span class="tag">The distinction teams blur</span>A <strong>transfer function</strong> reproduces the design's transformation so the environment can predict an output. It does not exist a priori, it is not golden by definition, and it will contain as many errors as the design itself. When model and design disagree, the first question is <em>which of the two misread the specification</em>.</div>
+  <table class="cols3"><tr>
+    <td><div class="ex"><span class="tag">1 &middot; algorithmic</span>You write it from the specification. The crossbar's address decoder; the DMA's descriptor legalizer. Cheap to build, cheap to change, <strong>never trusted absolutely</strong>.</div></td>
+    <td><div class="ex"><span class="tag">2 &middot; golden executable</span>The standard ships the model, so checking collapses to comparison. A video decoder is the clean case &mdash; and the <em>encoder</em> beside it on the same die is where the species runs out.</div></td>
+    <td><div class="ex"><span class="tag">3 &middot; co-simulated ISS</span>The model runs alongside the RTL; comparison happens at <strong>instruction retirement</strong> &mdash; PC, registers, control registers, trap status.</div></td>
+  </tr></table>
+  <table class="cols"><tr>
+    <td><p class="small"><strong>Golden is not the same as complete.</strong> A standard constrains the bitstream, not the choices that produced it: two conformant encoders emit different bitstreams from the same picture and both are correct. What replaces the model is a conjunction of weaker claims &mdash; it decodes, within a distortion target <em>the team itself</em> set, without breaking buffer constraints. Each checkable; none golden.</p></td>
+    <td><p class="small"><strong>Two conditions on co-simulation.</strong> Models need only be <em>functionally</em> accurate, not cycle-accurate &mdash; which dictates that you compare at an architectural boundary, never cycle by cycle. And <strong>every asynchronous event must reach both sides</strong>: notify the model of the same interrupts, or each random interrupt becomes a divergence that costs a day and is entirely an artifact of your environment.</p></td>
+  </tr></table>
+  <p class="note"><b>Say</b>Whatever species you build, you have written a second implementation of the specification. Every spec change is now two edits, two reviews and one argument.</p>
+  <p class="src">Done for real: the OpenHW Group's CV32E40Pv2 &mdash; a RISC-V core descended from ETH Zurich's RI5CY, developed by Dolphin Design &mdash; ran the same program on RTL and on a reference model supplied by Imperas rather than written in-house, streaming RTL internal state and asynchronous events over RVVI-TRACE and comparing state as each instruction retires. Qualitative: the paper describes the environment and measures no comparison of it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- ============ 12. MONITORS NEVER DRIVE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 8 &middot; Passive checking</p>
+  <h2>A monitor never drives &mdash; and the modport is what enforces it</h2>
+  <table class="cols"><tr>
+    <td>
+<pre class="tight">interface axi_mon_if (input logic clk,
+                      input logic rst_n);
+  logic        awvalid, awready;
+  logic [31:0] awaddr;
+  logic [3:0]  awid;
+  clocking cb @(posedge clk);
+    input awvalid, awready, awaddr, awid;
+  endclocking
+  // Only the clocking block and reset are
+  // reachable through this modport.
+  modport MON (clocking cb, input rst_n);
+endinterface</pre>
+      <p class="small">A monitor handed a <code>virtual axi_mon_if.MON</code> cannot assign to the bus at all: <strong>the compiler rejects it, so no code review has to catch it.</strong></p>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">The shortcut version of this claim is false</span>A component holding a plain <code>virtual axi_mon_if</code> handle reaches <em>every</em> member: <code>awvalid</code> and friends are ordinary <code>logic</code> variables, so <code>vif.awvalid = 1'b1;</code> compiles and drives. A clocking block on its own constrains <code>vif.cb.*</code> and <strong>nothing else</strong>.</div>
+      <h3>Who initiates &mdash; not which direction</h3>
+      <p class="small">Signal direction is the wrong criterion. If a task <em>initiates</em> under testbench control it is stimulus; if it <em>waits</em> for a transaction the design initiated it is a monitor. So a subordinate-side responder is an agent's <strong>driver</strong>, however passive it feels.</p>
+      <h3>And it must always be monitoring</h3>
+      <p class="small">Activate a response task late and the design finds the testbench not ready: back-pressure builds so throughput is never verified, output data spills, or the protocol is violated outright &mdash; <em>a protocol error that is entirely the testbench's fault.</em> The answer is the <strong>autonomous monitor</strong>: a thread started at construction, pushing into a FIFO the environment drains at its leisure.</p>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>The failure mode to name aloud: a monitor that <em>infers</em> what it cannot observe has become a second design &mdash; with its own bugs, and nobody reviewing it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- ============ 13. THE CROSSBAR ENVIRONMENT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 8 &middot; Worked example</p>
+  <h2>The crossbar environment &mdash; and the contract written before any code</h2>
+  <table class="diag">
+    <tr>
+      <td style="width:34%"><div class="db">Manager agents &times;5<span class="s">driver + monitor</span></div></td>
+      <td style="width:32%"><div class="db bus">CROSSBAR 5 &times; 4<span class="s">the design under verification</span></div></td>
+      <td style="width:34%"><div class="db">Subordinate agents &times;4<span class="s">responder + monitor</span></div></td>
+    </tr>
+    <tr class="stem"><td><i class="dash"></i></td><td></td><td><i class="dash"></i></td></tr>
+    <tr>
+      <td><div class="db obs">Protocol checkers<span class="s">is this traffic legal?</span></div></td>
+      <td><div class="db obs">Coverage collector<span class="s">what did we exercise?</span></div></td>
+      <td><div class="db chk">Predictor &rarr; scoreboard<span class="s">queue per (manager, direction, ID)</span></div></td>
+    </tr>
+  </table>
+  <p class="small">Nine agents, one per interface &mdash; <strong>all nine carry a monitor</strong>, including the interfaces the environment itself drives. Monitors publish; none of the subscribers can block them, and none may modify what it receives.</p>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex good"><span class="tag">Step 0 &mdash; four verdicts, each with a named owner</span>Data integrity per ordered stream and completeness &rarr; the <strong>scoreboard</strong>. Routing correctness &rarr; the <strong>forward-path check</strong>. Protocol legality on nine interfaces &rarr; the <strong>checkers</strong>.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">And three it will NOT produce</span>Relative ordering between different transaction IDs. Arbitration fairness. Latency bounds. <strong>Keep the negative list</strong> &mdash; it is the half teams skip, and the half that stops a reviewer assuming a check that does not exist.</div>
+    </td>
+  </tr></table>
+  <p class="small"><strong>Step 5 &mdash; what this environment cannot see.</strong> The canonical crossbar bug is write-data interleaving at a subordinate port under back-pressure: the subordinate stalls <code>WREADY</code> on the first data beat and the write arbiter releases the grant mid-burst, so beats of two bursts arrive interleaved. The scoreboard is blind to it <em>by construction</em>: the violation is a relation <strong>between</strong> two transactions, not a property of either one's data. It was found by protocol assertions in formal, with an 11-cycle counterexample.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- ============ 14. DISCUSSION 1 ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 8 &middot; Discussion</p>
+  <h2>Take the environment you work on today</h2>
+  <div class="ex"><span class="tag">Question 1</span>Write its <strong>checking contract</strong> from memory: every verdict it produces, and the component that owns each. How long did that take &mdash; and did you have to go and read code to finish it?</div>
+  <div class="ex"><span class="tag">Question 2</span>Now write the <strong>negative list</strong>: three things a reasonable reviewer might assume it checks, and it does not. Who else on your team knows that list?</div>
+  <div class="ex"><span class="tag">Question 3</span>Find one place where two of the five responsibilities are merged. What capability did that merge delete &mdash; the oracle, passive reuse, or honest measurement? Is the merge worth keeping?</div>
+  <p class="note"><b>Facilitation</b>Question 2 is the one that goes quiet. Let the silence run &mdash; it is the lesson. If nobody can produce the negative list, the environment's promises live only in the head of whoever wrote it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- ============ 15. DIVIDER CH9 ============ -->
+<section class="slide divider">
+  <p class="chno">09</p>
+  <h1>Stimulus</h1>
+  <p class="sub">Directed to random to portable &mdash; stop writing tests, start writing rules, and measure what you got.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- ============ 16. WHAT IS TEST 12? ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 9 &middot; The opening scenario</p>
+  <h2>Eleven directed tests. Every one passes. What is test&nbsp;12?</h2>
+  <p>The DMA testbench is three weeks old: a driver, a scoreboard, eleven directed tests. Test&nbsp;1 copies 64 bytes. Test&nbsp;7 does a 2D transfer with a positive row stride. Test&nbsp;11 puts a destination four bytes below a 4&nbsp;KB frontier, because someone read the bus rule and wanted to watch the midend split a burst.</p>
+  <div class="ex"><span class="tag">There is no shortage of candidates</span>Negative strides. Both channels at once. A row exactly one maximum burst long, starting exactly one maximum burst below a page frontier, on channel 0, while channel 1 is draining. Each is plausible. Each takes half a day to write and debug.</div>
+  <p class="lead">The list, honestly enumerated, does not have eleven more entries. <strong>It has several thousand.</strong></p>
+  <div class="ex warn"><span class="tag">And the deeper problem is not speed</span>Writing them by hand <strong>guarantees that the bugs you find are the ones you already imagined.</strong></div>
+  <p class="note"><b>Say</b>This is the question that ends the directed era on every project that survives its first tape-out.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- ============ 17. DIRECTED: GOOD AT / STOPS AT ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 9 &middot; Directed tests</p>
+  <h2>Precision, and its ceiling</h2>
+  <table class="cols3"><tr>
+    <td><div class="ex good"><span class="tag">Bring-up</span>The first stimulus a new block sees must be small enough to debug when <em>everything</em> is broken at once. A twelve-line test answers &ldquo;register decode, midend, backend, scoreboard or clock?&rdquo; in one waveform. A random 47-row negative-stride transfer answers nothing.</div></td>
+    <td><div class="ex good"><span class="tag">Spec compliance</span>Some stimulus is enumerated for you by an external authority, and randomizing it is a category error. A memory controller's training sequence has <strong>exactly one legal opening move</strong>. The value of running the industry's list is that it <em>is</em> the industry's list.</div></td>
+    <td><div class="ex good"><span class="tag">Regression anchors</span>Short, deterministic, finishes in seconds, and its failure is never ambiguous &mdash; the ideal smoke test.</div></td>
+  </tr></table>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">Where it stops</span>Manageable to completion when the total is in the <strong>low hundreds</strong>. A project with over a thousand identified test cases would need <strong>more than a year</strong> this way. A schedule claim, not a feasibility one &mdash; and quite bad enough.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Two failure modes that matter more than the arithmetic</span><strong>Bias.</strong> Hand-written stimulus is a projection of the author's model of the design; where the model is wrong, the stimulus is silent. <strong>Decay.</strong> A test can pass forever while ceasing to test what it was written for &mdash; enlarge a FIFO and every test that verified its full operation still succeeds while exercising only part of it.</div>
+    </td>
+  </tr></table>
+  <p class="small"><strong>None of this retires the technique.</strong> In 2024, random tests are still described as covering the vast majority of easy-to-detect scenarios but unable to reach complex corner cases in reasonable time, with directed tests covering the remainder. The mature position: use a directed test when a scenario is too complex to describe or too unlikely to happen randomly &mdash; and a directed sequence can be <em>injected</em> into a stream of random ones. In a mature environment, <strong>&ldquo;directed&rdquo; describes a fragment of a run, not a run.</strong></p>
+  <p class="src">The 2024 characterisation is Jayasena &amp; Mishra, &ldquo;Directed Test Generation for Hardware Validation: A Survey&rdquo;, ACM Computing Surveys 56(5), 2024 &mdash; a third-party survey of the literature, not a company case.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- ============ 18. ENUMERATION TO DESCRIPTION ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 9 &middot; The constrained-random turn</p>
+  <h2>Stop describing <em>a</em> run. Describe the set of legal runs.</h2>
+  <p>Constraints are formal, unambiguous specifications of design behaviour: they define what input combinations can be applied, and when. Because they are <strong>declarative</strong> they read like the specification rather than like a program; because they are <strong>executable</strong>, the manual construction of a procedural testbench disappears.</p>
+  <div class="ex"><span class="tag">One artifact, three hats</span>The same constraint that <strong>generates</strong> legal traffic on one block's input can <strong>check</strong> legality on a neighbouring block's output &mdash; and Chapter 14 makes it a formal <strong>assumption</strong>. That generator/monitor duality is what makes interface constraints reusable one level up the hierarchy.</div>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">Commitment 1 &mdash; you must measure</span>You no longer know what you ran. <strong>&ldquo;If you are not using functional coverage in tandem with a random environment, you are only doing directed test cases with random stimulus filling.&rdquo;</strong> The generator answers <em>what could happen</em>; only the coverage model answers <em>what did</em>.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Commitment 2 &mdash; the generator is an architecture</span>One able to exercise the required features does not happen by accident. Design a generator that can be constrained <em>from the outside</em> rather than altering its code per test. <strong>Every forked generator is a directed test wearing a costume.</strong></div>
+    </td>
+  </tr></table>
+  <p class="small">The turn is older than it looks, and it arrived as a <strong>commercial product</strong> rather than as a research result &mdash; in a language whose aspect-oriented design existed precisely so that constraints and checks could be layered onto an existing code base <em>without editing it</em>.</p>
+  <p class="src">Source: Hollander, Morley &amp; Noy (Verisity Ltd.), &ldquo;The e Language: A Fresh Separation of Concerns&rdquo;, TOOLS 2001 &mdash; the <code>e</code> language and Specman, Verisity's flagship product. Qualitative: the paper reports industrial use and prints no measurement. Constraint semantics: IEEE 1800 SystemVerilog LRM.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- ============ 19. LEGALITY VS POLICY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 9 &middot; Writing good constraints</p>
+  <h2>Legality is a claim about the design. Policy is a claim about your test.</h2>
+  <table class="cols"><tr>
+    <td style="width:42%">
+      <div class="nest">
+        <span class="lab">Universal &mdash; every input combination</span>
+        <div class="nest n2">
+          <span class="lab">Legal &mdash; environment constraints</span>
+          <div class="nest n3">
+            <span class="lab">Corners &mdash; directive constraints</span>
+            the run you asked for
+          </div>
+        </div>
+      </div>
+      <p class="small" style="margin-top:8px">The outer boundary belongs to the <strong>design</strong> and lives in the generator. The inner one belongs to a <strong>test</strong> and lives in a layer above it. Confusing the two is the origin of most bad stimulus.</p>
+    </td>
+    <td>
+<pre class="mini">// --- legality: the frontend rejects anything else ---
+constraint c_bus_alignment {     // 64-bit data path
+  src_addr[2:0]   == 3'b000;
+  dst_addr[2:0]   == 3'b000;
+  num_bytes[2:0]  == 3'b000;
+}
+// --- policy, NOT legality: an unmapped address is
+// legal to PROGRAM. Disable this one in the
+// error-response test.
+constraint c_addressable {
+  src_addr inside {[SRAM_BASE : SRAM_BASE + SRAM_SIZE - 1]};
+  foreach (dst_row[i])   // a negative stride must not
+    dst_row[i] inside    // walk the rows out of the map
+      {[SRAM_BASE : SRAM_BASE + SRAM_SIZE - 1]};
+}
+// --- policy: keep the object small enough to solve fast
+constraint c_solver_budget {
+  num_bytes  inside {[8 : 2048]};   // &lt;= one 256-beat burst
+  num_reps   inside {[1 : 64]};
+}</pre>
+    </td>
+  </tr></table>
+  <table class="cols"><tr>
+    <td><p class="small"><strong>The comment on <code>c_addressable</code> is the most important line in the file.</strong> What the DMA does with an unmapped address &mdash; a decode error, reported per channel &mdash; is <em>a feature to verify, not stimulus to suppress</em>. A constraint block is the most convenient place in the language to commit that error permanently.</p></td>
+    <td><p class="small"><strong>Label the budget honestly.</strong> <code>c_solver_budget</code>'s bounds are engineering choices about solve time, not statements about the design. Saying so lets a later test relax them without anyone wondering whether it has just generated something illegal.</p></td>
+  </tr></table>
+  <p class="note"><b>Say</b>Teams that stay sane require every constraint block to declare <em>legality</em> or <em>policy</em> in a comment. After a year nobody remembers which of the forty are which.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- ============ 20. UNIFORM PROMISE + SHAPING ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 9 &middot; Distribution</p>
+  <h2>The solver's promise is about your constraints, not your coverage model</h2>
+  <div class="ex"><span class="tag">What the solver owes you</span>Random values shall be selected to give a <strong>uniform distribution over legal value combinations</strong>. A strong guarantee &mdash; about the solution space <em>defined by your constraints</em>, which is not the space your coverage model measures. Nothing in the constraint model knows which edges matter.</div>
+  <table class="cols3"><tr>
+    <td>
+      <h3><code>dist</code></h3>
+      <p class="small">Weights over values and ranges. <code>:=</code> applies the weight to each element of a range; <code>:/</code> divides one weight across it. Nonzero weights <strong>cannot cause the solver to fail</strong> &mdash; they do not change the solution space.</p>
+      <p class="small"><strong>The trap:</strong> values <em>absent</em> from the list, and values whose total weight is zero, are treated as <strong>forbidden</strong>. A <code>dist</code> that does not cover everything legal is silently an over-constraint.</p>
+    </td>
+    <td>
+      <h3><code>solve &hellip; before</code></h3>
+      <p class="small">Changes probabilities by ordering the choice. With <code>s -&gt; d == 0</code> over a 1-bit <code>s</code> and a 32-bit <code>d</code>:</p>
+      <p class="small"><code>s</code> is true in exactly one of 1&nbsp;+&nbsp;2&#179;&#178; legal combinations, so <code>d == 0</code> occurs with probability <strong>2/(1&nbsp;+&nbsp;2&#179;&#178;)</strong> &mdash; effectively never.</p>
+      <p class="small">Add <code>solve s before d</code>: identical legal set, and <code>d == 0</code> now occurs with probability <strong>slightly over 50%</strong>.</p>
+    </td>
+    <td>
+      <h3><code>soft</code></h3>
+      <p class="small">Preference, not requirement: discarded when it cannot hold alongside the active hard constraints. Its purpose is <strong>layering</strong> &mdash; a generic component supplies defaults that a specialized constraint overrides automatically.</p>
+      <p class="small">In the DMA generator, <em>&ldquo;most descriptors are small&rdquo;</em> belongs in a soft constraint. <em>&ldquo;Addresses are 8-byte aligned&rdquo;</em> does not.</p>
+    </td>
+  </tr></table>
+  <div class="ex warn"><span class="tag">Shape the measured quantity, not the raw field</span>Write the distribution over <strong>the same expression the coverpoint samples</strong>. Shaping a raw field and hoping the interesting combination emerges is guesswork; shaping the expression that defines the bin is aim. </div>
+  <p class="note"><b>Say</b>Weights hold <em>absent any other constraints</em>. Two distributions over overlapping expressions are a <strong>request</strong> &mdash; you learn whether it was granted from the coverage report.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- ============ 21. OVER-CONSTRAINING: THE WEEK-4 LINE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 9 &middot; The silent killer</p>
+  <h2>One line, added in week 4, deletes the feature under test</h2>
+  <table class="cols"><tr>
+    <td style="width:53%">
+<pre class="mini">class dma_desc_overconstrained extends dma_2d_descriptor;
+  // Week 4: "the AXI spec says no burst may cross a 4 KB page."
+  constraint c_no_page_cross {
+    foreach (dst_row[i])
+      (32'(dst_row[i][11:0]) + num_bytes) &lt;= 32'd4096;
+  }
+endclass</pre>
+      <div class="ex warn"><span class="tag">True of the design's output. False of its input.</span>The 4&nbsp;KB rule governs the bursts the <em>backend may emit</em>. Splitting a request that would cross a page is precisely the <strong>midend legalizer's job</strong> &mdash; the feature the campaign exists to verify. The engineer has taken the design's obligation and imposed it on the stimulus, and <strong>the tests keep passing because the design is no longer asked to do the thing it gets wrong.</strong></div>
+      <p class="small">Nothing fails. Nothing warns. What the team sees is a coverage report with one clean block of cells permanently empty. The block looks like a hard corner, gets an owner and a due date, and slides.</p>
+    </td>
+    <td>
+      <table class="cross" style="margin-left:auto;margin-right:0">
+        <tr><th class="rl"></th><th colspan="2">len 1</th><th colspan="2">len 255</th><th colspan="2">len 256</th></tr>
+        <tr><th class="rl">stride &middot; boundary</th><th>idle</th><th>busy</th><th>idle</th><th>busy</th><th>idle</th><th>busy</th></tr>
+        <tr><th class="rl">pos &middot; gt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">pos &middot; eq_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">pos &middot; lt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">pos &middot; straddle</th><td class="del">&nbsp;</td><td class="del">&nbsp;</td><td class="del">&nbsp;</td><td class="del">&nbsp;</td><td class="unr">&times;</td><td class="unr">&times;</td></tr>
+        <tr><th class="rl">zero &middot; gt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">zero &middot; eq_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">zero &middot; lt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">zero &middot; straddle</th><td class="del">&nbsp;</td><td class="del">&nbsp;</td><td class="del">&nbsp;</td><td class="del">&nbsp;</td><td class="unr">&times;</td><td class="unr">&times;</td></tr>
+        <tr><th class="rl">neg &middot; gt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">neg &middot; eq_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl">neg &middot; lt_burst</th><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><th class="rl hot">neg &middot; straddle</th><td class="del">&nbsp;</td><td class="bug">&nbsp;</td><td class="del">&nbsp;</td><td class="bug">&nbsp;</td><td class="unr">&times;</td><td class="unr">&times;</td></tr>
+      </table>
+      <p class="small" style="margin-top:5px"><span class="lg del"></span>cost of the constraint &nbsp; <span class="lg unr"></span>already excluded &nbsp; <span class="lg bug"></span>the bug</p>
+      <p class="small"><strong>72</strong> cells &middot; <strong>18</strong> contain <code>straddle</code> &middot; <strong>6</strong> were already excluded under the generator's solver budget &middot; the week-4 line costs the other <strong>12</strong> &mdash; including <strong>both</strong> of the bug's 2 reachable cells.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- ============ 22. HOW THE HOLE IS FOUND ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 9 &middot; Diagnosis</p>
+  <h2>Three habits that catch it &mdash; and a diagnostic that can fail</h2>
+  <table class="cols3"><tr>
+    <td><div class="ex"><span class="tag">1 &middot; Read empty cells as a generator question first</span>A gap could be a symptom of a problem in the generators, not in the design. <strong>Structure decides which:</strong> a whole <em>value</em> of an axis missing from every combination &mdash; a clean projection, not scattered cells &mdash; says a dimension of the stimulus is switched off.</div></td>
+    <td><div class="ex"><span class="tag">2 &middot; Diff the constraint set against the coverage model</span>For each axis, find the generator variable that moves it. For <code>cp_boundary_dist</code> there is none &mdash; only a constraint pinning it.</div></td>
+    <td><div class="ex"><span class="tag">3 &middot; Aim, and watch it fail</span>Ask for the missing <strong>cell</strong> &mdash; for the relation that defines it, not for a field you hope moves it &mdash; and let the failure be the diagnosis.</div></td>
+  </tr></table>
+<pre class="tight">// aim at neg x straddle: a destination row reaching past the frontier
+if (!desc.randomize() with { dst_stride &lt; 0;
+                             (32'(dst_addr[11:0]) + num_bytes) &gt; 32'd4096; })
+  $fatal(1, "over-constrained: no descriptor reaches past a 4 KB frontier");</pre>
+  <table class="cols"><tr>
+    <td><p class="small"><strong>The second clause carries the diagnosis.</strong> Against the honest generator it is satisfiable &mdash; offset 4088 with a 2048-byte row reaches 6136. Against the over-constrained one it cannot be: <code>c_no_page_cross</code> asserts precisely the negation of what you asked for.</p></td>
+    <td><p class="small"><strong>Aim at <code>dst_stride</code> alone</strong> and the same generator answers cheerfully with an 8-byte row, which fits inside a frame at every legal offset. <em>A diagnostic that cannot fail diagnoses nothing.</em></p></td>
+  </tr></table>
+  <div class="ex warn"><span class="tag">And one axis no shaping can reach</span>Nothing in a single descriptor moves <code>cp_other_ch</code>, because <em>&ldquo;the other channel is active&rdquo;</em> is not a property of a descriptor at all &mdash; it is a relation between two streams. <strong>Both reachable cells of the canonical bug lie on the other-channel-active side</strong>, so this generator, however well shaped, reaches neither.</div>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- ============ 23. CONSTRAINTS CANNOT CROSS GENERATORS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 9 &middot; Layering</p>
+  <h2>Layering exists because constraints cannot cross generators</h2>
+  <table class="chain" style="width:100%">
+    <tr>
+      <td style="width:30%"><div class="cbox">ATOMIC<span class="q">individually constrained transactions &mdash; one descriptor</span></div></td>
+      <td style="width:5%" class="arrowr">&rarr;</td>
+      <td style="width:30%"><div class="cbox">SCENARIO<span class="q">an <em>array</em> of items solved at once, so the solver can relate past, current and future</span></div></td>
+      <td style="width:5%" class="arrowr">&rarr;</td>
+      <td style="width:30%"><div class="cbox out">MULTI-STREAM<span class="q">one object holding a sub-descriptor per stream</span></div></td>
+    </tr>
+  </table>
+  <p class="small">Each level exists because the one below cannot express something. You cannot say <em>&ldquo;the third descriptor reuses the second's destination&rdquo;</em> by randomizing three descriptors in turn &mdash; and you cannot express a relation <strong>across</strong> streams at all, because those items live in different generators and are not inside any object one generator randomizes.</p>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">class contention_scenario;
+  rand dma_2d_descriptor dma_ch0;  // under test
+  rand dma_2d_descriptor dma_ch1;  // what cp_other_ch samples
+  rand nn_job_descriptor nn;
+
+  constraint c_channels {
+    dma_ch0.channel == 1'b0;
+    dma_ch1.channel == 1'b1;
+  }
+  constraint c_contend {        // one SRAM bank, all three
+    nn.wgt_addr[4:3]      == dma_ch0.dst_addr[4:3];
+    dma_ch1.dst_addr[4:3] == dma_ch0.dst_addr[4:3];
+  }
+  // a TEST layer, not the environment
+  constraint c_worst_cell {
+    nn.weight_bits     == 2;
+    nn.tensor_width    == 1;
+    dma_ch0.dst_stride  &lt; 0;
+  }
+endclass</pre>
+    </td>
+    <td>
+      <div class="ex"><span class="tag">What each clause is doing</span><code>c_channels</code> closes the axis no single generator could reach: a descriptor on channel&nbsp;1 is what makes <code>other_channel_active</code> true while the coverage model samples channel&nbsp;0's transfer. <code>c_contend</code> equates bank-select bits, turning <em>&ldquo;all three are busy&rdquo;</em> into <em>&ldquo;all three are contending&rdquo;</em>.</div>
+      <div class="ex warn"><span class="tag">Constraints state relations, not schedules</span>Pinning channel numbers and bank bits guarantees the three descriptors <strong>would</strong> contend if they ran together. Making them run together is the job of the sequence that starts them &mdash; and <em>a scenario class without that step has aimed carefully at a cell it never fills.</em></div>
+      
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- ============ 24. PORTABLE STIMULUS ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 9 &middot; Portable stimulus</p>
+  <h2>What layering runs out of at the top</h2>
+  <p class="small">Everything so far assumes a testbench that owns the interfaces. At system level that breaks: block-level sequences are not portable to firmware or post-silicon; system-level stimulus is simple directed feature tests; post-silicon failures are hard to bring back to simulation. <strong>Three platforms, three incompatible stimulus formats, no reuse across them.</strong></p>
+  <table class="cols"><tr>
+    <td>
+      <h3>The model</h3>
+      <p class="small">An <strong>action</strong> is behaviour &mdash; atomic if it maps to one operation, compound if it encapsulates a flow of others in an <strong>activity</strong>. Actions consume <strong>objects</strong> whose type fixes the scheduling, and claim <strong>resources</strong> from sized <strong>pools</strong>: two DMA channels is a pool of two, so no more than two channel-locking actions run at once.</p>
+      <div class="ex"><span class="tag">What distinguishes it from a constraint class</span><strong>Inference.</strong> Where intent is partial, the tool infers the additional actions needed to make it complete and valid &mdash; and infers nothing that is not required. You write <em>&ldquo;do a 2D transfer, then run an inference job&rdquo;</em>; the tool works out that the transfer needs a free channel and that the accelerator must have been configured first.</div>
+    </td>
+    <td>
+      <h3>Honest limits</h3>
+      <ul class="small">
+        <li>Generic actions can be complex to create, and may need <strong>procedural</strong> description &mdash; the declarative model does not cover everything.</li>
+        <li>It prefers <strong>complete control</strong>: a bare-metal environment with statically allocated tests &mdash; which needs a bare-metal library, and a multi-discipline team to build one.</li>
+        <li>Test <em>generation</em> time can increase <strong>exponentially</strong>. The solver cost reappears at scenario scale, before simulation even starts.</li>
+        <li>Diagnosing an over-constraint across an <em>inferred graph</em> is harder than in a class.</li>
+      </ul>
+      <div class="ex warn"><span class="tag">And two from the standard itself</span>The value concentrates in scenario <em>composition</em>, not checking. <strong>It generates the test; the oracle remains your problem.</strong> And realization code is per-platform work &mdash; <em>portable describes the model, not the effort.</em></div>
+    </td>
+  </tr></table>
+  <p class="src">Done for real: at AMD, Portable Stimulus descriptions were compiled to UEFI/bare-metal tests that ran unchanged on an emulated and then a post-silicon AMD APU through an in-house runtime layer (uDREX), and were used in the lab to generate new power-management firmware tuning scenarios. The deck reports no speed-up, bug count or effort saving &mdash; and records one cost: test generation time can grow exponentially. (DVCon US 2019, slides 4, 6, 15-16.) Language: Accellera Portable Test and Stimulus Standard 3.0.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- ============ 25. DISCUSSION 2 ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 9 &middot; Discussion</p>
+  <h2>Open your generator's constraint file</h2>
+  <div class="ex"><span class="tag">Question 1</span>Take the first ten constraint blocks. For each, answer in one word: <strong>legality</strong> or <strong>policy</strong>? How many did you have to think about &mdash; and how many could a colleague answer without you?</div>
+  <div class="ex"><span class="tag">Question 2</span>Find a constraint that reads like a quotation from the specification. Ask the question that matters: does it restrict the <strong>input the design must accept</strong>, or the <strong>output it must produce</strong>? Only the first belongs in a generator.</div>
+  <div class="ex"><span class="tag">Question 3</span>Pick the coverage hole your team has been calling &ldquo;a hard corner&rdquo; for longest. Is it <em>scattered cells</em>, or a whole <em>value of one axis</em> missing from every combination? Which diagnosis does that shape support?</div>
+  <p class="note"><b>Facilitation</b>Question 3 has a right answer per project and the room usually knows it within thirty seconds of looking at the shape. The point is that nobody had looked at the shape.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- ============ 26. DIVIDER CH10 ============ -->
+<section class="slide divider">
+  <p class="chno">10</p>
+  <h1>UVM as a Methodology</h1>
+  <p class="sub">Every structural decision in the library is an answer to some version of &ldquo;why did that cost three weeks?&rdquo;</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- ============ 27. TWO ENGINEERS, THREE WEEKS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 10 &middot; The opening scenario</p>
+  <h2>Both had already written a working AXI4 driver</h2>
+  <p>Two engineers spend a month each on a block-level testbench &mdash; one on the crossbar, one on the DMA, whose backend is one of the crossbar's five managers. Both write a driver that turns transaction objects into AXI4 handshakes. Both write a monitor that turns handshakes back into transactions. Both write something that decides whether a response was legal.</p>
+  <div class="ex warn"><span class="tag">Neither can use a line of the other's code</span>The transaction fields differ. One uses a mailbox where the other uses a queue. One prints <code>ERROR:</code>, the other <code>*E</code>. And the two testbenches end in different ways &mdash; one on a beat counter, one on a <code>$finish</code> buried inside a task.</div>
+  <p class="lead">Then integration arrives. It can be done: <strong>roughly three weeks of rewriting.</strong></p>
+  <p>The interesting question is not <em>how do I call <code>create</code></em>. It is why that costs three weeks when both engineers had already solved the problem.</p>
+  <p class="small">The library's own motivation says the same thing in industry language: verification spans internal and external teams, and the discontinuity created by <strong>multiple incompatible methodologies</strong> among those teams limits productivity. The stated purpose is interoperability, and removing the cost of rewriting verification IP for each new project or tool.</p>
+  <p class="note"><b>Say</b>Everything in this chapter is downstream of that one invoice.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- ============ 28. THREE ORDERS OF REUSE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 10 &middot; Which reuse do you mean?</p>
+  <h2>Three orders, and they get harder in order</h2>
+  <table class="chain" style="width:100%">
+    <tr>
+      <td style="width:31%"><div class="cbox">FIRST ORDER<span class="q">one environment across many testcases of one project</span></div></td>
+      <td style="width:3.5%" class="arrowr">&rarr;</td>
+      <td style="width:31%"><div class="cbox">SECOND ORDER<span class="q">its components inside a system-level environment</span></div></td>
+      <td style="width:3.5%" class="arrowr">&rarr;</td>
+      <td style="width:31%"><div class="cbox">THIRD ORDER<span class="q">those components in a different environment, for a different design</span></div></td>
+    </tr>
+    <tr class="stem"><td></td><td></td><td><i></i></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td><p class="small" style="text-align:center;margin:0"><strong>The opening scenario failed here</strong> &mdash; the order most block-level teams silently assume they get for free.</p></td><td></td><td></td></tr>
+  </table>
+  <div class="ex"><span class="tag">And the mechanism that makes any of them possible</span>A component must be not merely correct but <strong>configurable</strong>: able to exhibit the behaviour a block-level environment needs and, <em>without modification</em>, the behaviour a system-level environment needs. Configurability is not a convenience bolted onto a testbench &mdash; it is the mechanism, and most of the library exists to provide it.</div>
+  <table class="cols"><tr>
+    <td><p class="small"><strong>The second thing it sells is vocabulary.</strong> &ldquo;Make the manager agent passive at the top level&rdquo; carries a structural consequence <em>both of you can look up in a public document</em>. In-house methodologies have vocabulary too &mdash; it just does not survive a new hire, a purchased component, or an external partner.</p></td>
+    <td><p class="small"><strong>Which order you are buying should be written down.</strong> First order is a testbench; second is a component contract; third is a product with users you will never meet. The library's cost &mdash; the indirection of the next slide &mdash; is priced for the third, and you pay it in full even if you only ever wanted the first.</p></td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- ============ 29. THE AGENT AND THE SWITCH ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 10 &middot; The component taxonomy</p>
+  <h2>The reusable unit is one interface &mdash; because a protocol survives integration</h2>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">virtual function void build_phase(uvm_phase phase);
+  super.build_phase(phase);
+  mon = axi_monitor::type_id::create("mon", this);
+  if (get_is_active() == UVM_ACTIVE) begin
+    seqr = axi_sequencer::type_id::create("seqr", this);
+    drv  = axi_driver::type_id::create("drv", this);
+  end
+endfunction
+</pre>
+      <p class="small"><strong>Three load-bearing details.</strong> Sub-components are built in <code>build_phase</code>, not the constructor, because a virtual function can be overridden and a constructor cannot. They are created through <code>type_id::create</code> &mdash; which is what makes overrides possible &mdash; and the driver-to-sequencer link is made later, in <code>connect_phase</code>.</p>
+    </td>
+    <td>
+      <div class="ex good"><span class="tag">The switch that carries a block environment up a level</span>Active mode emulates a device and drives signals; <strong>passive mode disables driver and sequencer and leaves the monitor.</strong> That one flag is what makes second-order reuse <em>mechanical rather than a rewrite</em>.</div>
+      <h3>Then the invoice arrives</h3>
+      <p class="small">Instantiate it inside the system environment, with the real core and real memories, and all nine agents go passive &mdash; one configuration field, and it works. <strong>What breaks is everything that assumed <em>we</em> were driving:</strong></p>
+      <ul class="small">
+        <li><strong>Stimulus becomes dead code</strong> &mdash; and any checking in the driver goes with it.</li>
+        <li><strong>Configuration paths move</strong> &mdash; silently.</li>
+        <li><strong>Objections change owner</strong>, so a test that inherited its ending now ends at time zero.</li>
+        <li><strong>Block-local expectations expire</strong>: transactions now come from firmware, so the predictor needs another source of truth.</li>
+      </ul>
+      <p class="small" style="margin-bottom:0">The agent survived because it was built around an <em>interface</em>. What did not survive is the code that assumed a <strong>role</strong>.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- ============ 30. FACTORY + CONFIG DB ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 10 &middot; The central economic fact</p>
+  <h2>Reuse is bought with indirection. Indirection is paid for in debug time.</h2>
+  <p class="small">If the environment hard-codes <code>axi_driver</code>, a test needing a different driver must edit the environment &mdash; and the environment is the artifact you were trying to reuse unmodified. The factory is the answer; the configuration database is its twin.</p>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">// Replace the driver of manager port 3 ONLY; the other
+// eight agents keep the standard driver. Registered
+// before super.build_phase() builds env.
+set_inst_override_by_type("env.mgr_agent[3].drv",
+                          axi_driver::get_type(),
+                          axi_stall_driver::get_type());
+super.build_phase(phase);</pre>
+      <p class="small">That test provokes the crossbar's canonical bug &mdash; write-data interleaving at a subordinate port under back-pressure &mdash; <strong>without touching one line</strong> of the environment, the agent, or the driver it extends. A <em>type</em> override instead would have made all nine agents stall: the choice between the two is the choice between <em>&ldquo;this scenario&rdquo;</em> and <em>&ldquo;this policy&rdquo;</em>.</p>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Now the bill</span>Both mechanisms replace a <strong>compile-time reference</strong> with a <strong>runtime lookup</strong>. So both defer their failures to runtime and report them somewhere other than where the mistake was made:</div>
+      <ul class="small">
+        <li>A <code>set</code> whose path pattern has a typo <strong>silently does nothing</strong>. The component keeps its default and the failure surfaces a hundred microseconds later as a null virtual interface.</li>
+        <li>An override registered <em>after</em> <code>super.build_phase</code> runs is simply <strong>ignored</strong>.</li>
+        <li>An instance path that was correct before the environment moved one level down is now wrong, and <strong>no tool will tell you</strong>.</li>
+      </ul>
+      <p class="small"><strong>This is the honest trade.</strong> A hand-written testbench of a thousand lines is easier to debug than a UVM environment of a thousand lines; it is the ten-thousand-line case where the comparison reverses.</p>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>Most reported &ldquo;UVM bugs&rdquo; are configuration-path bugs: a <code>set</code> that never matched, or an override registered too late. Give the environment's configuration surface one owner, the way a module's port list has one.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- ============ 31. PHASING AND OBJECTIONS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 10 &middot; Phasing</p>
+  <h2>A testbench needs a state machine, and objections &mdash; not phases &mdash; end the test</h2>
+  <table class="cols3"><tr>
+    <td><div class="ex"><span class="tag"><code>build_phase</code> &mdash; top-down</span>A parent decides what its children are &mdash; how many agents, active or passive &mdash; and must therefore run <strong>before they exist</strong>.</div></td>
+    <td><div class="ex"><span class="tag"><code>connect_phase</code> &mdash; bottom-up</span>Wiring can only happen once both endpoints exist, so the deepest, most local connections are made first.</div></td>
+    <td><div class="ex"><span class="tag"><code>run_phase</code> &mdash; a task</span>Runs concurrently with the run-time schedule, and starts a global timeout whose expiry is fatal &mdash; the mechanism that turns a hung testbench into a <em>failed test</em> instead of a job that occupies a licence overnight.</div></td>
+  </tr></table>
+  <p class="small">Formalizing the steps is what lets independently developed block environments <strong>combine</strong> into a system-level one, and lets tests intervene at the right moment without violating the sequence. Phasing is second-order reuse made executable.</p>
+  <div class="ex good"><span class="tag">The asymmetry that decides who objects</span>An <strong>active manager agent has an agenda</strong> &mdash; its reads and writes must finish &mdash; so it objects. A <strong>reactive subordinate agent has none</strong>, since it merely serves requests as they arrive, and should therefore <em>not object at all</em>. With no objections the run phase ends at time zero; with the responders objecting, the test never ends.</div>
+  <div class="ex warn"><span class="tag">And the window drain time closes</span>Without it, the last write response is still crossing the crossbar when the final manager objection drops, and <strong>the scoreboard never sees it</strong> &mdash; &ldquo;all objections dropped&rdquo; is genuinely temporary. Declare the drain <em>per sub-system</em>, so it still applies when that environment becomes one of six inside a larger one.</div>
+  <p class="note"><b>Say</b>Pitfall to name: drain time increased until the test passes. That is a green regression hiding a scoreboard that stopped draining.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- ============ 32. THE REGISTER LAYER ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 10 &middot; The register layer</p>
+  <h2>A mirror is not a scoreboard</h2>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">The most important sentence in the register layer</span>The model maintains a <strong>mirror</strong> of what it believes each register holds &mdash; but its only information is the accesses it has seen. It can predict the content of registers the design does not update; <strong>it cannot determine whether an updated value is correct.</strong> Teams that forget it end up with a register model that agrees with the design about a value both of them got wrong.</div>
+<pre class="mini">//          parent size lsb access volatile reset has_rst rand indiv
+oe.configure(this,  1,   3,  "W1C",   1,      1'b0,  1,     0,   0);</pre>
+      <p class="small">Two arguments carry the weight, and both are the ones people get wrong. <code>volatile</code> declares that <strong>the mirrored value cannot be trusted</strong>, because the field changes in ways the model cannot observe &mdash; so comparing it against the mirror without a fresh read is <em>not a check</em>. <code>"W1C"</code> is a statement about prediction: if the real design <em>also</em> clears on read, you have modelled the wrong register and the model gets blamed for the divergence.</p>
+    </td>
+    <td>
+      <h3>Front door and back door</h3>
+      <p class="small">A front-door access drives real bus cycles through the real path; a back-door access reaches the simulation constructs directly. Back-door read and write <em>mimic</em> the front-door side effects; <code>peek</code> and <code>poke</code> bypass the behaviour entirely.</p>
+      <div class="ex good"><span class="tag">The redundancy is the point</span>When both directions share one path, a bug introduced on the way in is <strong>undone on the way out</strong> &mdash; so a reversed data bus is invisible to any write-then-read check that never leaves the front door.</div>
+      <div class="ex"><span class="tag">The canonical peripheral bug, in two lines</span>The overrun flag is never cleared if software reads the status register in the same cycle as a framing error. That is a <em>disagreement between the two access paths</em>: a front-door read then the clearing write leaves the model believing the flag is down, while a back-door <code>peek</code> shows it still up. Written as <strong>&ldquo;read front door, peek back door, compare&rdquo;</strong>, it is a two-line register test instead of a firmware lockup.</div>
+      <p class="small"><strong>Choose a prediction mode deliberately.</strong> Once firmware running on the core writes the peripherals through the crossbar, an <em>implicitly</em>-predicted model is wrong within microseconds, because those writes never went through it. Use explicit prediction: a predictor per interface, fed by the bus monitor.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<!-- ============ 33. WHAT UVM DOES NOT SOLVE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 10 &middot; The boundary</p>
+  <h2>Four things sit outside the library &mdash; and all four decide whether you succeed</h2>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">The checking strategy</span><strong>Nothing in UVM would have told you</strong> that same-ID write ordering under back-pressure was the property that mattered on the crossbar. That came from the specification and a plan.</div>
+      <div class="ex warn"><span class="tag">The quality of the coverage model</span>It decides where a collector plugs in, not what it counts. A model with the wrong axes reaches 100% and means nothing &mdash; the accelerator's prefetcher bug escaped 100% code coverage entirely.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Debuggability</span>The indirection bill, come due: what would have been compile-time errors are now runtime silence.</div>
+      <div class="ex warn"><span class="tag">Performance</span>Per-item allocation, dynamic dispatch and a report server on the message path are not free &mdash; invisible on a block run, highly visible in a nightly regression, or at the emulation boundary where transactor code must be synthesizable and a UVM component is not.</div>
+    </td>
+  </tr></table>
+  <p class="lead">UVM removes most of the <em>accidental</em> cost of building a testbench and none of the <em>essential</em> difficulty &mdash; which is deciding what to check and proving you checked it.</p>
+  <div class="ex"><span class="tag">And when not to use it at all</span><strong>Small blocks with one narrow interface</strong>: a module-based testbench with bound assertions is finished before the UVM version elaborates. <strong>Formal-first blocks</strong>: a random generator <em>samples</em> where a proof <em>concludes</em>. <strong>Bring-up throwaways</strong>: not debt if you delete them; debt the day someone keeps them.</div>
+  <p class="note"><b>Say</b>The rule in one line: build a UVM environment when the interface will be verified more than once &mdash; a second test, a second level of hierarchy, or a second project. If none of the three is true, you are buying insurance against a risk you do not carry.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">33</span>
+</section>
+
+<!-- ============ 34. DIVIDER CH11 ============ -->
+<section class="slide divider">
+  <p class="chno">11</p>
+  <h1>Assertion-Based Verification</h1>
+  <p class="sub">A specification sentence, written so a tool can evaluate it, sitting on the port where it applies.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">34</span>
+</section>
+
+<!-- ============ 35. THE FOUR-CYCLE BUG ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 11 &middot; The opening scenario</p>
+  <h2>Nothing about that failure was hard to detect. It was hard to <em>find</em>.</h2>
+  <p>The bug report opens with a scoreboard mismatch: a DMA channel copies 3&nbsp;KB into the accelerator's weight buffer and eleven bytes land at the wrong offset. Two engineers spend <strong>a day and a half</strong> on it, because the scoreboard raised its hand at the end of the transfer &mdash; some <strong>nine hundred cycles</strong> after the damage &mdash; and everything in between must be walked backwards through a waveform.</p>
+  <div class="ex warn"><span class="tag">The cause is four cycles wide</span>The DMA asserted <code>AWVALID</code> with an address; the subordinate was slow to accept it; an arbitration event made the DMA <strong>withdraw the request and re-offer it with a different address</strong> before <code>AWREADY</code> came back. The subordinate had already latched the first one.</div>
+  <div class="ex good"><span class="tag">And the rule it broke</span><em>Once you offer an address, you keep offering it, unchanged, until it is taken.</em> One sentence of the bus specification. Decidable from <strong>five signals on one interface</strong>, <strong>in the cycle it is broken</strong>.</div>
+  <p class="lead">What was missing was not a smarter test. It was a statement of that rule, written so a tool could evaluate it.</p>
+  <p class="note"><b>Say</b>Detection distance is the whole economics of this chapter: nine hundred cycles and a day and a half, versus one annotated cycle.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">35</span>
+</section>
+
+<!-- ============ 36. WRITE THE SENTENCE ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 11 &middot; A specification you can run</p>
+  <h2>Everyone nods at the sentence. Now write it.</h2>
+  <p class="small"><em>&ldquo;The payload must remain stable while VALID is asserted and READY is low.&rdquo;</em></p>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">// WRONG: compares this cycle's payload against
+// the PREVIOUS cycle's.
+property p_aw_stable_wrong;
+  @(posedge clk) disable iff (!rst_n)
+  (awvalid &amp;&amp; !awready) |->
+    $stable({awid, awaddr, awlen, awsize, awburst});
+endproperty</pre>
+      <div class="ex warn"><span class="tag">It does not fail quietly</span>A manager drives a fresh address in the same cycle it raises <code>AWVALID</code>. If <code>AWREADY</code> is low that cycle, the antecedent is true, <code>$stable</code> compares against the <em>idle cycle before</em>, and the property <strong>fires on perfectly legal traffic</strong>.</div>
+    </td>
+    <td>
+<pre class="mini">// RIGHT: the payload offered now must still be
+// there at the next tick.
+property p_aw_stable;
+  @(posedge clk) disable iff (!rst_n)
+  (awvalid &amp;&amp; !awready) |=>
+    awvalid &amp;&amp;
+    $stable({awid, awaddr, awlen, awsize, awburst});
+endproperty
+a_aw_stable : assert property (p_aw_stable);</pre>
+      <div class="ex good"><span class="tag">Two edits, two different jobs</span>The <strong>cycle shift</strong> repairs a known mistranslation: &ldquo;remain stable&rdquo; in protocol prose means <em>hold the same value into the next clock cycle</em>. The added <code>awvalid</code> is a <strong>second rule</strong>, not a sharpening of the first &mdash; <em>do not withdraw an offer before it is accepted</em> &mdash; and it is what catches the opening scenario.</div>
+    </td>
+  </tr></table>
+  <div class="ex"><span class="tag">Why writing one is worth the trouble even before you run it</span>A specification sentence can be vague and still feel complete; <strong>a property cannot.</strong> Writing one forces you to name the clock, the exact cycle relation, the condition under which the obligation starts, the reset behaviour and the polarity of every term &mdash; each a question you must answer from the specification or from whoever owns it. <em>An unanswered question shows up as a property you cannot finish typing.</em></div>
+  <p class="note"><b>Say</b>Folding two obligations into one property is a choice this book makes deliberately &mdash; worth knowing you have made it.</p>
+  <p class="src">Ariane (64-bit RISC-V) and OpenPiton, both taped-out open source: 236 SVA liveness and safety properties from 110 lines of annotation, 100% proven on the page-table walker and TLB after ~30 minutes of human effort, real bugs found in the MMU and an OpenPiton NoC buffer. Academic authors, on hardware they did not build (AutoSVA, DAC 2021, p.5).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">36</span>
+</section>
+
+<!-- ============ 37. THE ANATOMY OF SVA ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 11 &middot; Anatomy</p>
+  <h2>Four layers &mdash; and the layering matters more than the operator catalogue</h2>
+  <table class="cols"><tr>
+    <td>
+      <table class="stack">
+        <tr><td><div class="layer top">STATEMENT<span class="d">the four directives: assert, assume, cover, restrict</span></div></td></tr>
+        <tr><td><div class="layer">PROPERTY<span class="d">claims over sequences; the workhorse is implication</span></div></td></tr>
+        <tr><td><div class="layer">SEQUENCE<span class="d">patterns over time &mdash; a regular expression whose alphabet is Boolean and whose step is a clock tick</span></div></td></tr>
+        <tr><td><div class="layer">BOOLEAN<span class="d">ordinary expressions &mdash; but over <em>sampled</em> values</span></div></td></tr>
+      </table>
+      <div class="ex"><span class="tag">Sampled values are not pedantry</span>A concurrent assertion uses the value a variable had <strong>before any of that edge's updates</strong>. So it cannot race the RTL it watches, cannot see a glitch on a combinational path, and <strong>reads a waveform the way you do</strong> &mdash; which is why a property that looks off by one cycle in a debugger usually is not.</div>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag"><code>disable iff</code> &mdash; the reset guard</span>It discards any attempt in flight while its expression is true, ending it as <strong>disabled: neither pass nor failure</strong>. It is <em>asynchronous</em>, monitored at every time step. And there may be <strong>at most one per assertion</strong>, immediately after the clocking event &mdash; you cannot reset half a rule.</div>
+      <p class="small">Nearly every real property carries one, because a design in reset violates almost every rule it has &mdash; and <strong>a wall of reset-time failures is how assertion suites get switched off.</strong></p>
+      <h3>Evaluation attempts</h3>
+      <p class="small">A fresh attempt starts at <em>every</em> tick of the leading clock, each running to its own verdict, overlapping the others. A property with a five-cycle window has up to five in flight &mdash; which is why a rule broken under sustained traffic produces a <strong>burst</strong> of failures rather than one.</p>
+      <h3>Immediate versus concurrent</h3>
+      <p class="small">If the claim is <em>&ldquo;this is true at this point in this code&rdquo;</em>, it is <strong>immediate</strong> &mdash; procedural, like an <code>if</code>, where x or z counts as failure. If it involves a clock or spans time, it is <strong>concurrent</strong>, and it will be checked on every test that ever runs, whether or not anyone remembers it is there.</p>
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">37</span>
+</section>
+
+<!-- ============ 38. THREE CLAIMS, AND WHERE THEY LIVE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 11 &middot; Directives and ownership</p>
+  <h2>Three claims about one property text &mdash; and two very different engines</h2>
+  <table class="compact">
+    <tr><th>Directive</th><th>In simulation</th><th>In formal verification</th></tr>
+    <tr><td><code>assert</code></td><td>fails if violated on this trace</td><td>proved, or a counterexample produced, under all stated assumptions</td></tr>
+    <tr><td><code>assume</code></td><td>checked like an assertion: a violation means the <em>environment</em> misbehaved</td><td><strong>constrains the legal traces; its own correctness is not checked</strong></td></tr>
+    <tr><td><code>cover</code></td><td>reports and counts each match on this trace</td><td>asks whether a matching trace <em>exists</em>, and returns a witness</td></tr>
+    <tr><td><code>restrict</code></td><td>ignored</td><td>constrains traces, like <code>assume</code></td></tr>
+  </table>
+  <div class="ex warn"><span class="tag">In simulation the first two are synonyms. In formal they are not remotely the same.</span>An assumption is not checked &mdash; it <strong>deletes traces from consideration</strong>, and the assertions are proved only over what survives. <em>Write an assumption stronger than reality and you have proved something about a design that does not exist.</em></div>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex good"><span class="tag">The mirror image is the whole trick</span>The rule that is an <code>assume</code> when you verify the DMA in isolation is an <code>assert</code> when you verify the crossbar that feeds it &mdash; <strong>and the same text serves both.</strong></div>
+    </td>
+    <td>
+      <p class="small"><strong>Where the text sits, and who wrote it, are two questions.</strong> Assertions over <em>internal</em> signals need the micro-architecture, so the designer writes them <strong>inline in the RTL</strong> &mdash; comments that can fail. Assertions over <em>external interfaces</em> derive from the specification, are written by verification, and <strong>must not touch the RTL</strong>: <code>bind</code> exists for exactly this.</p>
+      
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>The hazard at the inline end: an assertion written by the same person, in the same hour, from the same reading of the specification as the RTL <strong>encodes the same misunderstanding and never fires.</strong></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">38</span>
+</section>
+
+<!-- ============ 39. WHEN PROPERTIES OUTGROW THEMSELVES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 11 &middot; The contract on a crossbar port</p>
+  <h2>Three clauses, three visibly different amounts of machinery</h2>
+  <table class="cols3"><tr>
+    <td><div class="ex"><span class="tag">1 &middot; handshake stability</span>While a request is offered and not yet accepted, it stays offered and unchanged. <strong>No memory:</strong> the rule relates two adjacent cycles and the language expresses it directly.</div></td>
+    <td><div class="ex"><span class="tag">2 &middot; one burst's write data at a time</span>There is <em>no ID on the write-data channel</em>, so the obligation must be reconstructed &mdash; each burst's beats counted and reconciled against the length promised by the address that opened it. <strong>Needs a counter and a queue.</strong></div></td>
+    <td><div class="ex"><span class="tag">3 &middot; a response only for work in flight</span>Only for an ID with an outstanding address, and never more responses than addresses accepted. <strong>Needs per-ID bookkeeping.</strong></div></td>
+  </tr></table>
+  <p class="small">Clauses two and three tip the property over into a <strong>bound checker</strong>: a small module carrying its own model of the interface. The escalation is normal, and it is the honest boundary of the technique &mdash; <em>a property that quietly assumes a scoreboard behind it is not reusable</em>, so the state goes in the file, in plain sight.</p>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">// The covers that keep the assertions honest.
+c_aw_stall     : cover property (@(posedge clk)
+                   disable iff (!rst_n) awvalid &amp;&amp; !awready);
+c_w_overlap    : cover property (@(posedge clk)
+                   disable iff (!rst_n)
+                   aw_hs &amp;&amp; (aw_len_q.size() != 0));
+c_same_id_pair : cover property (@(posedge clk)
+                   disable iff (!rst_n)
+                   aw_hs &amp;&amp; (id_out[awid] != 0));
+
+bind xbar_manager_port     xbar_port_checker u_chk (.*);
+bind xbar_subordinate_port xbar_port_checker u_chk (.*);</pre>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Read the covers against the binding point</span>The five manager-side instances check the five managers. The four subordinate-side ones check <strong>the crossbar itself</strong>, which plays the manager role as far as a subordinate is concerned.</div>
+      <p class="small">The canonical crossbar bug &mdash; two managers issuing writes with the <em>same ID through different ports</em>, whose data beats the crossbar then interleaves &mdash; is <strong>a violation by neither manager</strong>. It appears on the subordinate side. There, <code>c_same_id_pair</code> reads <em>a second write accepted with an ID already outstanding at this subordinate</em>: the bug's precondition exactly.</p>
+      
+    </td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">39</span>
+</section>
+
+<!-- ============ 40. VACUITY, QUALITY, TWO ENGINES ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 11 &middot; Assertion quality</p>
+  <h2>Measured by how much of it could ever have failed</h2>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">Two ways to pass and prove nothing</span><strong>Strict vacuity:</strong> if every subordinate accepts immediately, <code>awvalid &amp;&amp; !awready</code> is never true and the assertion <em>reports a perfect record on a rule it never evaluated</em>.<br><br><strong>Subtler:</strong> the assertion <em>does</em> run. If the sequence library issues one outstanding write per manager, <code>a_w_burst_len</code> evaluates every run and still never sees the interleaving case it was written for. <strong>Six weeks at 100% pass, and the hazard untouched.</strong></div>
+      <p class="lead" style="font-size:16px"><strong>The rule: every implication ships with a <code>cover</code> on its antecedent</strong> &mdash; written at the same time, reviewed in the same review.</p>
+      <p class="small">When a cover reads zero the diagnosis forks two ways, both actionable: <em>no test drives the design into the situation</em>, or <em>the design can never reach it</em> &mdash; in which case the property is misformulated.</p>
+    </td>
+    <td>
+      <p class="small"><strong>Vacuity depends on how you phrased the rule.</strong> <code>ok |-&gt; !err</code> and <code>err |-&gt; !ok</code> are logically equivalent and pass vacuously under <em>opposite</em> conditions. Make the antecedent the rare, constructed condition &mdash; then a non-vacuous pass is evidence.</p>
+      <div class="ex"><span class="tag">The mutation question, for every assertion in a review</span>Name one change to the RTL that this assertion catches and <strong>code coverage does not</strong>. An assertion with no answer is not a check &mdash; it is a comment with a runtime cost.</div>
+<pre class="mini">property p_no_4kb_crossing;
+  @(posedge clk) disable iff (!rst_n)
+  (awvalid &amp;&amp; awready &amp;&amp; (awburst == 2'b01)) |->
+    (16'(awaddr[11:0]) +
+     ((16'(awlen) + 16'd1) &lt;&lt; awsize)) &lt;= 16'd4096;
+endproperty
+a_no_4kb_crossing : assert property (p_no_4kb_crossing);</pre>
+      <p class="small"><strong>The same text, two engines.</strong> In simulation this property is <em>sampled</em> &mdash; silent about the bursts the tests did not generate. Chapter 14 hands the identical text to a proof engine: <em>no legal input sequence whatsoever</em> can produce a crossing burst, or here is one that does. <strong>Nothing in the property changes; the question asked of it does.</strong></p>
+    </td>
+  </tr></table>
+  <p class="src">Where vacuity turns up in practice: an Infineon team's fully agentic LLM formal flow reports an overall efficacy of about 40% on a graded benchmark of small designs &mdash; and names <em>vacuous passes</em> and invented signals among its failure modes. The benchmark designs are small exercises &mdash; a Booth multiplier, an RV32I core, a PID controller &mdash; not Infineon products. (Saarthi, DVCon 2025, pp.11-12.)</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">40</span>
+</section>
+
+<!-- ============ 41. DIVIDER CH12 ============ -->
+<section class="slide divider">
+  <p class="chno">12</p>
+  <h1>Regression Engineering</h1>
+  <p class="sub">The machine that turns commits into evidence &mdash; and the morning it destroys.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">41</span>
+</section>
+
+<!-- ============ 42. 37 FAILURES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 12 &middot; The opening scenario</p>
+  <h2>Thursday, 07:40. Nine hundred runs, 863 passed, 37 failed.</h2>
+  <p>Three engineers spend the morning on those 37. By noon the arithmetic is in.</p>
+  <table class="funnel">
+    <tr><td><div class="fbar" style="width:88%"><span class="n">37</span> failures in the inbox</div></td></tr>
+    <tr><td><div class="fbar" style="width:74%"><span class="n">29</span> are <strong>one bug</strong> &mdash; a scoreboard change merged yesterday afternoon</div></td></tr>
+    <tr><td><div class="fbar" style="width:56%"><span class="n">4</span> a real design bug &nbsp;&middot;&nbsp; <span class="n">2</span> &ldquo;the flaky one&rdquo; &nbsp;&middot;&nbsp; <span class="n">1</span> a disk quota</div></td></tr>
+    <tr><td><div class="fbar warn" style="width:44%"><span class="n">1</span> a genuine DMA legalization failure &mdash; <strong>closed as a duplicate of the flaky one</strong>, because the log looks similar and it is 11:50</div></td></tr>
+  </table>
+  <div class="ex warn"><span class="tag">Nothing in that morning was a verification-technique problem</span>The scoreboard was right, the stimulus was right, the coverage model was right. <strong>What failed was the factory.</strong> One fact was reported twenty-nine times; a real find was destroyed by a signature collision with a defect the team had learned to ignore; and the loop consumed most of a working day of three engineers.</div>
+  <p class="note"><b>Say</b>Chapter 7 taught you to read the numbers a regression produces. This chapter builds the thing that produces them.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">42</span>
+</section>
+
+<!-- ============ 43. TIERS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 12 &middot; Tiers</p>
+  <h2>A tier is not a schedule. It is an admission policy with a runtime budget.</h2>
+  <table>
+    <tr><th>Tier</th><th>Trigger</th><th>Wall-clock budget</th><th>Admission rule</th></tr>
+    <tr><td><strong>Smoke</strong></td><td>every commit / merge request</td><td>minutes</td><td>proves the build is alive; fixed seeds; bounded runtime; <strong>zero</strong> known failures</td></tr>
+    <tr><td><strong>Nightly</strong></td><td>scheduled, daily</td><td>one night</td><td><strong>discriminates:</strong> fails when the design or environment regresses</td></tr>
+    <tr><td><strong>Weekend</strong></td><td>scheduled, weekly</td><td>one weekend</td><td>everything long, deep-seeded, or configuration-crossed</td></tr>
+    <tr><td><strong>Campaign</strong></td><td>on demand</td><td>none &mdash; bounded by its written purpose</td><td>purpose-built runs that belong on no clock</td></tr>
+  </table>
+  <table class="cols3"><tr>
+    <td><p class="small"><strong>Smoke earns its place by speed and silence.</strong> A smoke tier that randomizes is one that sometimes lies; a gate with a permanent red light in it is decoration.</p></td>
+    <td><p class="small"><strong>Nightly earns its place by discrimination.</strong> A test belongs there if a <em>plausible regression</em> would make it fail &mdash; not because it is important.</p></td>
+    <td><p class="small"><strong>A campaign is launched for a reason, owned by someone, produces a written result, then stops.</strong> Teams keep reinventing it without a name.</p></td>
+  </tr></table>
+  <div class="ex"><span class="tag">The budget is a design constraint, defended like a timing constraint</span>Twelve minutes for lint, clock-domain checks and a 60-run smoke suite. When that grew to fifteen, <strong>two tests moved to the daily tier rather than the slip being accepted</strong> &mdash; because a gate a human will not wait for is a gate that gets bypassed.</div>
+  <p class="src">One way a runtime budget becomes negotiable is to change what has to run in a simulator at all: Graphcore moved its coverage model out of SystemVerilog into an in-house Python implementation so coverage could be collected with no simulator, cutting collection on the same 200 seeds from 40,493&nbsp;s to 3,718&nbsp;s &mdash; 10.9&times;. The authors' own limit: it applies only to coverage that does not need cycle-accurate information. (DVCon Europe, pp.1, 3.)</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">43</span>
+</section>
+
+<!-- ============ 44. THE (TEST, SEED) MATRIX ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 12 &middot; The unit of work</p>
+  <h2>A constrained-random test is not one experiment. It is a family indexed by seed.</h2>
+  <table class="cols"><tr>
+    <td>
+      <div class="ex warn"><span class="tag">One seed proves nothing much</span>The default seed is the commonest failure of discipline in constrained-random verification: engineers keep using it until the simulation runs error-free and consider the job done &mdash; <strong>but the same seed generates the same input sequence.</strong> A test that passes on seed 1 has established one path through its own constraint space.</div>
+      <div class="ex"><span class="tag">Seed budgets are an allocation problem, not a constant</span>A descriptor test spanning four axes has a large space to sample; a framing test with three legal configurations does not, and its seventh seed buys almost nothing. <strong>Allocate proportionally to <em>unclosed</em> coverage</strong> &mdash; groups closed and stable get one seed as a change detector.</div>
+      <p class="small"><strong>And run one fixed seed nightly on a handful of tests.</strong> Fresh seeds measure the design; the fixed seed measures the machine &mdash; because if its result moves while its manifest does not, something outside the manifest did.</p>
+    </td>
+    <td>
+<pre class="mini">run_id:        nightly-20260312-0417
+test:          dma_2d_stride_stress
+seed:          3417755291
+tier:          nightly
+rtl_rev:       9f21ac4          # design repo, tagged 'regress'
+tb_rev:        c07e13b          # verification repo
+tool:          sim-2025.3-p2    # patch level, not just major
+config:        DMA_CH=2, SRAM_KB=512, XBAR=5x4
+host:          farm-node-118 (linux-x86_64, 64 GB)
+result:        FAIL
+signature:     SCB_DATA_MISMATCH:dma_scoreboard:beat_compare
+cpu_seconds:   641</pre>
+      <p class="small"><strong>Every field is there because somebody once lost a day without it.</strong> The <code>tool</code> line is worth arguing about: the <em>major</em> version is common practice and is not enough. <code>signature</code> makes triage possible; <code>cpu_seconds</code> makes the economics possible.</p>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>Reproducibility must be <em>easy</em>, not merely possible. An incomplete manifest is a defect in its own right.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">44</span>
+</section>
+
+<!-- ============ 45. TRIAGE ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 12 &middot; Triage at scale</p>
+  <h2>Turning <em>failures</em> into <em>facts</em> &mdash; a data-reduction problem before it is a debugging problem</h2>
+  <table class="cols"><tr>
+    <td>
+<pre class="mini">signature := &lt;ERROR_CLASS&gt;:&lt;COMPONENT&gt;:&lt;CHECK&gt;
+             from the FIRST error line, with these stripped:
+               - timestamps, simulation time, run ids, seeds
+               - hierarchical paths below the component boundary
+               - numeric operands (addresses, IDs, data values)
+
+example:     SCB_DATA_MISMATCH:dma_scoreboard:beat_compare
+
+counter-ex:  UVM_ERROR @ 12480ns [dma_sb]
+             exp=32'hDEAD_BEEF got=32'hDEAD_BEE0
+             (over-specific: every seed a distinct signature)</pre>
+      <p class="small">Built from the <strong>first</strong> error, since later errors are usually consequences. The seed is stripped from the signature and kept in the <em>manifest</em>: a dedup key carrying the seed makes every failure unique &mdash; the over-specific pathology by construction.</p>
+    </td>
+    <td>
+      <div class="ex warn"><span class="tag">Both directions are expensive</span><strong>Over-generic</strong> buckets map many bugs into one and <em>eventually swallow a real find</em> &mdash; the opening scenario. <strong>Over-specific</strong> buckets destroy the reduction: 37 failures in 34 buckets is no better than 37 failures. <em>A signature that never splits is not a signature.</em></div>
+      <h3>Then classify, three ways</h3>
+      <p class="small"><strong>Design bug &middot; testbench bug &middot; environment failure</strong> &mdash; and the ratio is itself a health metric. Testbench bugs are not noise: the environment is a design too. Environment failures are the only category that may be discarded without debugging &mdash; <em>and even they must be counted</em>, because a rising count is an infrastructure problem masquerading as flakiness.</p>
+      <h3>And do not debug the same thing twice</h3>
+      <p class="small">Track <strong>errors re-found</strong>. A suite spending 40% of its night re-discovering three known-open bugs spends 40% of its night <em>learning nothing</em>.</p>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>The organizational counterpart is a <strong>triage rota</strong>: one engineer per week who does not debug but classifies, deduplicates and assigns. Debugging and triage compete for the same person, and triage always loses &mdash; because debugging is more interesting.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">45</span>
+</section>
+
+<!-- ============ 46. FLAKINESS ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 12 &middot; Flakiness</p>
+  <h2>A flaky test is more expensive than a failing one</h2>
+  <p class="small">A failing test carries <em>information</em>. A flaky test carries an <em>instruction</em>, and it is <strong>ignore red</strong>. The opening scenario's lost bug was not carelessness &mdash; it was a team behaving rationally on the training data <strong>its own regression gave it</strong>.</p>
+  <table class="funnel">
+    <tr><td><div class="fbar" style="width:92%"><span class="n">35</span> failures over twelve weeks / 15,600 DMA runs &mdash; <span class="n">1 in 450</span>, closed every morning as &ldquo;the flaky one&rdquo;</div></td></tr>
+    <tr><td><div class="fbar" style="width:80%"><strong>Refuse the bucket.</strong> Three carried a distinct first error &mdash; <span class="n">32</span> remain: <span class="n">1 in 490</span></div></td></tr>
+    <tr><td><div class="fbar" style="width:68%"><strong>Buy statistics.</strong> A weekend campaign of <span class="n">4,000</span> fresh seeds &rarr; <span class="n">9</span> failures = <span class="n">1 in 444</span> &mdash; a number, not an impression</div></td></tr>
+    <tr><td><div class="fbar warn" style="width:56%"><strong>Rerun from the manifest &mdash; and find the manifest is wrong.</strong> 6 of 9 reproduce: the farm ran <em>two patch levels</em>, the manifest recorded only the major</div></td></tr>
+    <tr><td><div class="fbar out" style="width:44%"><strong>Bisect.</strong> The monitor sampled in the active region <em>and popped the expected item there too</em> &mdash; two processes on one edge, ordered by the simulator</div></td></tr>
+  </table>
+  <table class="cols"><tr>
+    <td><div class="ex"><span class="tag">Two changes, each curing one half</span>Sample through a <strong>clocking block</strong>, so what the monitor captures no longer depends on what the design does at that edge. And the monitor <strong>stops popping</strong>: it enqueues, the scoreboard compares. <em>The clocking block is the seductive one</em> &mdash; it defines <strong>when</strong> a signal is sampled, not the order of two processes.</div></td>
+    <td><div class="ex good"><span class="tag">Prove the fix honestly</span>Re-running the 4,000-seed campaign produced <strong>zero failures</strong>. State what that establishes and no more: zero events in 4,000 trials bounds the true rate <strong>below roughly 1 in 1,300 with 95% confidence.</strong> It does not prove zero &mdash; and the difference between &ldquo;bounded below 1 in 1,300&rdquo; and &ldquo;fixed&rdquo; is the difference between an engineering claim and a hope.</div></td>
+  </tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">46</span>
+</section>
+
+<!-- ============ 47. COMPUTE ECONOMICS ============ -->
+<section class="slide dense denser">
+  <p class="kicker">Chapter 12 &middot; Compute economics</p>
+  <h2>What to run when you cannot run everything</h2>
+  <p class="small">The budget is not a policy but a <em>physical quantity</em>. Adding cores buys throughput, not evidence: large regressions consist of redundant simulations that do not improve coverage while still consuming resources and lengthening turnaround.</p>
+  <table class="cols"><tr>
+    <td>
+      <h3>A night that no longer contains the suite</h3>
+      <p class="small">The flagship's nightly <em>candidate</em> list is <strong>6,400 runs = 4,409 CPU-hours</strong>. On 240 concurrent licences that is <strong>18.4 hours</strong> of wall clock. The night is <strong>10</strong>. Three decisions, in this order:</p>
+      <table class="compact">
+        <tr><th>Decision</th><th>CPU-h</th><th>Wall</th></tr>
+        <tr><td>candidate list</td><td>4,409</td><td>18.4 h</td></tr>
+        <tr><td>1 &middot; re-tier system runs to the weekend</td><td>3,359</td><td>14.0 h</td></tr>
+        <tr><td>2 &middot; rank the random block (4,800 &rarr; 1,150)</td><td>1,534</td><td>6.4 h</td></tr>
+        <tr><td>3 &middot; prune the directed set</td><td><strong>1,417</strong></td><td><strong>5.9 h</strong></td></tr>
+      </table>
+    </td>
+    <td>
+      <div class="ex good"><span class="tag">The load-bearing decision looks like a detail</span><strong>The nightly tier is ranked and the weekend tier is not.</strong> A ranked regression reproduces known coverage and <em>explores nothing</em>, so a project whose <strong>only</strong> regression is ranked stops finding bugs while its dashboard stays green &mdash; the flat-curve pathology of Chapter 7, <em>manufactured by the regression itself</em>.</div>
+      <p class="small"><strong>Ranking buys the night; the unranked weekend buys back the exploration.</strong> And the ranking is regenerated whenever the design moves significantly, so it stays a compression of the current design rather than a fossil of an old one.</p>
+      <p class="small"><strong>Select, don't just rank.</strong> Filtering tests <em>before</em> simulating them, on the hypothesis that dissimilar tests hit dissimilar coverage, is the complementary technique: ranking buys speed at the price of exploration, novelty selection tries to buy speed <em>from</em> it.</p>
+    </td>
+  </tr></table>
+  <p class="src">Calibration, and a warning about the size of these factors. Across three of Infineon's own projects &mdash; one an ASIL-D microprocessor IP in VHDL, one an automotive radar SoC &mdash; both seed ranking and Cadence Xcelium ML gave compression and speed-up factors of around <strong>3</strong>, and the ML regressions sometimes exceeded the original's coverage (arXiv 2405.17481, pp.1, 4-5). Separately, on a signal-processing unit of commercial complexity with about 6,000 hard-to-hit white-box coverage events, autoencoder novelty selection reached 99.5% coverage while saving up to 49.37% of simulation &mdash; that paper attributes the design to no organisation (arXiv 2207.00445, pp.1, 3). Licence economics and cost per bug: no measured industrial figure exists in this book's corpus, so the table above is the reference SoC's, not anybody's data. Farm scale is published, though: Chapter 12 derives about four million CPU-hours for one commercial signal-processing unit, and cites a 6&times;, not 8&times;, gain from distributing 1,738 tests across up to eight emulation boards.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">47</span>
+</section>
+
+<!-- ============ 48. DISCUSSION 3 ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 12 &middot; Discussion</p>
+  <h2>Your last nightly regression</h2>
+  <div class="ex"><span class="tag">Question 1</span>How many <strong>distinct facts</strong> did it report &mdash; not how many failures? If you cannot answer without opening logs, your signatures are doing no reduction.</div>
+  <div class="ex"><span class="tag">Question 2</span>Name your team's flaky test. Everyone has one and everyone knows its name. <strong>How long has it been red, and what has it taught the team to do with red things?</strong></div>
+  <div class="ex"><span class="tag">Question 3</span>If your nightly suite doubled tomorrow, which of the three levers would you pull first &mdash; re-tier, rank, or prune? What would you lose, and how would you know you had lost it?</div>
+  <p class="note"><b>Facilitation</b>Question 2 is the one to sit with. Ask whether anyone has ever closed a real bug as a duplicate of it. In a room of practising verification engineers, someone always has &mdash; and saying so out loud is the point of the exercise.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">48</span>
+</section>
+
+<!-- ============ 49. CLOSING ============ -->
+<section class="slide dense">
+  <p class="kicker">Part III &middot; Where to go next</p>
+  <h2>An architecture with a checking contract</h2>
+  <table class="cols"><tr>
+    <td>
+      <p><strong>The through-line, restated.</strong> Chapter 8 separated stimulus, checking and coverage so each could be reasoned about alone. Chapter 9 grew stimulus up; Chapter 11 grew checking up; coverage grew up in Part II. Chapters 10 and 12 are the infrastructure either side.</p>
+      <div class="ex good"><span class="tag">Seven sentences worth leaving with</span>
+      <ul class="small" style="margin-top:5px">
+        <li>Predict from what was <em>observed</em>, never from what was requested.</li>
+        <li>A stream key must be computable from what the observer sees.</li>
+        <li>A predictor you wrote is not golden.</li>
+        <li>Legality is a claim about the design; policy is a claim about your test. Label every constraint.</li>
+        <li>Over-constraining stays satisfiable, and silently deletes the feature under test.</li>
+        <li>An assertion that never triggers proves nothing; its antecedent's cover is the evidence.</li>
+        <li>Flakiness teaches a team to ignore red &mdash; which is why it costs more than failure.</li>
+      </ul>
+      </div>
+    </td>
+    <td>
+      <h3>The chapters behind these slides</h3>
+      <table class="compact">
+        <tr><td><strong>Chapter 8</strong></td><td>Testbench Architecture</td></tr>
+        <tr><td><strong>Chapter 9</strong></td><td>Stimulus: Directed to Random to Portable</td></tr>
+        <tr><td><strong>Chapter 10</strong></td><td>UVM as a Methodology</td></tr>
+        <tr><td><strong>Chapter 11</strong></td><td>Assertion-Based Verification</td></tr>
+        <tr><td><strong>Chapter 12</strong></td><td>Regression Engineering</td></tr>
+      </table>
+      <p class="small">The scoreboard class, the bound checker and the constraint files sketched here appear there in full.</p>
+      <div class="ex"><span class="tag">What Part III deliberately left open</span>Every assertion on these slides was <em>sampled</em>. <strong>Chapter 14</strong> hands the same text to a proof engine and asks a different question. <strong>Chapter 17</strong> takes the transaction-level layering of Chapter 8 and moves the environment onto an emulator. And <strong>Chapter 19</strong> asks what survives at gate level.</div>
+    </td>
+  </tr></table>
+  <p class="note"><b>Say</b>If the room remembers one sentence: a testbench is an architecture with a checking contract, not a pile of components.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">49</span>
+</section>
+
+<script>
+  // Keyboard navigation in the browser (ignored by weasyprint).
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var idx = 0;
+    function go(i) {
+      idx = Math.max(0, Math.min(slides.length - 1, i));
+      try { slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+      if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(idx - 1); }
+      if (e.key === 'Home') { e.preventDefault(); go(0); }
+      if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+    });
+  })();
+</script>

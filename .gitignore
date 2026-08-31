@@ -1,0 +1,66 @@
+# ===========================================================================
+# ATTENZIONE — questo repository è PUBBLICO
+# ===========================================================================
+# Le regole qui sotto non sono igiene di repository: sono un confine legale.
+# L'apparato editoriale completo (registri delle fonti, review, audit) contiene
+# estratti verbatim da standard IEEE e da paper, copiati per verificare le
+# nostre parafrasi. Come appunti di lavoro privati è uso legittimo; pubblicati
+# sarebbero riproduzione di testo protetto.
+#
+# L'apparato completo vive nella repository privata `verification-material-kb`.
+# Prima di rimuovere una qualunque riga di questo file, leggi quel repository.
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Apparato editoriale — solo i sei file necessari alla build, tutti verificati
+# ---------------------------------------------------------------------------
+# Esclusi in blocco, poi riammessi uno per uno: se domani nasce un file nuovo
+# in meta/ resta fuori per default. La logica giusta è "chiuso salvo eccezioni",
+# non "aperto salvo divieti" — un file dimenticato non deve poter uscire.
+meta/*
+!meta/corpus_index.md
+!meta/example_bank.md
+!meta/glossary.md
+!meta/outline_master.md
+!meta/references.md
+!meta/style_guide.md
+
+# ---------------------------------------------------------------------------
+# Output di build — rigenerabile, non va in storia
+# ---------------------------------------------------------------------------
+# 82 MB di build intermedie. Si ricostruiscono con un comando. Unica eccezione:
+# il PDF finale, per chi vuole leggere senza installare la toolchain.
+build/*
+!build/hardware_verification_guide.pdf
+
+# ---------------------------------------------------------------------------
+# Snapshot editoriali — sostituiti dalla storia git
+# ---------------------------------------------------------------------------
+.gate_baseline_*/
+
+# ---------------------------------------------------------------------------
+# Artefatti Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# ---------------------------------------------------------------------------
+# Materiale di terzi — non deve MAI entrare
+# ---------------------------------------------------------------------------
+# Le fonti primarie in PDF stanno fuori da questo albero e sono soggette alle
+# licenze dei rispettivi editori. Rete di sicurezza nel caso in cui un PDF
+# venisse copiato qui per sbaglio.
+verification_corpus/
+corpus/
+**/sources/*.pdf
+*.epub
+*.djvu
+
+# ---------------------------------------------------------------------------
+# Ambiente locale
+# ---------------------------------------------------------------------------
+.DS_Store
+*.swp
+*~
+.venv/

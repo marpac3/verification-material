@@ -1,0 +1,1023 @@
+<title>Foundations — Lecture Deck, Part I</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* ---------------------------------------------------------------
+     Lecture deck for "Hardware Verification: A Holistic Guide".
+     Single-theme (projection + print): explicit colours, no dark mode,
+     no flexbox/grid — table-based columns for weasyprint compatibility.
+     16:9 slide = 264mm x 148.5mm.
+     --------------------------------------------------------------- */
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #dfe4ec;
+    color: #1c2430;
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.42;
+  }
+  .slide {
+    background: #ffffff;
+    width: 960px;
+    min-height: 540px;
+    margin: 24px auto;
+    padding: 40px 52px 46px;
+    box-sizing: border-box;
+    border: 1px solid #c6cedd;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+  }
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #2c4f8c; margin: 0 0 9px;
+  }
+  h1 { font-size: 42px; font-weight: 700; line-height: 1.10; margin: 0 0 12px; }
+  h2 { font-size: 27px; font-weight: 700; line-height: 1.15; margin: 0 0 14px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 12px 0 5px; color: #2c4f8c; }
+  p, li { font-size: 15.5px; }
+  p { margin: 0 0 9px; }
+  ul, ol { margin: 0 0 9px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  .muted { color: #566174; }
+  .small { font-size: 13px; }
+  .big { font-size: 18px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code, .mono {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.87em;
+    background: #eef1f6;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    background: #eef1f6; border: 1px solid #d8dee8;
+    padding: 9px 13px; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; line-height: 1.45; margin: 7px 0;
+    white-space: pre-wrap;
+  }
+  pre.tight { font-size: 11.5px; line-height: 1.4; padding: 8px 11px; }
+
+  /* ---- tables ---- */
+  table { border-collapse: collapse; width: 100%; margin: 7px 0; }
+  th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px;
+    letter-spacing: 1px; text-transform: uppercase; color: #566174;
+    text-align: left; padding: 5px 9px 5px 0;
+    border-bottom: 2px solid #d8dee8; vertical-align: bottom;
+  }
+  td { font-size: 14px; padding: 6px 9px 6px 0; border-bottom: 1px solid #e3e8f0; vertical-align: top; }
+  table.cols, table.cols3 { width: 100%; }
+  table.cols td { border: none; padding: 0 16px 0 0; width: 50%; }
+  table.cols3 td { border: none; padding: 0 14px 0 0; width: 33.3%; font-size: 13.5px; }
+  table.plain td { border: none; }
+  table.compact td { font-size: 13px; padding: 4px 8px 4px 0; }
+
+  /* ---- pills, callouts ---- */
+  .pill {
+    display: inline-block; font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: #e7edf7; color: #2c4f8c; white-space: nowrap;
+  }
+  .pill.ok  { background: #e2f2e9; color: #256b46; }
+  .pill.no  { background: #f8e4df; color: #9c3a2a; }
+  .pill.mid { background: #f6efdc; color: #8a6516; }
+  .ex {
+    background: #f2f6fb; border-left: 3px solid #2c4f8c;
+    padding: 9px 13px; margin: 9px 0; font-size: 14px;
+  }
+  .ex.warn { background: #fbf3f1; border-left-color: #9c3a2a; }
+  .ex .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; color: #2c4f8c;
+    display: block; margin-bottom: 3px;
+  }
+  .ex.warn .tag { color: #9c3a2a; }
+  .lead { font-size: 19px; line-height: 1.35; margin: 0 0 12px; }
+
+  /* density utility for the few slides that carry a full worked artifact */
+  .dense h2 { margin-bottom: 10px; }
+  .dense h3 { margin: 8px 0 4px; font-size: 15px; }
+  .dense p  { margin-bottom: 6px; }
+  .dense li { margin-bottom: 3px; font-size: 13.5px; line-height: 1.34; }
+  .dense td { padding: 3px 8px 3px 0; font-size: 13px; }
+  .dense .ex { padding: 7px 11px; margin: 6px 0; font-size: 13px; }
+
+  /* ---- speaker note (teacher prompt) ---- */
+  .note {
+    margin-top: 11px; border-top: 1px solid #dbe2ec; padding-top: 6px;
+    font-size: 12px; color: #6b7686; font-style: italic;
+  }
+  .note b {
+    font-family: "IBM Plex Mono", monospace; font-style: normal;
+    font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: #98a3b3; margin-right: 6px;
+  }
+  .src {
+    font-size: 10.5px; color: #98a3b3; margin: 5px 0 0;
+    font-family: "IBM Plex Mono", monospace; line-height: 1.4;
+  }
+
+  /* ---- chrome ---- */
+  .pagenum {
+    position: absolute; bottom: 15px; right: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+  }
+  .brand {
+    position: absolute; bottom: 15px; left: 22px;
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: #98a3b3;
+    letter-spacing: 1px;
+  }
+
+  /* ---- title & divider slides ---- */
+  .title-slide { padding-top: 118px; }
+  .title-slide .sub { font-size: 19px; color: #566174; max-width: 660px; line-height: 1.4; }
+  .divider { background: #2c4f8c; border-color: #2c4f8c; padding-top: 150px; }
+  .divider h1, .divider p { color: #ffffff; }
+  .divider .chno {
+    font-family: "IBM Plex Mono", monospace; font-size: 62px; font-weight: 600;
+    color: #7d9bd0; line-height: 1; margin: 0 0 6px;
+  }
+  .divider .sub { font-size: 18px; color: #c6d5ec; max-width: 640px; }
+  .divider .brand, .divider .pagenum { color: #6f8dc4; }
+
+  /* ---- diagram primitives (CSS boxes: no external assets) ---- */
+  table.diag { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  table.diag td { padding: 0 3px; border: none; vertical-align: middle; }
+  .db {
+    text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.22;
+    border: 1.5px solid #2c4f8c; border-radius: 4px; padding: 7px 3px; background: #eef2f9;
+  }
+  .db.bus { background: #2c4f8c; color: #ffffff; font-size: 13px; padding: 9px 6px; }
+  .db.sub { background: #ffffff; }
+  .db.per { background: #f7f9fc; border: 1.5px dashed #98a3b3; color: #566174; font-size: 11.5px; }
+  tr.stem td { padding: 0; }
+  tr.stem i { display: block; width: 0; height: 11px; border-left: 2px solid #2c4f8c; margin: 0 auto; }
+
+  /* funnel bars (observability collapse) */
+  .bar {
+    border: 1px solid #2c4f8c; border-radius: 3px; padding: 6px 11px;
+    font-size: 13px; margin: 0 0 5px; background: #e7edf7; line-height: 1.25;
+  }
+  .bar .bl { font-weight: 600; }
+  .bar.s2 { background: #edf0f5; }
+  .bar.s3 { background: #f7ece8; border-color: #b9705f; }
+  .bar.s4 { background: #f8e4df; border-color: #9c3a2a; }
+
+  /* chain: activate -> propagate -> check */
+  table.chain { table-layout: fixed; border-collapse: collapse; margin: 8px 0 2px; }
+  table.chain td { border: none; padding: 0; text-align: center; vertical-align: top; }
+  table.chain td.annot { padding: 5px 7px 0; }
+  .cbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 8px 6px; font-size: 13px; font-weight: 600; line-height: 1.25;
+    margin: 0 3px;
+  }
+  .cbox .q { display: block; font-weight: 400; font-size: 11.5px; color: #566174; margin-top: 2px; }
+  .esc {
+    border: 1px dashed #9c3a2a; border-radius: 4px; background: #fbf3f1;
+    padding: 6px 5px; font-size: 11.5px; color: #9c3a2a; line-height: 1.25; margin: 9px 3px 0;
+  }
+  .arrowr { font-size: 20px; color: #2c4f8c; padding-top: 12px; }
+
+  /* stage ladder */
+  .rung {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #eef2f9;
+    padding: 7px 12px; margin: 0 0 6px; font-size: 13px; line-height: 1.3;
+  }
+  .rung .rl { font-weight: 700; color: #2c4f8c; }
+  .rung.r1 { margin-left: 0; background: #ffffff; }
+  .rung.r2 { margin-left: 34px; }
+  .rung.r3 { margin-left: 68px; background: #e2f2e9; border-color: #256b46; }
+  .rung.r3 .rl { color: #256b46; }
+
+  /* two-path reconvergence */
+  .pbox {
+    border: 1.5px solid #2c4f8c; border-radius: 4px; background: #ffffff;
+    padding: 5px 8px; font-size: 12px; text-align: center; line-height: 1.2;
+  }
+  .pbox.spec { background: #2c4f8c; color: #ffffff; font-weight: 600; }
+  .pbox.interp { background: #f6efdc; border-color: #8a6516; }
+  .pbox.cmp { background: #e7edf7; font-weight: 600; border-radius: 999px; }
+  table.path { table-layout: fixed; border-collapse: collapse; margin: 0; width: 100%; }
+  table.path td { border: none; padding: 0 3px; vertical-align: middle; }
+  table.path td.ar { text-align: center; color: #2c4f8c; font-size: 13px; line-height: 1; padding: 3px; }
+
+  @page { size: 264mm 148.5mm; margin: 0; }
+  @media print {
+    body { background: #ffffff; }
+    .slide {
+      width: 264mm; min-height: 148.5mm; margin: 0;
+      border: none; padding: 11mm 15mm 13mm;
+    }
+    .divider { padding-top: 40mm; }
+    .title-slide { padding-top: 32mm; }
+  }
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide title-slide">
+  <p class="kicker">Hardware Verification: A Holistic Guide &middot; Lecture companion</p>
+  <h1>Part I &mdash; Foundations</h1>
+  <p class="sub">Why verification exists, how a verifier thinks, why completeness is formally impossible &mdash; and the lifecycle that manages the residual risk instead of pretending it away.</p>
+  <p class="muted" style="margin-top:34px">Chapters <strong>1&ndash;4</strong> &nbsp;&middot;&nbsp; Running example: <strong>the reference SoC</strong> &nbsp;&middot;&nbsp; Every figure carries its year and its source</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">1</span>
+</section>
+
+<!-- ============ 2. PART MAP ============ -->
+<section class="slide">
+  <p class="kicker">The arc of Part I</p>
+  <h2>Four chapters, and what each settles</h2>
+  <table>
+    <tr><th style="width:16%">Chapter</th><th style="width:30%">Question</th><th>What you leave with</th></tr>
+    <tr><td><strong>1 &middot; Why Verification Exists</strong></td><td>What does an escape cost?</td><td>Escape, respin, first-silicon success; the measured industry numbers; the cost curve that funds the whole discipline</td></tr>
+    <tr><td><strong>2 &middot; The Verifier's Mindset</strong></td><td>Why can't the designer just test it?</td><td>Reconvergence, breakage thinking, independence of judgment, disciplined doubt</td></tr>
+    <tr><td><strong>3 &middot; The Verification Problem</strong></td><td>Why is completeness impossible?</td><td>State-space arithmetic, controllability and observability, the oracle problem &mdash; and the pivot to risk</td></tr>
+    <tr><td><strong>4 &middot; The Verification Lifecycle</strong></td><td>So how is it actually run?</td><td>Six phases, maturity stages, the review calendar, and what industry schedules really do</td></tr>
+  </table>
+  <p class="ex"><span class="tag">The thread</span>Each chapter removes one comfortable belief &mdash; that correctness is the default, that testing your own work suffices, that "done" is reachable &mdash; and replaces it with something you can measure and defend.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">2</span>
+</section>
+
+<!-- ============ 3. DIVIDER CH1 ============ -->
+<section class="slide divider">
+  <p class="chno">01</p>
+  <h1>Why Verification Exists</h1>
+  <p class="sub">The problem, the numbers, the cost &mdash; and the design we will keep breaking for the rest of the book.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">3</span>
+</section>
+
+<!-- ============ 4. THE COUNTERFACTUAL ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; The opening scenario</p>
+  <h2>Eleven days before tape-out, one seed fails</h2>
+  <p class="small muted" style="margin-bottom:10px">A 2D transfer, <strong>negative stride</strong>, row crossing a <strong>4&nbsp;KB boundary</strong>, mis-split by the DMA's legalizer &mdash; only while the <strong>second channel</strong> competes for the bus. 214 directed tests had passed for months.</p>
+  <table class="cols"><tr><td>
+    <h3>Universe A &mdash; the regression caught it</h3>
+    <ul>
+      <li>Overnight scoreboard mismatch</li>
+      <li>Every internal signal observable</li>
+      <li><strong>The fix takes a day</strong></li>
+    </ul>
+  </td><td>
+    <h3>Universe B &mdash; it shipped</h3>
+    <ul>
+      <li>Silicon boots; bring-up sees nothing for weeks</li>
+      <li>A customer corrupts a buffer, intermittently, under load</li>
+      <li>Weeks of senior time, at a fraction of simulation's visibility</li>
+      <li><strong>Respin, requalification, missed launch window</strong></li>
+    </ul>
+  </td></tr></table>
+  <p class="ex"><span class="tag">The whole book in one line</span>The difference between these two universes is one nightly regression. Multiplied across every block of every chip, that difference is why verification consumes most of a project.</p>
+  <p class="note"><b>Say</b>Ask the room which universe their last project was in &mdash; and how they know.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">4</span>
+</section>
+
+<!-- ============ 5. ESCAPE / RESPIN / FIRST SILICON ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; Vocabulary and the headline</p>
+  <h2>Three words that price the discipline</h2>
+  <table class="compact">
+    <tr><th style="width:24%">Term</th><th>Meaning</th></tr>
+    <tr><td><strong>Bug escape</strong></td><td>A design flaw that survives verification and reaches the next stage &mdash; integration, silicon, or the field</td></tr>
+    <tr><td><strong>Respin</strong></td><td>The consequence when an escape reaches silicon and cannot be worked around: a new fabrication cycle with corrected masks</td></tr>
+    <tr><td><strong>First-silicon success</strong></td><td>The fraction of projects whose first fabricated silicon is production-worthy &mdash; the effectiveness headline of the whole discipline</td></tr>
+  </table>
+  <table class="cols" style="margin-top:6px"><tr><td>
+    <div class="ex"><span class="tag">Verification vs validation vs test</span><strong>Verification</strong> asks: <em>is the design right?</em> &nbsp;<strong>Manufacturing test</strong> asks: <em>was this copy built right?</em> &nbsp;<strong>Validation</strong> checks the actual silicon after fabrication.</div>
+  </td><td>
+    <div class="ex warn"><span class="tag">The number</span><span style="font-size:30px;font-weight:700;color:#9c3a2a">14%</span> of IC/ASIC projects achieved first-silicon success in <strong>2024</strong> &mdash; the lowest in twenty years.<br><span class="small">Six out of seven projects pay for at least one extra fabrication cycle.</span></div>
+  </td></tr></table>
+  <p class="src">Source: Wilson Research Group 2024 IC/ASIC functional verification trend report &mdash; 597 eligible participants, &plusmn;4% margin of error at a 95% confidence interval (p.&nbsp;3).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">5</span>
+</section>
+
+<!-- ============ 6. THE TREND, DATED ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; The numbers, dated</p>
+  <h2>What the industry measures about itself</h2>
+  <table class="compact">
+    <tr><th style="width:34%">Measure</th><th style="width:22%">2014</th><th style="width:22%">2024</th><th>Reading</th></tr>
+    <tr><td>First-silicon success (IC/ASIC)</td><td>~30%</td><td><strong>14%</strong></td><td>Decline unbroken from 2012; twenty-year low</td></tr>
+    <tr><td>Projects behind original schedule</td><td>61%</td><td><strong>75%</strong></td><td>Verification sits at the end of the critical path</td></tr>
+    <tr><td>Designs with an embedded processor</td><td>71%</td><td><strong>84%</strong></td><td>52% back in 2004 &mdash; each layer multiplies the intersections</td></tr>
+  </table>
+  <table class="cols" style="margin-top:4px"><tr><td>
+    <h3>What sends projects back to the fab</h3>
+    <ul class="small">
+      <li><strong>Logic or functional flaws</strong> lead the categories &mdash; ahead of analog, timing, power, physical</li>
+      <li>Root causes: <strong>design errors</strong> first, then <strong>changing, incorrect or incomplete specifications</strong></li>
+      <li>A large share of "hardware bugs" are ambiguities about what the design was <em>supposed</em> to do</li>
+    </ul>
+  </td><td>
+    <h3>What 2024 projects must also carry</h3>
+    <ul class="small">
+      <li><strong>95%</strong> &mdash; two or more asynchronous clock domains</li>
+      <li><strong>83%</strong> &mdash; security features &nbsp;&middot;&nbsp; <strong>44%</strong> &mdash; a safety-critical standard</li>
+      <li><strong>58%</strong> RISC-V &nbsp;&middot;&nbsp; <strong>59%</strong> an AI accelerator</li>
+    </ul>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Read "14%" as a headwind, not an indictment: complexity compounded while respin rates only slowly worsened. Projects using formal and mature methodologies reported fewer spins in 2024.</p>
+  <p class="src">Sources: Wilson Research Group 2024 IC/ASIC report; Foster, "Trends in Functional Verification," DAC 2015 (2014 study, 1,886 participants).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">6</span>
+</section>
+
+<!-- ============ 7. FPGA ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; The other half of the industry</p>
+  <h2>FPGAs: the illusion of a free respin</h2>
+  <p class="lead">No mask set, so a fix is "just" a rebuild. Asked in 2024 how many non-trivial bugs escaped into production, only <strong>13%</strong> of FPGA projects answered <em>zero</em>.</p>
+  <table class="cols"><tr><td>
+    <div class="ex warn"><span class="tag">2024</span><span style="font-size:30px;font-weight:700;color:#9c3a2a">87%</span> of FPGA projects shipped production systems with non-trivial bugs &mdash; notably worse than the IC/ASIC first-silicon rate.</div>
+  </td><td>
+    <h3>Why the comfort is false</h3>
+    <ul class="small">
+      <li><strong>Cultural diagnosis:</strong> teams minimise pre-lab verification and race to the bench &mdash; a strategy that worked for simple parts, not for SoC-class devices</li>
+      <li><strong>Reprogramming is not free:</strong> in aerospace it means removing covers and a full system revalidation</li>
+      <li><strong>The transition is under way:</strong> FPGA verification headcount grew 8.5% CAGR against 4.7% for design, 2012&ndash;2024</li>
+    </ul>
+  </td></tr></table>
+  <p class="ex"><span class="tag">The rule that follows</span>Spend pre-lab effort <strong>where the design is new</strong>. Reuse of verified IP is what lets some projects legitimately spend less.</p>
+  <p class="src">Source: Wilson Research Group 2024 FPGA functional verification trend report.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">7</span>
+</section>
+
+<!-- ============ 8. EFFORT: FOLKLORE VS MEASUREMENT ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; The effort</p>
+  <h2>"70% of the effort" &mdash; folklore, and what was measured</h2>
+  <table class="cols"><tr><td>
+    <h3>The folklore</h3>
+    <ul class="small">
+      <li>Quoted in nearly every talk and textbook</li>
+      <li>Also called <em>"subjective or unsubstantiated"</em> &mdash; repeated publication to publication without primary data</li>
+      <li>Yet well rooted: ~70% of design effort in the SoC era; ~70% of design <em>time</em> on multiple projects; validation ~70% of SoC time and resources</li>
+    </ul>
+    <div class="ex" style="margin-top:8px"><span class="tag">The defensible claim</span><strong>More than half &mdash; and how much more is set by how much of your design is new.</strong></div>
+  </td><td>
+    <h3>The measurement</h3>
+    <p class="small" style="margin-bottom:6px"><span style="font-size:30px;font-weight:700;color:#2c4f8c">57%</span> of total project time spent in verification, measured in <strong>2014</strong>, essentially unchanged from 2012.</p>
+    <ul class="small">
+      <li>Wide dispersion in <em>both</em> directions &mdash; and a growing tail above 80%</li>
+      <li>Low end: projects assembling <strong>pre-verified IP</strong></li>
+      <li>High end: projects with high proportions of <strong>newly developed IP</strong></li>
+    </ul>
+    <p class="small muted">The dispersion is the insight. The 70% figure is not wrong so much as unqualified.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>This is a lesson in reading industry numbers: a figure everyone repeats, a figure someone measured, and the honest sentence that survives both.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">8</span>
+</section>
+
+<!-- ============ 9. WHERE THE HOURS GO ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; Headcount and hours</p>
+  <h2>Whatever the org chart says, you are running a verification project</h2>
+  <table class="compact">
+    <tr><th style="width:30%">Finding</th><th style="width:26%">Window</th><th>Number</th></tr>
+    <tr><td>Headcount growth, IC/ASIC</td><td>2007&ndash;2014</td><td><strong>12.5%</strong> CAGR for verification engineers vs <strong>3.7%</strong> for designers</td></tr>
+    <tr><td>Headcount growth, cooled</td><td>2016&ndash;2024</td><td><strong>3%</strong> verification vs <strong>2.4%</strong> design &mdash; from an already-inverted baseline</td></tr>
+    <tr><td>Peak team size</td><td>by 2014</td><td>Mean peak verification engineers <strong>exceeded</strong> mean peak design engineers</td></tr>
+    <tr><td>Processor segment</td><td>2024</td><td>A <strong>5-to-1</strong> verification-to-design ratio is <em>not unusual</em> (not a norm)</td></tr>
+    <tr><td>Designers verify too</td><td>2014 &rarr; 2024</td><td><strong>47% &rarr; 49%</strong> of a design engineer's own time goes to verification</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">And the largest single time sink inside verification is</span><strong>Debug</strong> &mdash; ahead of planning, testbench development and running tests, in 2014 and again in 2024. It is also <strong>unpredictable and varies wildly between projects</strong>, which is why schedules extrapolated from the last project keep failing.</p>
+  <p class="note"><b>Say</b>Much of this book &mdash; self-checking testbenches, assertions at the point of origin, disciplined triage &mdash; is at bottom debug-time reduction.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">9</span>
+</section>
+
+<!-- ============ 10. THE COST CURVE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; The economics</p>
+  <h2>The cost curve is an observability curve</h2>
+  <p class="small muted" style="margin-bottom:8px">Cost to find and fix <strong>rises</strong>; time available <strong>shrinks</strong>; and behind both sits how much internal state you can see when something goes wrong.</p>
+  <div class="bar" style="width:100%"><span class="bl">Block RTL simulation</span> &mdash; any internal signal, any time &nbsp;&middot;&nbsp; fix = edit and recompile</div>
+  <div class="bar s2" style="width:70%"><span class="bl">Full-chip simulation / emulation</span> &mdash; reduced &nbsp;&middot;&nbsp; fix = rebuild, hours</div>
+  <div class="bar s3" style="width:42%"><span class="bl">Post-silicon bring-up</span> &mdash; scan and trace only &nbsp;&middot;&nbsp; workaround or respin</div>
+  <div class="bar s4" style="width:22%"><span class="bl">Production / field</span> &mdash; near zero &nbsp;&middot;&nbsp; recall, errata, respin</div>
+  <table class="cols" style="margin-top:9px"><tr><td>
+    <ul class="small">
+      <li><strong>Simulation is slow but transparent:</strong> roughly a billion times slower than the target silicon &mdash; booting an operating system would take years</li>
+      <li><strong>Post-silicon debug is measured in weeks:</strong> on one heavily instrumented program, medium-severity bugs took ~<strong>10 days</strong> to root-cause, 90th percentile <strong>20 days</strong> &mdash; per bug</li>
+    </ul>
+  </td><td>
+    <ul class="small">
+      <li><strong>The industry pre-pays in silicon:</strong> in some modern SoCs over <strong>20% of die area</strong> is design-for-debug instrumentation</li>
+      <li><strong>The market window dwarfs everything:</strong> missing a launch window is documented in the range of <strong>millions to billions</strong></li>
+      <li>The "10&times; per stage" rule is a <em>mnemonic, not data</em> &mdash; but no mechanism pushes the other way</li>
+    </ul>
+  </td></tr></table>
+  <p class="src">Row three, from a reported case: Broadcom reused the existing regression for a &ldquo;silicon-proven&rdquo; in-house audio IP whose only change was one added channel. Every RTL regression passed before tape-out; the bug appeared months into silicon testing, and it was closed with a software workaround rather than a re-spin.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">10</span>
+</section>
+
+<!-- ============ 11. BUG REPORT ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; Worked example</p>
+  <h2>Anatomy of a near-escape</h2>
+<pre class="tight">Bug ID:          SOC-1284
+Title:           DMA ch0 2D negative-stride transfer corrupts data at 4 KB
+                 boundary when ch1 is concurrently active
+Found by:        Nightly constrained-random regression (scoreboard mismatch),
+                 11 days before tape-out
+Severity:        Critical - silent data corruption, no error response raised
+Root cause:      Midend transfer legalizer mis-splits a negative-stride 2D row
+                 that crosses a 4 KB AXI boundary; the malformed burst is
+                 masked unless ch1 owns the backend in the same window.
+Escape analysis: 214 directed DMA tests passed; none combined negative stride
+                 x 4 KB crossing x dual-channel activity. The functional
+                 coverage model had no cross of these three dimensions -
+                 the hole was invisible to our own metrics.
+Cost if escaped: intermittent field corruption -> weeks of bring-up debug at
+                 ~10 days/bug post-silicon norms, likely respin + requal
+Actions:         (1) fix legalizer split logic; (2) add coverage cross
+                 stride_sign x boundary_cross x channel_concurrency; (3) extend
+                 scoreboard with end-to-end check for 2D descriptors; (4) audit
+                 all legalizer corner cases against the AXI 4 KB rule.</pre>
+  <p class="ex"><span class="tag">Note what found it and what did not</span>The directed tests all passed, honestly. Constrained-random found the unimagined combination; the <strong>scoreboard</strong>, not any human, noticed the corruption; and the <strong>coverage model could not even represent the hole</strong>.</p>
+  <p class="note"><b>Say</b>Read the "cost if escaped" line aloud. A bug report is an economic document.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">11</span>
+</section>
+
+<!-- ============ 12. THE REFERENCE SoC ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 1 &middot; The running example</p>
+  <h2>The reference SoC &mdash; small enough to hold in your head</h2>
+  <table class="diag">
+    <tr>
+      <td colspan="4"><div class="db">core-I</div></td>
+      <td colspan="4"><div class="db">core-D</div></td>
+      <td colspan="4"><div class="db">DMA ch0</div></td>
+      <td colspan="4"><div class="db">DMA ch1</div></td>
+      <td colspan="4"><div class="db">debug</div></td>
+    </tr>
+    <tr class="stem"><td colspan="4"><i></i></td><td colspan="4"><i></i></td><td colspan="4"><i></i></td><td colspan="4"><i></i></td><td colspan="4"><i></i></td></tr>
+    <tr><td colspan="20"><div class="db bus">the crossbar &mdash; full AXI4 &middot; 5 managers &times; 4 subordinates &middot; 32-bit address &middot; 64-bit data &middot; ID width 4</div></td></tr>
+    <tr class="stem"><td colspan="5"><i></i></td><td colspan="5"><i></i></td><td colspan="5"><i></i></td><td colspan="5"><i></i></td></tr>
+    <tr>
+      <td colspan="5"><div class="db sub">the memory<br>512 KB &middot; 4 banks</div></td>
+      <td colspan="5"><div class="db sub">boot ROM</div></td>
+      <td colspan="5"><div class="db sub">APB bridge</div></td>
+      <td colspan="5"><div class="db sub">the neural accelerator</div></td>
+    </tr>
+    <tr class="stem"><td colspan="10"></td><td colspan="5"><i></i></td><td colspan="5"><i></i></td></tr>
+    <tr>
+      <td colspan="10"></td>
+      <td colspan="5"><div class="db per">UART &middot; SPI &middot; I&sup2;C &middot; GPIO<br>timer &middot; event unit</div></td>
+      <td colspan="5"><div class="db per">2/4/8-bit weights<br>16-lane MAC datapath</div></td>
+    </tr>
+  </table>
+  <table class="cols3" style="margin-top:8px"><tr>
+    <td><strong>the core</strong> &mdash; 4-stage, in-order, single-issue RV32IMC, ~50k gates, optional DSP/SIMD extensions<br><strong>the DMA engine</strong> &mdash; frontend / midend / backend, 2 channels, 1D and 2D, max burst 256 beats</td>
+    <td><strong>clocking</strong> &mdash; 3 asynchronous domains: system 200&nbsp;MHz, peripheral 50&nbsp;MHz, always-on RTC 32&nbsp;kHz<br><strong>power</strong> &mdash; 2 UPF domains, retention on the event unit</td>
+    <td><strong>Representative by the numbers:</strong> an embedded processor (like 84% of 2024 projects), RISC-V (58%), an AI accelerator (59%), multiple async clock domains (95%)</td>
+  </tr></table>
+  <p class="note"><b>Say</b>Every element is a teaching seam: the crossbar carries protocol and formal, the DMA carries data-mover corner cases, the core carries ISA co-simulation, the clock and power domains carry CDC and low-power.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">12</span>
+</section>
+
+<!-- ============ 13. DISCUSSION 1 ============ -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for the room &mdash; the economics</h2>
+  <ol class="big" style="margin-top:16px">
+    <li style="margin-bottom:14px">Take the last bug that <strong>escaped</strong> on a project you worked on. At which stage was it found &mdash; and what did the lost observability cost, in days?</li>
+    <li style="margin-bottom:14px">What fraction of engineering hours does your project spend on verification? Is that number <strong>measured, or assumed</strong>? What would it take to measure it?</li>
+    <li style="margin-bottom:14px">If your first silicon works, was that <strong>verification or luck</strong>? Name one piece of evidence that would tell the two apart.</li>
+  </ol>
+  <p class="note"><b>Facilitation</b>Question 3 is the one that lands. Most teams discover they have no evidence, only an outcome &mdash; which is exactly the gap Chapters 5 to 7 close.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">13</span>
+</section>
+
+<!-- ============ 14. DIVIDER CH2 ============ -->
+<section class="slide divider">
+  <p class="chno">02</p>
+  <h1>The Verifier's Mindset</h1>
+  <p class="sub">From "make it work" to "prove it does not break" &mdash; a different intellectual act, not a second pass over the same one.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">14</span>
+</section>
+
+<!-- ============ 15. TWO MINDS ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 2 &middot; The opening scenario</p>
+  <h2>Two minds, one specification</h2>
+  <p class="small muted" style="margin-bottom:8px">The DMA designer verifies her own block in one week &mdash; register defaults, 1D and 2D transfers, a bad address, completion interrupts. All pass. Three months later a random seed finds the negative-stride bug her tests could never have reached.</p>
+  <table class="cols"><tr><td>
+    <div class="ex"><span class="tag">The designer</span>Constructs a component that correctly implements the intended function, with the required performance and, ideally, without defects.</div>
+  </td><td>
+    <div class="ex warn"><span class="tag">The verifier</span>Starts from the opposite premise &mdash; <strong>the bugs are already in there</strong> &mdash; and finds them by stressing protocols, exploring corner cases, and applying zero tolerance toward inconsistencies.</div>
+  </td></tr></table>
+  <ul style="margin-top:6px">
+    <li>Two <strong>orientations toward the same specification</strong> &mdash; not two intensities of one activity.</li>
+    <li>Not a distinction between job titles: designers already spend <strong>49%</strong> of their time verifying (2024).</li>
+    <li>Hiring filters on languages and tools. <strong>Mindset</strong> is the stronger determinant &mdash; and takes years, not months.</li>
+  </ul>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">15</span>
+</section>
+
+<!-- ============ 16. RECONVERGENCE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 2 &middot; The mechanism</p>
+  <h2>Reconvergence: where do the two paths meet?</h2>
+  <table class="cols"><tr><td>
+    <h3 style="color:#9c3a2a">Self-verification &mdash; they meet at the interpretation</h3>
+    <table class="path">
+      <tr><td colspan="2"><div class="pbox spec">Specification</div></td></tr>
+      <tr><td colspan="2" class="ar">&darr;</td></tr>
+      <tr><td colspan="2"><div class="pbox interp">the designer's interpretation</div></td></tr>
+      <tr><td class="ar">&darr;</td><td class="ar">&darr;</td></tr>
+      <tr><td><div class="pbox">RTL</div></td><td><div class="pbox">tests + expected results</div></td></tr>
+      <tr><td class="ar">&darr;</td><td class="ar">&darr;</td></tr>
+      <tr><td colspan="2"><div class="pbox cmp">compare</div></td></tr>
+    </table>
+    <p class="small muted" style="margin-top:8px">If the interpretation is wrong anywhere, verification faithfully confirms that the design matches what she believed the spec to mean.</p>
+  </td><td>
+    <h3 style="color:#256b46">Independent verification &mdash; they meet at the spec</h3>
+    <table class="path">
+      <tr><td colspan="2"><div class="pbox spec">Specification</div></td></tr>
+      <tr><td class="ar">&darr;</td><td class="ar">&darr;</td></tr>
+      <tr><td><div class="pbox interp">designer's interpretation</div></td><td><div class="pbox interp">verifier's interpretation</div></td></tr>
+      <tr><td class="ar">&darr;</td><td class="ar">&darr;</td></tr>
+      <tr><td><div class="pbox">RTL</div></td><td><div class="pbox">testbench + checks</div></td></tr>
+      <tr><td class="ar">&darr;</td><td class="ar">&darr;</td></tr>
+      <tr><td colspan="2"><div class="pbox cmp">compare</div></td></tr>
+    </table>
+    <p class="small muted" style="margin-top:8px">Three mechanisms reduce human error: automation, mistake-proofing, and <strong>redundancy</strong>. Design is too creative for the first two.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Independence attaches to the <em>artifact</em>, not the person: a designer is often an excellent verifier of someone else's block. What redundancy forbids is only one mind on both paths.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">16</span>
+</section>
+
+<!-- ============ 17. STRESS DON'T INTEROPERATE ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 2 &middot; Thinking in terms of breakage</p>
+  <h2>Stress it &mdash; do not interoperate with it</h2>
+  <div class="ex"><span class="tag">The paradox of robustness</span>Build a monitor for a protocol needing clock-data recovery. <strong>The more robust its recovery algorithm, the less checking it performs</strong> &mdash; a tolerant monitor gracefully adapts to data rates that are out of spec, masking the bug it exists to catch. The right answer is the <em>least tolerant</em> observer the reference clock permits, even though no real receiver would ever be built that way.</div>
+  <p class="big" style="margin:10px 0 8px">Verification's aim is not to replicate reality but to verify the design in the most thorough manner possible &mdash; <em>"even if it means doing so in spite of reality."</em></p>
+  <table class="compact">
+    <tr><th style="width:24%">The helpful testbench</th><th style="width:38%">Symptom</th><th>Cure</th></tr>
+    <tr><td><strong>Handshakes</strong></td><td>Auto-NACKs a corrupted transfer, so a simulation that should have failed keeps running</td><td>Log an error and fail; NACK generation only under explicit error-injection control</td></tr>
+    <tr><td><strong>Status outputs</strong></td><td>Tests pace themselves on the FIFO's <code>full</code>/<code>empty</code> flags &mdash; the blind leading the blind</td><td>Check the flags first (white-box assertion or independent count), <em>then</em> rely on them</td></tr>
+    <tr><td><strong>Error recovery</strong></td><td>Recovery paths keep a failing simulation alive; downstream checking is compromised anyway</td><td>Stop on first error &mdash; a mousetrap that has caught its bug is done for that simulation</td></tr>
+  </table>
+  <p class="src">Source: Montesano &amp; Litterick (Verilab), &ldquo;Verification Mind Games: how to think like a verifier&rdquo;, DVCon &mdash; which frames the mindset as a series of concrete choices rather than an attitude, the first being whether the environment's duty is to replicate the real world, and names zero tolerance for design inconsistencies as the distinguishing commitment.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">17</span>
+</section>
+
+<!-- ============ 18. INVALID IS NOT A FILTER ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 2 &middot; Corner cases</p>
+  <h2>"Invalid" is not a stimulus filter</h2>
+  <p class="lead">Whether a scenario is valid or invalid is irrelevant. The only question is whether it <strong>can happen</strong> &mdash; and if it can, the design's response to it must be verified.</p>
+  <table class="cols"><tr><td>
+    <div class="ex warn"><span class="tag">Reported case 1</span>A designer dismissed a <strong>zero-radius circle</strong> as meaningless input. In that very production system, upstream software was generating zero-radius circles routinely &mdash; unknown to him.</div>
+    <div class="ex warn"><span class="tag">Reported case 2</span>A low-power mode bit was tested the obvious way: write 1, check entry; write 0, check exit. It passed until tape-out. Writing <strong>0 to a bit that was already 0</strong> put the device into low-power mode.</div>
+  </td><td>
+    <h3>On the DMA</h3>
+    <ul class="small">
+      <li>"Negative stride" is on the list not because anyone plans to use it &mdash; but because <strong>the register field is signed</strong>, so it can happen</li>
+      <li>The verifier crosses the breaking points: stride sign &times; boundary proximity &times; channel concurrency &times; burst length</li>
+      <li>That cross is exactly the cell where the legalizer's bug lives</li>
+    </ul>
+    <div class="ex"><span class="tag">The reflex to unlearn</span>Nothing in the specification suggests either test above. Both bugs are invisible to a mind that tests what the design is <em>for</em>, and near-inevitable finds for a mind that enumerates what the design can be <em>subjected to</em>.</div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">18</span>
+</section>
+
+<!-- ============ 19. WORKED EXAMPLE: LEGALIZER ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 2 &middot; Worked example</p>
+  <h2>Attacking the transfer legalizer</h2>
+  <p class="small muted" style="margin-bottom:6px">The designer thinks <em>"the legalizer splits at 4&nbsp;KB."</em> The verifier states the <strong>prohibition at the output</strong> and lets the tool hunt for any way to violate it.</p>
+<pre class="tight">// No INCR write burst emitted by the DMA backend may cross a 4 KB page,
+// regardless of how the midend legalized the transfer. (FIXED bursts hold
+// their address; WRAP bursts stay inside their aligned container.)
+// 16-bit arithmetic on purpose: an illegal awsize (>3 on this 64-bit bus)
+// must overflow the comparison and fail - not wrap silently and pass.
+property p_no_4kb_crossing;
+  @(posedge clk) disable iff (!rst_n)
+  (awvalid &amp;&amp; awready &amp;&amp; (awburst == 2'b01)) |-&gt;
+    (16'(awaddr[11:0]) + ((16'(awlen) + 16'd1) &lt;&lt; awsize)) &lt;= 16'd4096;
+endproperty
+a_no_4kb_crossing : assert property (p_no_4kb_crossing);</pre>
+  <table class="cols"><tr><td>
+    <div class="ex"><span class="tag">The property</span>The zero-tolerance check: one rule, every cycle, every test.</div>
+  </td><td>
+    <div class="ex"><span class="tag">The cross</span>The map of where to apply pressure: <strong>stride sign &times; distance to boundary &times; burst length &times; other channel active</strong> &mdash; a block of empty bins would have exposed the directed suite's blind spot long before any failure.</div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The 16-bit arithmetic is doubt applied to the verifier's <em>own</em> code &mdash; so an illegal size fails loudly instead of wrapping past the check and passing.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">19</span>
+</section>
+
+<!-- ============ 20. INDEPENDENCE + DOUBT ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 2 &middot; Judgment</p>
+  <h2>Independence of judgment, and the value of doubt</h2>
+  <table class="cols"><tr><td>
+    <h3>Three disciplines that protect independence</h3>
+    <ul class="small">
+      <li><strong>Predict from the specification, not from the design.</strong> The moment your checker is tuned until the design passes, you are verifying the design against itself.</li>
+      <li><strong>Trust no signal you have not checked.</strong> Every unchecked DUT output delegates a piece of your judgment back to the object under suspicion.</li>
+      <li><strong>Speak as the third party in the room.</strong> The verifier is the natural liaison between architect and designer &mdash; often the first to detect that the two have diverged.</li>
+    </ul>
+    <div class="ex"><span class="tag">"Software will never do that"</span>The operative question is not intent but reachability: <strong>can the programming interface express it?</strong> If yes, either the RTL is fixed or the case is detected and rejected &mdash; and a test proves the rejection.</div>
+  </td><td>
+    <h3>Four doubts</h3>
+    <ul class="small">
+      <li><strong>Doubt the green.</strong> No coverage without checking. A bin hit while nothing verified the outcome is worse than an empty bin &mdash; it converts ignorance into confidence.</li>
+      <li><strong>Doubt the quiet.</strong> A block that has never failed a test is either simple or under-attacked. Ask which, and reallocate.</li>
+      <li><strong>Doubt your own tools.</strong> Much of a testbench's behaviour never appears in waveforms; if you cannot interrogate it from the logs, you have no grounds to trust its verdicts.</li>
+      <li><strong>Doubt the schedule's promises.</strong> Success undefined is unfalsifiable. <em>Doubt, written down and agreed before the pressure arrives, is called a plan.</em></li>
+    </ul>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">20</span>
+</section>
+
+<!-- ============ 21. DISCUSSION 2 ============ -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for the room &mdash; the mindset</h2>
+  <ol class="big" style="margin-top:16px">
+    <li style="margin-bottom:14px">Pick a block you have verified. <strong>Where did your two paths reconverge</strong> &mdash; at the specification, or at somebody's interpretation of it?</li>
+    <li style="margin-bottom:14px">Name one <strong>DUT output your environment trusts without checking</strong>. What would a bug in that output do to your pass rate?</li>
+    <li style="margin-bottom:14px">Which of your blocks has been <strong>quiet longest</strong>? Is it simple, or under-attacked &mdash; and what evidence do you have either way?</li>
+  </ol>
+  <p class="note"><b>Facilitation</b>Question 2 usually produces a ready flag or a status register within thirty seconds. That is the exercise working.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">21</span>
+</section>
+
+<!-- ============ 22. DIVIDER CH3 ============ -->
+<section class="slide divider">
+  <p class="chno">03</p>
+  <h1>The Verification Problem</h1>
+  <p class="sub">Why completeness is not merely expensive but impossible &mdash; and what the discipline does about it.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">22</span>
+</section>
+
+<!-- ============ 23. STATE SPACE ARITHMETIC ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 3 &middot; The arithmetic that ends the argument</p>
+  <h2>"Test all the cases." Let us count them.</h2>
+  <table class="cols"><tr><td>
+    <p class="small" style="margin-bottom:4px"><strong>One channel</strong> of the reference SoC's DMA engine &mdash; the block a feature list would reasonably call simple:</p>
+    <table class="compact">
+      <tr><th style="width:52%">Register</th><th style="width:16%">Bits</th><th>Role</th></tr>
+      <tr><td class="mono">SRC_ADDR &middot; DST_ADDR</td><td>32 + 32</td><td>base addresses</td></tr>
+      <tr><td class="mono">NUM_BYTES</td><td>32</td><td>bytes per row</td></tr>
+      <tr><td class="mono">SRC_STRIDE &middot; DST_STRIDE</td><td>32 + 32</td><td>signed 2D strides</td></tr>
+      <tr><td class="mono">NUM_REPS</td><td>16</td><td>2D row count</td></tr>
+      <tr><td class="mono">CFG &middot; STATUS</td><td>8 + 8</td><td>flags, error code</td></tr>
+    </table>
+    <p class="small" style="margin-top:5px"><strong>192 bits</strong> of architecturally visible state &rarr; <strong>2<sup>192</sup> &asymp; 6.3 &times; 10<sup>57</sup></strong> configurations, for one channel.</p>
+  </td><td>
+    <div class="ex warn"><span class="tag">Now put a number on "visiting" them</span>
+      1 million new configurations per second &times; a farm of 1,000 simulations = <strong>10<sup>9</sup>/s</strong>.<br>
+      The universe is ~<strong>4.4 &times; 10<sup>17</sup></strong> seconds old.<br>
+      Running since the Big Bang, that farm reaches <strong>4.4 &times; 10<sup>26</sup></strong> configurations &mdash; a fraction of the space around <strong>10<sup>&minus;31</sup></strong>.<br>
+      <span class="small">Not one percent. Not one billionth. A denominator of thirty-two digits.</span>
+    </div>
+    <h3>And the register file is the <em>shallow</em> part</h3>
+    <ul class="small">
+      <li>The two address registers alone: 2<sup>64</sup> &asymp; 1.8 &times; 10<sup>19</sup> pairs &mdash; nearly <strong>six centuries</strong> on that farm</li>
+      <li>One 16 &times; 64-bit backend FIFO: 1,024 bits &rarr; <strong>2<sup>1024</sup> &asymp; 10<sup>308</sup></strong></li>
+      <li>Two channels: <strong>2<sup>384</sup> &asymp; 3.9 &times; 10<sup>115</sup></strong> &mdash; where the canonical DMA bug lives</li>
+      <li>Sequences too: ten binary environment choices per cycle, a thousand cycles &rarr; one path out of 2<sup>10000</sup></li>
+    </ul>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Not a matter of budget: enumeration is off the table before the project starts &mdash; and 512&nbsp;KB of SRAM alone holds over four million state bits.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">23</span>
+</section>
+
+<!-- ============ 24. ABSTRACTION AND THE WALL ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 3 &middot; The first honest response</p>
+  <h2>Abstraction shrinks the space &mdash; and it is still too big</h2>
+  <table class="cols"><tr><td>
+    <p class="small" style="margin-bottom:3px">Most states are equivalent. So partition each dimension into <strong>equivalence classes</strong> and cross classes instead of bits &mdash; for one DMA channel:</p>
+    <table class="compact">
+      <tr><th style="width:66%">Dimension</th><th>Classes</th></tr>
+      <tr><td>source offset in 4 KB page</td><td>~16</td></tr>
+      <tr><td>destination offset in page</td><td>~16</td></tr>
+      <tr><td>length (sub-beat &hellip; crosses 2+ pages)</td><td>~10</td></tr>
+      <tr><td>stride (sign &times; relation to row, zero)</td><td>~6</td></tr>
+      <tr><td>repetitions (1, 2, many, max)</td><td>~4</td></tr>
+      <tr><td>other channel (idle / active / erroring)</td><td>~4</td></tr>
+      <tr><td>backend back-pressure (ready delay 0&ndash;7)</td><td>~8</td></tr>
+      <tr><td>error response (none / read / write / both)</td><td>~4</td></tr>
+    </table>
+    <p class="small" style="margin-top:5px">The product is about <strong>nine million cases</strong> &mdash; no longer cosmological, still far beyond directed testing. A team maintaining a thousand hand-crafted tests is exceptional.</p>
+  </td><td>
+    <div class="ex"><span class="tag">The actual structure of simulation-based verification</span><strong>1.</strong> Abstraction &nbsp;<strong>2.</strong> Stimulus automation &nbsp;<strong>3.</strong> Measurement.<br><span class="small">Name the bargain exactly: relative completeness comes from a coverage metric, and defining that metric is <em>"a selective, and thus subjective, process."</em></span></div>
+    <h3>Doesn't formal verification solve this?</h3>
+    <ul class="small">
+      <li><strong>Partly, and importantly:</strong> a proven property holds for <em>every</em> reachable state and input sequence.</li>
+      <li>But model checking is exhaustive state-space search, worst-case <strong>exponential in storage elements</strong> &mdash; the same wall in formal clothes.</li>
+      <li>So full proofs go to small or well-abstracted targets: arbitration, protocols, control kernels.</li>
+      <li><strong>Bounded proofs</strong> are honest: guaranteed only within the bound.</li>
+      <li>Rigorous <em>complete verification</em> works &mdash; purchasable for selected modules, never ambient.</li>
+    </ul>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">24</span>
+</section>
+
+<!-- ============ 25. ACTIVATE PROPAGATE CHECK ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 3 &middot; The three links</p>
+  <h2>A bug is not found when it exists</h2>
+  <p class="small muted" style="margin-bottom:2px">It is found when three things happen in sequence. Break any link and the bug survives the test that technically "executed" it.</p>
+  <table class="chain" style="width:100%">
+    <tr>
+      <td style="width:27%"><div class="cbox">1 &middot; ACTIVATED<span class="q">stimulus drives the design into the buggy condition</span></div></td>
+      <td style="width:5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:27%"><div class="cbox">2 &middot; PROPAGATES<span class="q">the wrong value travels to a point your environment can see</span></div></td>
+      <td style="width:5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:27%"><div class="cbox">3 &middot; CHECKED<span class="q">something at that point knows the value is wrong</span></div></td>
+      <td style="width:9%"><div class="arrowr">&rarr;</div></td>
+    </tr>
+    <tr>
+      <td><div class="esc">Escape: never exercised</div></td><td></td>
+      <td><div class="esc">Escape: masked or unobserved</div></td><td></td>
+      <td><div class="esc">Escape: visible but unrecognised</div></td>
+      <td><div class="esc" style="border-style:solid;border-color:#256b46;background:#e2f2e9;color:#256b46">Bug detected</div></td>
+    </tr>
+  </table>
+  <table class="cols" style="margin-top:10px"><tr><td>
+    <div class="ex warn"><span class="tag">Link 3 broken &mdash; visible, never checked</span>The UART's RX overrun flag is never cleared if software reads status in the same cycle a stop-bit error arrives. For months the condition was <em>activated</em> in regressions. No checker ever looked at the flag after that sequence.</div>
+  </td><td>
+    <div class="ex warn"><span class="tag">Link 2 broken &mdash; nothing to propagate through</span>The event unit's retention register loses its configuration on power-domain re-entry when a wake event races isolation release. Plain RTL simulation did not model the power behaviour at all &mdash; it escaped RTL entirely.</div>
+  </td></tr></table>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">25</span>
+</section>
+
+<!-- ============ 26. CONTROLLABILITY / OBSERVABILITY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 3 &middot; The two classical limits</p>
+  <h2>Controllability and observability</h2>
+  <table class="cols"><tr><td>
+    <div class="ex"><span class="tag">Controllability</span>Your ability to <strong>steer</strong> the design into a given internal condition, using only the interfaces you can drive.</div>
+    <div class="ex"><span class="tag">Observability</span>Your ability to <strong>see</strong> the consequences of an internal event, at the interfaces you can watch.</div>
+    <p class="big" style="margin-top:6px"><strong>Smaller targets offer more of both.</strong> Verify each feature at a level where you can provoke it <em>and</em> see it fail.</p>
+  </td><td>
+    <h3>Both collapse on the way to silicon</h3>
+    <table class="compact">
+      <tr><th style="width:38%">Platform</th><th>What you can observe</th></tr>
+      <tr><td><strong>RTL simulation</strong></td><td>Virtually any internal signal, at any time</td></tr>
+      <tr><td><strong>FPGA prototype</strong></td><td>A few thousand signals, pre-selected before the bitstream is built</td></tr>
+      <tr><td><strong>Silicon</strong></td><td>Order of a hundred signals routed to trace buffers and pins; control limited to hooks defined in advance</td></tr>
+    </table>
+    <h3>Change the design, don't be a hero</h3>
+    <ul class="small">
+      <li>Observability problem &rarr; sample points readable through memory-mapped registers</li>
+      <li>Controllability problem &rarr; provisions to <strong>force error and exception conditions</strong></li>
+      <li>Assertions do it from inside: the error is flagged at its birthplace</li>
+    </ul>
+  </td></tr></table>
+  <p class="note"><b>Say</b>The budget you enjoy in simulation is the best you will ever have. Every bug missed here must be caught somewhere it is ten times harder to see.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">26</span>
+</section>
+
+<!-- ============ 27. THE ORACLE PROBLEM ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 3 &middot; The hardest link</p>
+  <h2>The oracle problem: how do you know the response is right?</h2>
+  <p class="small muted" style="margin-bottom:6px">A simulator produces what the design <em>did</em>. Correctness relates that to what it <em>should have done</em> &mdash; and "should" lives in prose, in the architect's head, or nowhere. <strong>Every practical oracle is partial.</strong></p>
+  <table class="compact">
+    <tr><th style="width:20%">Oracle</th><th style="width:40%">What it checks</th><th>What it is structurally blind to</th></tr>
+    <tr><td><strong>Reference model</strong></td><td>An independent executable of the specification, compared continuously &mdash; golden by definition for processors</td><td>Anything outside its projection: performance, protocol legality, timing side channels</td></tr>
+    <tr><td><strong>Scoreboard</strong></td><td>Data integrity and completeness of a transform: nothing lost, nothing invented</td><td><em>When</em> things happened (latency, fairness, starvation) and <em>how</em> (a protocol violation delivering correct data)</td></tr>
+    <tr><td><strong>Assertions</strong></td><td>Local invariants and protocol obligations, every cycle, on every test &mdash; the sharpest partial oracle</td><td>Everything outside the one rule each assertion states</td></tr>
+    <tr><td><strong>Offline / human</strong></td><td>Post-simulation comparison; some responses are easy for a human, awkward for a program</td><td>Arrives far from the state that caused it &mdash; diagnosis is cheap only near the failure</td></tr>
+  </table>
+  <p class="ex warn"><span class="tag">The failure that defeats all oracles at once</span><strong>The common-mode error.</strong> If the scoreboard author misreads the same ambiguous sentence the designer misread, model and design agree and the bug is structurally invisible. A passing regression says the design and the testbench agree &mdash; not that either is right.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">27</span>
+</section>
+
+<!-- ============ 28. WHAT ONE ASSERTION PROVES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 3 &middot; Worked example</p>
+  <h2>What one assertion proves &mdash; and what it does not</h2>
+  <p class="small muted" style="margin-bottom:5px">Interrogate the 4 KB property from Chapter 2, deliberately, question by question.</p>
+  <table class="compact">
+    <tr><th style="width:52%">Question</th><th>Does <code>a_no_4kb_crossing</code> answer it?</th></tr>
+    <tr><td>Did any issued burst cross a 4 KB boundary?</td><td><span class="pill ok">YES</span> &nbsp;Every INCR burst, every cycle, every test &mdash; FIXED and WRAP cannot cross by construction</td></tr>
+    <tr><td>Did the split bursts carry the right data?</td><td><span class="pill no">NO</span> &nbsp;It never looks at data</td></tr>
+    <tr><td>Do the split bursts add up to the programmed transfer?</td><td><span class="pill no">NO</span> &nbsp;It sees bursts one at a time, not their sum</td></tr>
+    <tr><td>Does a legal transfer ever complete at all?</td><td><span class="pill no">NO</span> &nbsp;A backend that hangs forever satisfies it <em>vacuously</em></td></tr>
+    <tr><td>Was the <em>read</em> channel also legal?</td><td><span class="pill no">NO</span> &nbsp;Separate assertion needed</td></tr>
+  </table>
+  <p class="ex"><span class="tag">The division of labour, on the canonical bug</span>The emitted bursts were individually <strong>legal</strong> &mdash; the assertion stayed silent. The <strong>data</strong> landed wrong, and only the scoreboard's byte-accurate memory model caught it. Assertion and scoreboard each covered the other's blind spot.</p>
+  <p class="note"><b>Say</b>The question to internalise is not "which oracle is best" but <strong>"which projection of correctness is each oracle responsible for, and is any projection unowned?"</strong></p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">28</span>
+</section>
+
+<!-- ============ 29. THE PIVOT ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 3 &middot; The intellectual pivot of the book</p>
+  <h2>From exhaustive to risk-driven</h2>
+  <table class="cols"><tr><td>
+    <h3>Assemble the three results</h3>
+    <ul class="small">
+      <li>You cannot <strong>visit</strong> all the states &mdash; finite, yet unvisitable</li>
+      <li>You cannot <strong>reach or see</strong> everything even in the fragment you do visit</li>
+      <li>You cannot fully <strong>check</strong> even what you see &mdash; every oracle is a partial projection of an imperfect specification</li>
+    </ul>
+    <div class="ex warn" style="margin-top:8px"><span class="tag">Only one conclusion is available</span>Verification can show the presence of errors, not their absence. Given enough time, an error <em>will</em> be found. So the question becomes:<br><strong>"Is the error likely to be severe enough to warrant the effort spent identifying it?"</strong></div>
+  </td><td>
+    <h3>What changes the morning after</h3>
+    <ul class="small">
+      <li><strong>Effort goes where risk is, not where habit is.</strong> Risk = likelihood &times; escape cost. Likelihood concentrates in novelty and intersections; cost concentrates where escapes are expensive to find downstream.</li>
+      <li><strong>Techniques are matched to the shape of each risk.</strong> Random simulation covers the reachable majority fast; directed tests reach a known corner precisely at engineer-days each; formal is exhaustive per property where it converges.</li>
+      <li><strong>"Done" is redefined.</strong> Not "verified everything" but <em>"reached the agreed evidence threshold on every planned item, and the risks we chose not to retire are enumerated and accepted by people entitled to accept them."</em></li>
+    </ul>
+    <p class="small muted">You are never finished. You stop, on purpose, in the open.</p>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Teams that pretend otherwise still stop &mdash; the tape-out date sees to that &mdash; but they stop with their residual risk unexamined.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">29</span>
+</section>
+
+<!-- ============ 30. DISCUSSION 3 ============ -->
+<section class="slide">
+  <p class="kicker">Discussion</p>
+  <h2>Questions for the room &mdash; the problem</h2>
+  <ol class="big" style="margin-top:16px">
+    <li style="margin-bottom:14px">Compute the <strong>state space of a block you own</strong>, the way we did for one DMA channel. What does that number change about your test plan &mdash; concretely?</li>
+    <li style="margin-bottom:14px">Take one feature of that block. <strong>Which oracle owns it</strong>, and name one thing that oracle is blind to. Who owns <em>that</em>?</li>
+    <li style="margin-bottom:14px">Name a risk your last project <strong>accepted</strong>. Was it written down? Who signed it? If nobody, the schedule signed it for you.</li>
+  </ol>
+  <p class="note"><b>Facilitation</b>Question 1 is a five-minute exercise with a pen. The number is always larger than the room expects, and the silence afterwards does the teaching.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">30</span>
+</section>
+
+<!-- ============ 31. DIVIDER CH4 ============ -->
+<section class="slide divider">
+  <p class="chno">04</p>
+  <h1>The Verification Lifecycle</h1>
+  <p class="sub">From the plan to the sign-off: phases, maturity stages, reviews &mdash; and what schedules actually do.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">31</span>
+</section>
+
+<!-- ============ 32. SIX PHASES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 4 &middot; The shape</p>
+  <h2>Six phases, three loops &mdash; once per verification level</h2>
+  <table class="chain" style="width:100%">
+    <tr>
+      <td style="width:15%"><div class="cbox">PLAN<span class="q">extract, decide how, estimate, review</span></div></td>
+      <td style="width:3.5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:15%"><div class="cbox">BUILD<span class="q">drivers, monitors, scoreboard, coverage</span></div></td>
+      <td style="width:3.5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:15%"><div class="cbox">BRING-UP<span class="q">first transaction, checked</span></div></td>
+      <td style="width:3.5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:15%"><div class="cbox">REGRESS &amp; COVER<span class="q">the long middle</span></div></td>
+      <td style="width:3.5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:12%"><div class="cbox">CLOSE<span class="q">holes, exclusions, dispositions</span></div></td>
+      <td style="width:3.5%"><div class="arrowr">&rarr;</div></td>
+      <td style="width:11%"><div class="cbox" style="background:#e2f2e9;border-color:#256b46">SIGN-OFF<span class="q">accept the residual risk</span></div></td>
+    </tr>
+  </table>
+  <table class="cols3" style="margin-top:10px"><tr>
+    <td><div class="ex"><span class="tag">Loop 1</span>A bug in the middle reveals a feature missing from the plan &rarr; <strong>back to planning</strong>.</div></td>
+    <td><div class="ex"><span class="tag">Loop 2</span>Coverage holes at closure send you <strong>back to regression</strong>.</div></td>
+    <td><div class="ex"><span class="tag">Loop 3</span>An escape after sign-off must flow into the <strong>next project's plan</strong>, or you pay for the same lesson twice.</div></td>
+  </tr></table>
+  <p class="ex"><span class="tag">One lifecycle per level</span>The crossbar runs its own complete cycle at block level; the SoC-level cycle <em>consumes</em> its results and gates its own bring-up on the crossbar reaching maturity. Levels exist to put each class of bug where it is cheapest to find.</p>
+  <p class="src">How far PLAN has to reach: for the IBM POWER8, bring-up tooling was specified at high-level design, so hardware irritators, non-functional stress modes and embedded checkers were designed into the chip for validation &mdash; and IBM counted any bug first found by an OS-based test or by real software as an escape from its validation strategy (IEEE Design &amp; Test, 2017).</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">32</span>
+</section>
+
+<!-- ============ 33. MILESTONES NOT PERCENTAGES ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 4 &middot; Managing it</p>
+  <h2>Milestones, not percentages</h2>
+  <table class="cols"><tr><td>
+    <div class="ex warn"><span class="tag">Uncheckable</span>"Agent coding 80% done."<br>"We're running lots of tests."<br>"Soon."</div>
+    <div class="ex"><span class="tag">Either true or false</span>"A single packet goes through the DUT and the scoreboard checks it."<br>"The register reset-value test passes in regression."</div>
+    <p class="small" style="margin-top:6px"><strong>Lifecycle milestones:</strong> plan review &middot; first transaction &middot; feature complete &middot; RTL freeze &middot; coverage closure &middot; verification sign-off. The vocabulary varies; the pattern does not.</p>
+  </td><td>
+    <h3>Planning is the highest-leverage phase</h3>
+    <ul class="small">
+      <li>Verification effort runs <strong>100% to 200% of the RTL design effort</strong>. No team would spend the design half without a specification &mdash; the verification plan <em>is</em> that specification.</li>
+      <li><strong>Audit your reuse:</strong> for every piece of collateral, is it <em>reused / modified / new</em>? Assuming "reuse" means 100% reuse is how projects arrive at bring-up under-scoped.</li>
+      <li><strong>Plan in deliverables with a definition of done</strong> that is an action, not a state.</li>
+      <li><strong>Reported ROI</strong> (one organization's figures): 10&ndash;20% added to the verification front end, returning 10&ndash;40% of the overall schedule and at least 20% of implementation and closure effort.</li>
+    </ul>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Treat the ROI numbers as one team's experience. The direction &mdash; planning is the highest-return phase &mdash; is consistent across every source in the chapter.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">33</span>
+</section>
+
+<!-- ============ 34. MATURITY LADDER + CHECKLIST ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 4 &middot; A shared language</p>
+  <h2>The maturity ladder &mdash; and a stage exit in the open</h2>
+  <table class="cols"><tr><td>
+    <div class="rung r3"><span class="rl">Stage 3 &mdash; Verified / sign-off ready</span><br><span class="small">Coverage closed against the plan, every exclusion reviewed; regression passing over a sustained window; every open bug dispositioned; the sign-off review has accepted the evidence.</span></div>
+    <div class="rung r2"><span class="rl">Stage 2 &mdash; Verification mature</span><br><span class="small">All planned stimulus and checkers implemented; coverage model reporting; regression at cadence with a managed pass rate; bug-open curve past peak. <em>The gate others build on.</em></span></div>
+    <div class="rung r1"><span class="rl">Stage 1 &mdash; Bring-up complete</span><br><span class="small">Plan reviewed; the environment drives real transactions against current RTL and checks them automatically; a smoke suite passes in regression.</span></div>
+    <p class="small muted" style="margin-top:5px">Each line is <strong>objectively true or false</strong>, so a stage claim is auditable in an hour by an outsider &mdash; and the stages compose upward into an SoC dashboard.</p>
+  </td><td>
+    <h3>The crossbar's stage-2 exit checklist, week 16</h3>
+<pre class="tight">[x] Verification plan reviewed; actions closed
+[x] All 5x4 manager/subordinate paths driven and checked
+[x] Protocol assertions bound on all 9 ports; sim + formal
+[x] Coverage model XB-01..XB-07; reporting nightly
+[x] Nightly regression >= 300 seeds, pass >= 95%
+[x] Bug-open curve past peak (closure > discovery)
+[ ] Formal ordering proofs (XB-04): 2 still bounded-only
+[ ] Starvation metric (XB-05) not yet on dashboard</pre>
+    <p class="small">Two open boxes: the crossbar has <strong>not exited</strong> stage 2 &mdash; and everyone sees exactly why.</p>
+    <div class="ex warn"><span class="tag">The warning</span>Stages describe <strong>verification maturity, not RTL quality</strong>. A block can be stage 2 with fifty open bugs: the claim is that the machinery to find them is mature.</div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>A stage claimed without its checklist is a percentage wearing a costume.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">34</span>
+</section>
+
+<!-- ============ 35. REVIEW CALENDAR ============ -->
+<section class="slide">
+  <p class="kicker">Chapter 4 &middot; The human layer</p>
+  <h2>Who checks what, and when</h2>
+  <p class="small muted" style="margin-bottom:5px">Reviews are cheap, they are skipped first under pressure, and they catch the class of error no tool can &mdash; the error of <strong>intent</strong>.</p>
+  <table class="compact">
+    <tr><th style="width:22%">Review</th><th style="width:24%">When</th><th style="width:24%">Who</th><th>What is being judged</th></tr>
+    <tr><td><strong>Requirements / plan</strong></td><td>Architectural spec complete</td><td>Design, verification, software, systems</td><td>Is the feature list complete? Are the must-not-do's and out-of-scopes right?</td></tr>
+    <tr><td><strong>Assumptions</strong></td><td>During planning; re-run when the spec moves</td><td>Verification with the designers, face to face</td><td>Every unstated "someone else covers this", made explicit and agreed</td></tr>
+    <tr><td><strong>Environment / code</strong></td><td>Continuously through build</td><td>Verification peers</td><td>Is the testbench itself trustworthy? It is a design too</td></tr>
+    <tr><td><strong>Coverage model</strong></td><td>Before the long middle</td><td>Designers + verification</td><td>Does the model measure the <em>intent</em>, not the implementation?</td></tr>
+    <tr><td><strong>Progress / triage</strong></td><td>Weekly through the middle</td><td>Lead + team</td><td>Trend lines: bug curves, coverage, regression health</td></tr>
+    <tr><td><strong>Sign-off</strong></td><td>End of closure, gating tape-out</td><td>All of the above + management</td><td>The full evidence package against the plan; explicit acceptance of residual risk</td></tr>
+  </table>
+  <p class="ex"><span class="tag">Why the outsider matters</span>At the crossbar's plan review the firmware engineer &mdash; invited under protest &mdash; asked how the debug port is verified while the core is halted. Silence. One row was added; in week 16 the test it produced caught an arbiter assumption that would have made post-silicon debug intermittently unreliable.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">35</span>
+</section>
+
+<!-- ============ 36. SCHEDULE REALITY ============ -->
+<section class="slide dense">
+  <p class="kicker">Chapter 4 &middot; Schedule reality</p>
+  <h2>The crunch, the guillotine, and the gap you created</h2>
+  <table class="cols"><tr><td>
+    <h3>What effort actually does</h3>
+    <ul class="small">
+      <li>Planning and build spend at a modest, steady rate; the long middle burns compute and debug time</li>
+      <li><strong>Closure concentrates the highest-pressure work</strong> &mdash; last coverage holes, intermittent failures, hardest bugs &mdash; into the weeks when the date is least movable. That is the <strong>crunch</strong>.</li>
+    </ul>
+    <div class="ex warn"><span class="tag">The guillotine</span>When a fixed ship date simply cuts off whatever verification was still in flight, what ships is <em>"whatever happened to work"</em> &mdash; and the features in the basket may be the ones the market needed.</div>
+    <p class="small"><strong>The defence was built in week one:</strong> a prioritised plan converts the guillotine into a negotiation, and a signature on the risk register converts "we ran out of time" into an accountable decision.</p>
+  </td><td>
+    <h3>The verification gap, decomposed</h3>
+    <table class="compact">
+      <tr><th style="width:28%">Class</th><th>What to do about it</th></tr>
+      <tr><td><strong>Inherent</strong></td><td>Complexity you must absorb &mdash; <em>innovate</em></td></tr>
+      <tr><td><strong>Transient</strong></td><td>Skills and tooling that lag but catch up &mdash; <em>invest</em></td></tr>
+      <tr><td><strong>Self-induced</strong></td><td>Schedule pressure forcing shortcuts; best-known methods unused (estimated ~20% productivity cost); sloppy environment engineering &mdash; <em>introspect</em></td></tr>
+    </table>
+    <p class="small">Individual productivity spread across engineers is reported up to <strong>10&times;</strong>, which makes team composition a first-order schedule variable no methodology hides.</p>
+    <p class="small muted">Much of this book aims at the third class: the gap you created and can close without waiting for anyone's roadmap.</p>
+  </td></tr></table>
+  <p class="src">Recall the ambient numbers: 14% first-silicon success for IC/ASIC, and 75% of IC/ASIC projects behind schedule in 2024 &mdash; up from a historical ~66% (Wilson Research Group 2024, pp.&nbsp;5&ndash;6); 87% of FPGA projects shipping non-trivial escapes into production (Wilson Research Group 2024, FPGA study). The ~20% best-known-methods cost and the up-to-10&times; productivity spread above are Oracle Labs' own printed bullets &mdash; <em>I created the Verification Gap</em>, DVCon U.S. 2015, pp.&nbsp;7, 9.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">36</span>
+</section>
+
+<!-- ============ 37. CLOSING ============ -->
+<section class="slide">
+  <p class="kicker">Part I &middot; Closing</p>
+  <h2>What Part I established</h2>
+  <table class="cols"><tr><td>
+    <ul class="small">
+      <li><strong>Verification is economics.</strong> Bug cost rises and fix time shrinks at every stage.</li>
+      <li><strong>Mindset, not tools, determines effectiveness.</strong> Verifying your own design reconverges on your interpretation, not the specification.</li>
+      <li><strong>Completeness is not on offer.</strong> The space is unvisitable, observability is bounded, every oracle is partial.</li>
+      <li><strong>So "done" is a risk-acceptance decision</strong>, made in the open &mdash; which is what the lifecycle exists to produce.</li>
+    </ul>
+    <div class="ex"><span class="tag">The pivot to carry forward</span>Replace <em>"have we verified everything?"</em> (always no) with <em>"is the residual risk known, bounded, and accepted?"</em></div>
+  </td><td>
+    <h3>Read the chapters</h3>
+    <table class="compact">
+      <tr><td style="width:8%"><strong>1</strong></td><td>Why Verification Exists &mdash; the numbers, the cost curve, the reference SoC</td></tr>
+      <tr><td><strong>2</strong></td><td>The Verifier's Mindset &mdash; reconvergence, breakage, independence, doubt</td></tr>
+      <tr><td><strong>3</strong></td><td>The Verification Problem &mdash; state space, observability, oracles, the pivot</td></tr>
+      <tr><td><strong>4</strong></td><td>The Verification Lifecycle &mdash; phases, maturity stages, reviews, schedule</td></tr>
+    </table>
+    <div class="ex"><span class="tag">Next</span><strong>Part II &mdash; Planning and Measurement.</strong> The plan as a contract, the measurement as truth. Without both, verification is opinion.</div>
+  </td></tr></table>
+  <p class="note"><b>Say</b>Close where the deck opened: the difference between the two universes was one nightly regression &mdash; and Part II is about deserving that regression's verdict.</p>
+  <span class="brand">A HOLISTIC GUIDE</span><span class="pagenum">37</span>
+</section>
+
+<script>
+  // Keyboard navigation in the browser (ignored by weasyprint).
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var idx = 0;
+    function go(i) {
+      idx = Math.max(0, Math.min(slides.length - 1, i));
+      try { slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+      if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(idx - 1); }
+      if (e.key === 'Home') { e.preventDefault(); go(0); }
+      if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+    });
+  })();
+</script>
