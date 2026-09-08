@@ -7,8 +7,9 @@ the moment a float is inserted above it.
 
 Authoring syntax, in the chapter markdown
 -----------------------------------------
-Figure caption — on its own line, immediately BELOW the figure (mermaid block or
-image), which is where a monograph puts it:
+Figure caption — on its own line, immediately BELOW the figure (a ```mermaid
+structural diagram, a ```wavedrom timing diagram, or an image), which is where a
+monograph puts it:
 
     {figure: driver_split} The layered environment of the DMA testbench.
 
@@ -40,19 +41,60 @@ from dataclasses import dataclass, field
 
 import book_meta
 
-FENCE_RE = re.compile(r"^[ \t]*(```|~~~)")
+# `(indent, marker, info)`. The marker's *length* is load-bearing: a fence is
+# closed by a marker of the same character and at least the same length, so a
+# ```` block can quote a ``` line. Toggling a boolean on every fence-shaped line
+# inverted the tracking for the rest of the document — the caption after such a
+# block was read as fenced, and the build stopped on a reference to a label it
+# had refused to collect.
+FENCE_RE = re.compile(r"^([ \t]*)(`{3,}|~{3,})(.*)$")
 
 CAPTION_RE = re.compile(r"^\{(figure|table):\s*([A-Za-z0-9_-]+)\}\s*(.*)$")
 REF_RE = re.compile(r"\{ref:\s*([A-Za-z0-9_-]+)\}")
+
+class _Fence:
+    """Fence state across one walk of the document.
+
+    `feed` returns True when the line is a fence delimiter — an opener, a closer,
+    or a fence-shaped line inside a block that does not close it — which is
+    exactly the set of lines the three walks skip. The same tracker shape is in
+    `check_exercises.find_section` and `lint_sv.extract_blocks`.
+    """
+
+    def __init__(self) -> None:
+        self.marker = ""
+
+    @property
+    def inside(self) -> bool:
+        return bool(self.marker)
+
+    def feed(self, line: str) -> bool:
+        match = FENCE_RE.match(line)
+        if match is None:
+            return False
+        if self.marker:
+            if (match.group(2)[0] == self.marker[0]
+                    and len(match.group(2)) >= len(self.marker)
+                    and not match.group(3).strip()):
+                self.marker = ""
+            return True
+        if "`" in match.group(3):  # an inline-code run, not a fence opener
+            return False
+        self.marker = match.group(2)
+        return True
+
 
 # A markdown table row is the cheapest reliable tell: a line starting with "|".
 TABLE_ROW_RE = re.compile(r"^[ \t]*\|")
 
 # By the time this module runs, the build has already replaced every ```mermaid
-# fence with a placeholder figure (see mermaid.extract), so that — not the fence
-# — is what a diagram looks like here. Both forms are recognised, because the
-# module is also used directly on raw chapter text by the checker.
-DIAGRAM_RE = re.compile(r'<figure class="diagram">@@MERMAID:')
+# and ```wavedrom fence with a placeholder figure (see mermaid.extract and
+# wavedrom.extract), so that — not the fence — is what a diagram looks like
+# here. Both forms are recognised, because the module is also used directly on
+# raw chapter text by the checker. A structural diagram and a timing diagram are
+# the same kind of float: both need a caption and both are numbered "Figure".
+DIAGRAM_FENCE_WORDS = ("mermaid", "wavedrom")
+DIAGRAM_RE = re.compile(r'<figure class="diagram">@@(?:MERMAID|WAVEDROM):')
 
 FIGURE_WORD = "Figure"
 TABLE_WORD = "Table"
@@ -74,6 +116,11 @@ class FloatResult:
     floats: list[Float] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
+    # Every label a `{ref: …}` in this file named, collected by the same pass
+    # that resolves them — so `tools/check_floats.py` cannot disagree with the
+    # build about what counts as a reference (a `{ref: …}` inside a fenced code
+    # block is text, not a reference, and only pass 3 knows that).
+    referenced: set[str] = field(default_factory=set)
 
 
 def chapter_prefix(chapter_id: str) -> str:
@@ -85,7 +132,7 @@ def chapter_prefix(chapter_id: str) -> str:
 
 
 def _uncaptioned_floats(lines: list[str], captioned: set[int]) -> list[str]:
-    """Report mermaid blocks and tables that no caption line accompanies.
+    """Report diagram blocks and tables that no caption line accompanies.
 
     A figure's caption is the first non-blank line after its closing fence; a
     table's is the first non-blank line above its first row. `captioned` holds
@@ -93,26 +140,31 @@ def _uncaptioned_floats(lines: list[str], captioned: set[int]) -> list[str]:
     decide whether the neighbour of each float is one of them.
     """
     notes: list[str] = []
-    in_fence = False
+    fence = _Fence()
     fence_is_figure = False
     index = 0
     while index < len(lines):
         line = lines[index]
-        if FENCE_RE.match(line):
-            if not in_fence:
-                in_fence = True
-                fence_is_figure = "mermaid" in line.lower()
-            else:
-                in_fence = False
+        was_inside = fence.inside
+        if fence.feed(line):
+            if not was_inside:
+                lowered = line.lower()
+                fence_is_figure = any(
+                    word in lowered for word in DIAGRAM_FENCE_WORDS
+                )
+            elif not fence.inside:
                 if fence_is_figure:
                     probe = index + 1
                     while probe < len(lines) and not lines[probe].strip():
                         probe += 1
                     if probe not in captioned:
-                        notes.append(f"line {index + 1}: mermaid figure has no {{figure: …}} caption")
+                        notes.append(
+                            f"line {index + 1}: diagram fence has no "
+                            "{figure: …} caption"
+                        )
             index += 1
             continue
-        if in_fence:
+        if fence.inside:
             index += 1
             continue
         if DIAGRAM_RE.search(line):
@@ -120,7 +172,8 @@ def _uncaptioned_floats(lines: list[str], captioned: set[int]) -> list[str]:
             while probe < len(lines) and not lines[probe].strip():
                 probe += 1
             if probe not in captioned:
-                # `mermaid.extract` replaces a ```mermaid fence with a padded
+                # `mermaid.extract` and `wavedrom.extract` replace a fence
+                # with a padded
                 # region whose first line is blank, so the <figure> placeholder
                 # always sits one line below the fence opener. Report the fence
                 # itself: that is what a reader greps for, and the caption goes
@@ -155,12 +208,11 @@ def process(text: str, chapter_id: str) -> FloatResult:
 
     # Pass 1 — collect, in document order, so numbers follow the page and a
     # forward reference still resolves.
-    in_fence = False
+    fence = _Fence()
     for index, line in enumerate(lines):
-        if FENCE_RE.match(line):
-            in_fence = not in_fence
+        if fence.feed(line):
             continue
-        if in_fence:
+        if fence.inside:
             continue
         match = CAPTION_RE.match(line)
         if not match:
@@ -187,13 +239,12 @@ def process(text: str, chapter_id: str) -> FloatResult:
 
     # Pass 2 — rewrite caption lines into captioned paragraphs carrying an id.
     out: list[str] = []
-    in_fence = False
+    fence = _Fence()
     for index, line in enumerate(lines):
-        if FENCE_RE.match(line):
-            in_fence = not in_fence
+        if fence.feed(line):
             out.append(line)
             continue
-        if in_fence or index not in caption_lines:
+        if fence.inside or index not in caption_lines:
             out.append(line)
             continue
         match = CAPTION_RE.match(line)
@@ -212,6 +263,8 @@ def process(text: str, chapter_id: str) -> FloatResult:
     text = "\n".join(out)
 
     # Pass 3 — resolve references, including inside blockquotes; skip fences.
+    referenced: set[str] = set()
+
     def resolve_line(line: str) -> str:
         def one(match: re.Match[str]) -> str:
             label = match.group(1)
@@ -219,19 +272,22 @@ def process(text: str, chapter_id: str) -> FloatResult:
             if item is None:
                 errors.append(f"reference to unknown float label {label!r}")
                 return match.group(0)
+            # After the lookup, not before: `referenced` is the set the float
+            # gate counts and tests membership in (§5.4), and a typo'd label
+            # inflated the count of the one chapter whose number is read.
+            referenced.add(label)
             word = FIGURE_WORD if item.kind == "figure" else TABLE_WORD
             return f"[{word} {item.number}](#{item.anchor})"
 
         return REF_RE.sub(one, line)
 
     resolved: list[str] = []
-    in_fence = False
+    fence = _Fence()
     for line in text.split("\n"):
-        if FENCE_RE.match(line):
-            in_fence = not in_fence
+        if fence.feed(line):
             resolved.append(line)
             continue
-        resolved.append(line if in_fence else resolve_line(line))
+        resolved.append(line if fence.inside else resolve_line(line))
 
     warnings = _uncaptioned_floats(lines, caption_lines)
     return FloatResult(
@@ -239,4 +295,5 @@ def process(text: str, chapter_id: str) -> FloatResult:
         floats=sorted(floats.values(), key=lambda f: (f.kind, f.number)),
         warnings=[f"{chapter_id}: {w}" for w in warnings],
         errors=[f"{chapter_id}: {e}" for e in errors],
+        referenced=referenced,
     )

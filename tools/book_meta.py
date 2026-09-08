@@ -5,16 +5,37 @@ Everything a human may want to retune without touching build logic lives here.
 
 from __future__ import annotations
 
+import datetime as _dt
+
 # --- Title page ------------------------------------------------------------
 
 BOOK_TITLE_MAIN = "Hardware Verification"
 BOOK_TITLE_SUB = "A Holistic Guide"
 BOOK_TITLE_FULL = f"{BOOK_TITLE_MAIN}: {BOOK_TITLE_SUB}"
-AUTHOR = "Marco Paci · ChipsIT"
-DATE = "2026-08-27"
-DRAFT_NOTE = (
-    "Draft for internal review — citations verified against full-text corpus"
-)
+AUTHOR = "Marco Paci · Fondazione Chips-IT"
+
+# The date on the title page and in the PDF's CreationDate is the date of the
+# build, not a constant someone remembers to bump.  It was a constant, and it
+# said 2026-08-27 on a book rebuilt in September: a hand-maintained date is a
+# claim about the artefact that nothing checks.  The cost is that two builds on
+# different days differ by these bytes; the docstring's "same inputs -> same
+# bytes" is therefore a statement about a single day.
+DATE = _dt.date.today().isoformat()
+
+# The edition statement.  It belongs to the subtitle, which is where a title
+# page names what this printing is (see subtitle_for below), and it is written
+# once so the cover, the copyright verso and the PDF's Subject cannot drift
+# apart.  A build that does not cover every part is a working draft and does
+# not carry it.
+EDITION = "First edition, September 2026"
+
+# The line under the date on the title page, and the tail of the PDF's Subject.
+# It used to read "Draft for internal review — citations verified against
+# full-text corpus": the first half outlived the decision it described, since
+# the book is released under CC BY-NC-SA 4.0 (see LICENSE and
+# front/copyright.md) and nothing about it is internal any more.  The second
+# half is the claim worth making on a cover, so it is what remains.
+CORPUS_NOTE = "Citations verified against the full-text corpus"
 
 # --- Design ----------------------------------------------------------------
 
@@ -136,6 +157,15 @@ APPARATUS_HEADINGS = (
     # rename does not silently drop a chapter's closing heading to level 2.
     "key takeaways",
     "summary",
+    # Pass H (W3) adds one "### Exercises" section per chapter, between the
+    # summary and the further reading. It is apparatus for the same reason the
+    # summary is: it closes the chapter rather than advancing its argument, and
+    # 26 "Exercises" rows would double the table of contents' apparatus noise.
+    # Listing it here is also what makes the heading's level *stable*: a chapter
+    # that wrote "## Exercises" by hand would otherwise ship a level-2 heading
+    # that build_book.py's `entry.level == 2` filter puts straight into the
+    # contents, so the omission would not fail — it would silently publish.
+    "exercises",
     "further reading",
     "references",
 )
@@ -191,7 +221,11 @@ def is_appendix(chapter_id: str) -> bool:
 
 
 def subtitle_for(chapter_ids: "tuple[str, ...] | list[str]") -> str:
-    """Describe the parts these chapters cover, e.g. 'Parts I-V - Working Draft'."""
+    """Describe the parts these chapters cover, e.g. 'Parts I-V - Working Draft'.
+
+    A build that covers every part carries the edition statement; anything
+    less is a working draft, which is what a partial build honestly is.
+    """
     parts = sorted({CHAPTER_PART[c] for c in chapter_ids if c in CHAPTER_PART})
     if not parts:
         return "Working Draft"
@@ -199,7 +233,7 @@ def subtitle_for(chapter_ids: "tuple[str, ...] | list[str]") -> str:
     complete = parts == sorted(PARTS)
     if complete:
         span = f"Parts {_ROMAN[parts[0] - 1]}–{_ROMAN[parts[-1] - 1]}"
-        return f"{span} — Complete Draft"
+        return f"{span} — {EDITION}"
 
     contiguous = parts == list(range(parts[0], parts[-1] + 1))
     if len(parts) == 1:

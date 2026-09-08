@@ -22,7 +22,7 @@ SVG_NS = "http://www.w3.org/2000/svg"
 XLINK_NS = "http://www.w3.org/1999/xlink"
 
 # Bumped whenever _postprocess_svg changes shape -> invalidates the cache.
-POSTPROC_VERSION = "postproc-v2"
+POSTPROC_VERSION = "postproc-v3"
 
 # A diagram wider than this ratio is scaled so far down to fit the text column
 # that its labels stop being comfortable; those bleed into the page margins.
@@ -272,6 +272,35 @@ def _merge_label_tspans(root: ET.Element) -> int:
     return merged
 
 
+def _normalise_cluster_rects(root: ET.Element) -> int:
+    """Use CairoSVG-safe paint for Mermaid flowchart subgraphs.
+
+    Mermaid neutral emits ``fill:hsl(...)`` for a ``.cluster rect``.  The
+    CairoSVG backend used by the PDF pass does not resolve that CSS colour and
+    paints the cluster black.  An inline hexadecimal declaration has higher
+    precedence than Mermaid's stylesheet and works in both the browser and the
+    PDF renderer.  Only the direct rectangle of each cluster is changed:
+    label background rectangles remain untouched.
+    """
+    fixed = 0
+    for group in root.iter(f"{{{SVG_NS}}}g"):
+        classes = set(group.get("class", "").split())
+        if "cluster" not in classes:
+            continue
+        for child in list(group):
+            if child.tag != f"{{{SVG_NS}}}rect":
+                continue
+            style = child.get("style", "").strip()
+            if style and not style.endswith(";"):
+                style += ";"
+            child.set(
+                "style",
+                style + "fill:#fafafa;stroke:#707070;stroke-width:1px;",
+            )
+            fixed += 1
+    return fixed
+
+
 def _postprocess_svg(svg_text: str, key: str) -> str:
     """Make one mermaid SVG safe to inline and safe for CairoSVG."""
     ET.register_namespace("", SVG_NS)
@@ -282,6 +311,7 @@ def _postprocess_svg(svg_text: str, key: str) -> str:
         raise MermaidError(f"mermaid produced unparseable SVG: {exc}") from exc
 
     _merge_label_tspans(root)
+    _normalise_cluster_rects(root)
 
     view_box = root.get("viewBox")
     if view_box:

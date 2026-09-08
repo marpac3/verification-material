@@ -1,143 +1,141 @@
-# Appendix B — Reading paths
+# Appendix B: Reading paths
 
-This book runs to about 500 pages, and almost nobody reads a book that size front to back. So this appendix inverts the table of contents: rather than describe what each chapter contains, it claims that *reading these chapters, in this order, equips you to do this specific thing.*
+This appendix provides reading paths through a book of about 500 pages. It reverses the table of contents: each ordered sequence of chapters claims to equip the reader for a specific task.
 
-That makes every path falsifiable. Each names a situation rather than a seniority, says what you can do at the end, and — the part reading guides skip — names what it leaves out and what that costs. A path claiming no cost has not chosen anything.
+Every path is therefore falsifiable: each specifies a situation rather than seniority, the expected capability, and omissions with their costs.
 
 Where only part of a chapter is needed the section number is given; Chapters 1–3 have unnumbered sections and are cited whole.
 
-## Read these three if you read nothing else
+## Three chapters for a minimal reading path
 
-The criterion is *maximum change in what you do next Monday, per page*, not logical completeness — and it assumes a reader whose work touches verification without being verification: a designer, a lead, an architect, a manager.
+This selection aims to maximize immediate practical change per page rather than logical completeness, for readers whose work touches verification: designers, leads, architects, and managers, rather than verification engineers.
 
-- **Chapter 2, *The Verifier's Mindset*** — because its opening scenario is the commonest way competent people ship bugs: a designer verifying her own block, whose stimulus exercised it the way it was meant to be used. Recognise yourself there and the rest of the book has a reason.
-- **Chapter 3, *The Verification Problem*** — because without it, coverage models, risk ranking and waivers read as bureaucracy. It explains why the discipline manages risk instead of pursuing completeness, and its oracle problem — every practical oracle is partial — is what most practitioners were never told.
-- **Chapter 7, *Metrics-Driven Sign-off*** — because "are we done?" is the decision you will actually be in the room for, and §7.4 is the evidence to demand when you are.
+- **Chapter 2, *The Verifier's Mindset***: its opening scenario concerns a designer verifying her own block with stimulus limited to intended use, letting bugs escape.
+- **Chapter 3, *The Verification Problem*** explains the rationale for coverage models, risk ranking, and waivers. It explains risk management rather than completeness and the partiality of every practical oracle, which this path assumes most practitioners have not been taught.
+- **Chapter 7, *Metrics-Driven Sign-off*** addresses the completion decision these readers will attend and the evidence to require (§7.4).
 
-Chapter 1 is absent: it argues that verification matters, and anyone holding this book agrees. Chapter 5 is absent for a harder reason — 8,000 words of instrument for a reader who may never own a plan.
+Chapter 1 is absent because this path assumes agreement that verification matters, the argument it develops. Chapter 5 is absent: 8,000 words on planning for a reader who may never own a plan.
 
-## You are starting your first verification job
+## A first verification job
 
-You can write SystemVerilog and have been dropped into an existing environment with a backlog of failing seeds. At the end: read an unfamiliar testbench and say which part is lying, write stimulus somebody else can reproduce, triage a regression without escalating all of it.
+This path assumes SystemVerilog proficiency and an inherited environment with failing seeds to resolve. The intended outcomes are locating faults in an unfamiliar testbench, writing reproducible stimulus, and triaging a regression without escalating every failure.
 
-- **Chapter 2** — because your training rewarded making things work, and this job asks the opposite posture first.
-- **Chapter 3** — because someone will tell you in week one that you cannot test everything, and without this you hear it as an excuse rather than the premise the method is built on.
-- **Chapter 8, *Testbench Architecture*** — because the environment you inherited separates five responsibilities (§8.1), and knowing which one owns a symptom is your fastest localisation.
-- **Chapter 10, *UVM as a Methodology*** — because the code you type will be UVM code, and §10.2 gives the argument behind the class taxonomy, not the API.
-- **Chapter 9, *Stimulus: Directed to Random to Portable*** — because most of your first year is constraints (§9.3), and §9.4 is what makes a failure reproducible enough for anyone senior to look at.
-- **Chapter 12, *Regression Engineering*** — because your mornings are triage, and §12.5 tells you when the answer is "this test has stopped being evidence" rather than "the design is broken".
+- **Chapter 2** addresses the initial change from training rewarded for making things work to the opposite verification posture.
+- **Chapter 3** explains why the impossibility of testing everything, raised in week one in this scenario, is a methodological premise rather than an excuse.
+- **Chapter 8, *Testbench Architecture*** separates the inherited environment into five responsibilities (§8.1); identifying which one owns a symptom directs fault localization.
+- **Chapter 10, *UVM as a Methodology*** explains the rationale for the class taxonomy used in the UVM code this job requires (§10.2), rather than the API.
+- **Chapter 9, *Stimulus: Directed to Random to Portable*** covers constraints (§9.3), assumed to occupy most of the first year, and the reproducibility needed for senior review (§9.4).
+- **Chapter 12, *Regression Engineering*** supports morning triage: §12.5 distinguishes a test that has stopped providing evidence from a broken design.
 
-**Omits Part II entirely** — planning, coverage theory, sign-off. You will execute plan rows without knowing where they came from and read a coverage report as a score, not an argument. Come back when someone hands you a row with your name on it. Come back for **Chapter 24 §24.1** when someone gives you a block of your own: it restates ownership as an outcome.
+**Omits Part II entirely** (planning, coverage theory, and sign-off). The reader will execute plan rows without knowing their origins and interpret coverage reports as scores rather than arguments. That material becomes necessary when a row is assigned to the reader. **Chapter 24 §24.1** follows when the reader takes ownership of a block; it restates ownership as an outcome.
 
-## You designed the block and there is nobody else to verify it
+## A designer verifying a block alone
 
-No verification engineer; the block is yours to verify and defend. At the end: the cheapest defensible checks, starting with ones needing no testbench, plus a list of your own reflexes that make an environment look healthier than it is.
+Without a verification engineer, the designer must verify and defend the block. The outcomes are the cheapest defensible checks, beginning without a testbench, and a list of designer reflexes that make an environment seem healthier than it is.
 
-- **Chapter 2** — because it was written about you: its *Independence of judgment* section gives three disciplines that survive a team of one, the load-bearing one being *predict from the specification, never from what your RTL does*.
-- **Chapter 13, *Static Verification*** — because you have no testbench yet, and §13.1 is the analysis needing none: no stimulus, no statement of expected output, running the first day the RTL compiles.
-- **Chapter 11, *Assertion-Based Verification*** — because §11.4 names the split you can exploit alone: you are better placed than any verifier to write the internal invariants, since they state the micro-architecture's assumptions, which no specification mentions.
-- **Chapter 5, *Verification Planning*** — because even a one-person plan must say what closes each row, and §5.2's five fields are the smallest honest form. §5.4 assumes a review audience you lack; take its three blades — correctness, precision, completeness — and turn them on your own rows.
-- **Chapter 10 §10.10** — the permission slip: a small block with one interface does not repay a UVM environment, and the alternative it names is a module testbench with bound assertions and one covergroup.
-- **Chapter 15 §§15.2–15.3** — because connectivity and register checks are proofs you can run against your own block without owning a formal methodology.
+- **Chapter 2** addresses this designer: *Independence of judgment* gives three disciplines for a team of one, with prediction from the specification, never RTL behavior, as the essential one.
+- **Chapter 13, *Static Verification*** addresses the absence of a testbench: §13.1 describes analysis needing no stimulus or statement of expected output, running the first day RTL compiles.
+- **Chapter 11, *Assertion-Based Verification***: §11.4 explains why the designer is better placed than any verifier to write internal invariants expressing micro-architectural assumptions absent from every specification.
+- **Chapter 5, *Verification Planning***: even a one-person plan must specify each row's closure; §5.2's five fields give the minimum adequate form. §5.4 assumes an unavailable review audience, but its three criteria (correctness, precision, and completeness) also apply to the designer's own rows.
+- **Chapter 10 §10.10** explains why a small block with one interface does not repay a UVM environment; its alternative is a module testbench with bound assertions and one covergroup.
+- **Chapter 15 §§15.2–15.3** provides connectivity and register proofs the designer can run on the block without owning a formal methodology.
 
-Come back for **Chapter 24 §24.4**, whose designer reflexes — explaining a failure instead of reproducing it, building a testbench that recovers, debugging in waveforms — read as a checklist against yourself.
+**Chapter 24 §24.4** provides a later checklist of designer reflexes: explaining failures instead of reproducing them, building a recovering testbench, and debugging in waveforms.
 
-**Omits coverage modelling (Chapter 6) and stimulus at scale.** Your evidence will be "checks that fired", not "space that was covered" — the weaker claim, and the first thing a reviewer pushes on.
+**Omits coverage modeling (Chapter 6) and stimulus at scale:** the evidence establishes checks that fired rather than space covered, a weaker claim; this path treats that limitation as the first issue for review.
 
-## You have a decade of simulation and the next block is going to formal
+## Formal verification after a decade of simulation
 
-The next block is an arbiter or a protocol converter — something whose specification is a set of properties. At the end: read a formal result with its three qualifiers attached, recognise the green that is not one, work an undetermined property in the order costing an afternoon rather than a fortnight.
+The next block is an arbiter or protocol converter whose specification is a set of properties. The outcomes are interpreting formal results with their three qualifiers, recognizing invalid passes, and working an undetermined property in the order costing, in this scenario, an afternoon rather than a fortnight.
 
-- **Chapter 11** — start here even though you already write assertions. §11.3 is the asymmetry everything rests on: in simulation `assert` and `assume` are effectively synonyms; in formal an assumption is never checked and deletes traces instead. §11.8 names the other two shifts — covers stop counting and start searching, liveness becomes decidable.
-- **Chapter 14, *Formal Property Verification*** — the chapter. §14.2 carries the hazard your simulation instincts do not: a *missing* assumption announces itself in red, an *extra* one only makes the report greener.
-- **Chapter 15, *Formal Apps and Equivalence*** — because it is what you can run next month with no formal methodology behind you: connectivity, register maps, and §15.4's unreachability, which turns a coverage waiver into a result.
-- **Chapter 16, *Hybrid Flows*** — because you are not leaving simulation, and §16.4 is a per-row decision procedure you can apply in a plan review.
+- **Chapter 11** comes first even for readers who already write assertions. §11.3 is the asymmetry everything rests on: in simulation `assert` and `assume` are effectively synonyms; in formal an assumption is never checked and deletes traces instead. §11.8 names the other two shifts: covers search instead of counting, and liveness becomes decidable.
+- **Chapter 14, *Formal Property Verification*** covers the transition. §14.2 explains the hazard absent from simulation instincts: a *missing* assumption causes failures, while an *extra* one only produces more passes.
+- **Chapter 15, *Formal Apps and Equivalence*** offers checks for next month without a formal methodology: connectivity and register maps, plus §15.4's unreachability proofs that replace coverage waivers with results.
+- **Chapter 16, *Hybrid Flows*** retains simulation and supplies a decision procedure for each plan row, applicable in review (§16.4).
 
-**Omits your vendor's engine.** §14.5's convergence tactics are generic; option names are your tool documentation's job. It also omits equivalence checking as a flow you would own — §15.6 puts it in the implementation flow, which is where it usually sits.
+**Omits the vendor's engine.** §14.5's convergence tactics are generic; tool documentation supplies option names. It also omits ownership of an equivalence-checking flow; §15.6 places it in implementation, where it usually sits.
 
-## You must produce a verification plan and answer for it
+## Producing and defending a verification plan
 
-Somebody senior will review it and quote it back at sign-off. At the end: rows with one measurable exit each, a method field you can defend, a plan that survives a specification with holes in it.
+This path assumes senior review of the plan and accountability against it at sign-off. The outcomes are rows with one measurable exit each, defensible method fields, and a plan that accommodates specification gaps.
 
-- **Chapter 4 §§4.2, 4.6** — because a plan's value is set by when it is written and who sits in the review — both calendar facts to negotiate before you write a line.
-- **Chapter 5** — the chapter. §5.2's five fields, §5.5 for choosing depth feature by feature, §5.6 for the situation you actually have.
-- **Chapter 6, *Coverage: Theory and Practice*** — because most of your closure metrics are coverage, and §§6.3 and 6.5 stop you writing a model that certifies your stimulus instead of the design.
-- **Chapter 16 §16.4** — because the method field is where plans turn optimistic. Its question 6 — what happens if it does not converge — is otherwise answered in week nine.
-- **Chapter 7 §7.4** — because the sign-off checklist is your plan's last column, and reading it now tells you which fields you are about to leave blank.
+- **Chapter 4 §§4.2, 4.6** explains how timing and review membership determine a plan's value; both calendar commitments need negotiation before writing begins.
+- **Chapter 5** supplies the planning method: §5.2's five fields, §5.5's depth selection for each feature, and §5.6's treatment of the reader's situation.
+- **Chapter 6, *Coverage: Theory and Practice*** addresses coverage, assumed to supply most closure metrics; §§6.3 and 6.5 prevent models that certify stimulus rather than the design.
+- **Chapter 16 §16.4** addresses optimism in method selection. Its question 6 addresses nonconvergence, otherwise left until week nine in this scenario.
+- **Chapter 7 §7.4** supplies the sign-off checklist for the plan's last column; reading it during planning exposes fields otherwise left blank.
 
-**Omits the engines themselves.** You will write "formal" in a method field without knowing what makes a property converge, and "emulation" without §17.5's queue for the machine. Survivable for a first plan, not a second; the formal path above is the fix.
+**Omits the engines themselves.** The reader will specify "formal" without knowing what makes a property converge and "emulation" without understanding the machine queue (§17.5). For a first plan, this path accepts the gap; a second plan requires the engine knowledge addressed by the formal path above.
 
-## You own sign-off and the evidence was produced by other people
+## Signing off evidence produced by others
 
-Block or SoC, your signature. At the end: know what to demand, in what form, and which green results cannot turn red.
+This path addresses responsibility for signing off a block or SoC. The outcomes are knowing which evidence to require, its form, and which passing results cannot fail.
 
-- **Chapter 7** — §7.4's seven items are the demand list; §7.3 distinguishes a bug curve flat because clean from one flat because the stimulus stopped asking.
-- **Chapter 6 §6.9** — because most of your hard calls are other people's waivers, and the three kinds have different owners and expiries. A risk-accepted waiver taken to make a date needs your signature, not the model owner's.
-- **Chapter 14 §14.6** — because a proof arrives as a tick, and you must ask the three reviewer-side questions: complete checker list, no unintentional over-constraints, required depth reached.
-- **Chapter 12 §§12.2, 12.5** — because "the regression passes" is a claim about a (test, seed) matrix, and a quarantine list nobody empties is the same disease with better manners.
-- **Chapter 19 §19.5** — because somebody will propose running the whole suite at gate level and somebody else will propose skipping the tier. The arithmetic kills the first; the five criteria pick which handful answers the second.
-- **Chapter 20 §20.5** — read it *before* you sign. It classifies every escape by which link broke first — activation, propagation or checking — and each owes a different upstream change.
+- **Chapter 7**: §7.4 lists seven required items; §7.3 distinguishes a clean flat bug curve from one flattened because stimulus stopped probing for bugs.
+- **Chapter 6 §6.9** addresses others' waivers, assumed to account for most difficult decisions; the three kinds differ in ownership and expiry. A risk-accepted waiver for a deadline needs the sign-off owner's signature rather than the model owner's.
+- **Chapter 14 §14.6** goes beyond a proof tick with three required review questions: checker-list completeness, absence of unintentional over-constraints, and achievement of required depth.
+- **Chapter 12 §§12.2, 12.5** explains that a passing regression describes a (test, seed) matrix; leaving quarantine lists uncleared similarly undermines the evidence.
+- **Chapter 19 §19.5** addresses proposals to run the whole suite at gate level or skip the tier entirely. The arithmetic rules out the first; five criteria select the handful of tests that answers the second.
+- **Chapter 20 §20.5** belongs before sign-off. It classifies every escape by the first broken link (activation, propagation, or checking), each requiring a different upstream change.
 
-**Omits how any of that evidence was produced.** You will audit work you could not have generated: adequate for a block, thin at SoC scale, where §20.2's design-for-debug budget was fixed at RTL freeze by people who did not consult you.
+**Omits how any of that evidence was produced.** The reader audits work they could not have produced: adequate for a block, limited at SoC scale, where others fixed §20.2's design-for-debug budget at RTL freeze without consulting them.
 
-## You are arriving from software test or QA
+## Transition from software test or QA
 
-You have written test frameworks, run continuous integration, chased flaky tests. Your instincts transfer; several of your words do not. At the end: the vocabulary held correctly, and a list of habits that were already right.
+This path assumes experience writing test frameworks, running continuous integration, and investigating flaky tests. Those instincts transfer, but several terms do not. The outcomes are correct vocabulary and a list of existing habits that already apply.
 
-- **Chapter 3** — start here, because the oracle problem is the bridge. You know test oracles; what is new is that here every practical oracle is *partial*, and the craft is combining ones whose blind spots do not overlap.
-- **Chapter 1, *Why Verification Exists*** — for the cost curve, because your instincts are calibrated against a world with patches in it.
-- **Chapter 8** — because §8.1's five responsibilities map almost one-to-one onto separations you already build — the cheapest chapter here for you.
-- **Chapter 12** — your home ground, with two corrections: §12.3 on why "run everything on every commit" does not transfer when a unit costs minutes not milliseconds, and §12.5 on flakiness with its hardware-specific sources.
-- **Chapter 6** — because "coverage" is narrower here: §6.2's code coverage is free and structurally blind, and §6.3's functional coverage is a model a human writes from the specification.
-- **Chapter 18 §18.4** — because firmware-driven verification is the closest thing here to what you used to do, and its lesson is that the interface contract was incomplete rather than either side wrong.
+- **Chapter 3** comes first because of the familiar oracle problem. The new distinction is that every practical hardware oracle is *partial*, requiring combinations whose blind spots do not overlap.
+- **Chapter 1, *Why Verification Exists*** supplies the cost curve for readers accustomed to patchable systems.
+- **Chapter 8** builds on familiar software separations: its five responsibilities (§8.1) map almost one-to-one onto them.
+- **Chapter 12** covers familiar work with two corrections: §12.3 explains why running everything on every commit does not transfer when a unit costs minutes rather than milliseconds; §12.5 covers hardware-specific sources of flakiness.
+- **Chapter 6** narrows "coverage": §6.2 treats free but structurally blind code coverage; §6.3 treats functional coverage as a model a person writes from the specification.
+- **Chapter 18 §18.4** covers firmware-driven verification, the closest match to prior software work, and attributes the problem to an incomplete interface contract rather than fault on either side.
 
-One vocabulary warning, the one that trips people in meetings: **validation** here does not mean "did we build the right thing?". Chapter 20 owns the term and states it at §20.1 — checking a design on real hardware rather than on a model. Everything before tape-out is *verification*.
+One vocabulary distinction concerns **validation**: the meaning used here excludes the one expressed by "did we build the right thing?". Chapter 20 defines it at §20.1 as checking a design on real hardware rather than on a model; everything before tape-out is *verification*.
 
-**Omits Part IV.** Formal will keep being mentioned around you and you will have no model for it. Take the formal path later.
+**Omits Part IV.** The reader will continue encountering formal verification without a model for it; the formal path is a later step.
 
-## A standard, not curiosity, put this on your desk
+## Verification required by a standard
 
-A market requires it, and someone external will read what you produce.
+This path addresses a market requirement and external review of the resulting artifacts.
 
-**Common spine, all three branches: Chapter 5, then Chapter 7.** Not because planning and metrics are generally good, but because each regime converts ordinary practice into a retained, traceable artifact — and these two are what gets converted.
+**Common spine, all three branches: Chapter 5, then Chapter 7.** Each regime converts ordinary planning and metrics into retained, traceable artifacts; these two practices explain the selection.
 
-**Safety.** **Chapter 22, *Safety Verification*** — §22.1 gives the three obligations (process, evidence, traceability) and the consequence outranking them: the argument itself becomes a deliverable. §22.5 changes your week: qualification is scoped to a tool *version* and *use cases*, so a mid-project upgrade is a re-argument, not an IT ticket. Then **Chapter 12 §12.2**, which defines the run manifest that §22.5 promotes to the atom of the evidence trail. Then **Chapter 19**: §22.3's fault-injection campaigns and §19.5's netlist tiers compete for the same machine hours.
+**Safety.** **Chapter 22, *Safety Verification***: §22.1 gives the three obligations (process, evidence, traceability) and their overriding consequence: the argument itself becomes a deliverable. §22.5 scopes qualification to a tool *version* and *use cases*, so a mid-project upgrade requires a new argument rather than merely an IT ticket. Then **Chapter 12 §12.2** defines the run manifest that §22.5 makes the unit of the evidence trail. Then **Chapter 19**: §22.3's fault-injection campaigns and §19.5's netlist tiers compete for the same machine hours.
 
-**Security.** **Chapter 23, *Security Verification*** — §23.2 is where the work starts, and it is a planning act: assets, adversary capabilities as an enumerable list rather than an open set of attacks, and trust boundaries. §23.6's table routes each question to the engine that can answer it. Then **Chapter 11**, because §23.3's central caveat — a confidentiality claim quantifies over *pairs* of executions, which one assertion cannot express — lands only once you can read an ordinary property. Then **Chapter 15 §15.2**, because a connectivity check carrying negative rows, in the build from day one, is the cheapest security artifact here.
+**Security.** **Chapter 23, *Security Verification*** starts with planning (§23.2): assets and trust boundaries, with adversary capabilities enumerated rather than an open set of attacks. §23.6's table routes each question to the engine that can answer it. Then **Chapter 11** prepares the reader to understand §23.3: a confidentiality claim quantifies over *pairs* of executions, which one assertion cannot express; this requires the ability to read an ordinary property. Then **Chapter 15 §15.2** supplies a security artifact for this path: a connectivity check with negative rows, in the build from day one.
 
-**Mixed-signal.** Deliberately short: read **Chapter 21 §21.5** and stop. It draws the boundary — you own the interface contract, the calibration sequences, the failure handling and the provenance of the tolerances, not the analog block. It omits analog verification itself: noise, linearity, corner behaviour. That belongs to the analog team, and Chapter 21 says so.
+**Mixed-signal.** This short branch ends with **Chapter 21 §21.5**. It assigns responsibility for the interface contract, calibration sequences, failure handling, and provenance of tolerances, while excluding ownership of the analog block. It omits analog verification itself, including noise, linearity, and corner behavior. That belongs to the analog team, and Chapter 21 says so.
 
-## You arrived with a specific failure in hand
+## Entry points for a specific failure
 
-An entry ramp, not a path: two chapters and a handoff.
+Each entry is limited to two chapters and a handoff.
 
-- **A bug escaped.** Chapter 7 §7.6 — the five written questions, blameless — then Chapter 20 §20.5, which names the link that broke first and what each break owes upstream. *Handoff*: if your honest answer to question 4 is "the metrics were fine and the plan was blind", the problem is upstream. Take the plan path.
-- **The regression is not trustworthy.** Chapter 12 §12.5 — flakiness, its recurring sources, quarantine with a named owner and a date — then Chapter 9 §9.4, on what a run actually is: a seed *and* a specific set of sources, which is where reproducibility is usually lost. *Handoff*: if your manifest cannot name the exact tool build, this is infrastructure, and §12.3 is the gate to build.
-- **Coverage will not close.** Chapter 6 §6.8 — the loop from holes to done, including the invalid-hole branch most teams skip — then Chapter 15 §15.4, a proof instead of a waiver — its first catch being that the verdict inherits every assumption in your setup, including ones in a script written by someone who has left. *Handoff*: if the same holes recur every project, the model is downstream of a planning problem.
+- **A bug escaped.** Chapter 7 §7.6 supplies five written, blameless questions; then Chapter 20 §20.5 identifies the first broken link and the upstream change each break requires. *Handoff*: an answer to question 4 of "the metrics were fine and the plan was blind" identifies an upstream problem; the plan path follows.
+- **The regression is not trustworthy.** Chapter 12 §12.5 covers recurring sources of flakiness and quarantine with a named owner and date; then Chapter 9 §9.4 defines a run as a seed *and* specific sources, where reproducibility is usually lost. *Handoff*: a manifest missing the exact tool build is an infrastructure problem, requiring the gate in §12.3.
+- **Coverage will not close.** Chapter 6 §6.8 covers the closure loop, including the invalid-hole branch this path assumes most teams skip; then Chapter 15 §15.4 replaces a waiver with proof, whose first limitation is inheriting every setup assumption, including those in scripts written by departed staff. *Handoff*: if the same holes recur every project, the model is downstream of a planning problem.
 
-## What genuinely presupposes what
+## Reading dependencies
 
-Chapter order is not dependency. The useful facts are the ones that license a skip.
+Chapter order differs from dependency, which determines what can be skipped.
 
-- **Chapter 13 presupposes nothing.** §13.1 says it outright: static analysis requires no stimulus and no statement of expected output. Readable on a project's first day, by someone with no testbench and no plan.
-- **Chapter 11 is readable before Part III.** Its argument runs from the specification and the RTL, not from an environment: §11.4 on who writes which assertion and where it lives, §11.8 on two engines reading one text. Neither needs Chapter 8 or Chapter 10 first.
+- **Chapter 13 presupposes nothing.** §13.1 states that static analysis needs no stimulus or statement of expected output. It is readable on a project's first day without a testbench or plan.
+- **Chapter 11 is readable before Part III.** Its argument starts from the specification and RTL rather than an environment: §11.4 covers assertion authorship and placement; §11.8 covers two engines reading one text. Neither needs Chapter 8 or Chapter 10 first.
 - **Chapter 21 §21.5 stands alone** as a boundary statement, which is why the mixed-signal branch above is one section long.
 
-The real dependencies, established by reading rather than inferred from numbering:
+The following dependencies come from reading the chapters rather than their numbering:
 
-- **Chapter 14 → Chapter 11 §11.3.** §14.2's whole hazard is the assert/assume asymmetry, and §11.3 establishes it — Chapter 11 says so on the page.
+- **Chapter 14 → Chapter 11 §11.3.** §14.2 depends entirely on the assert/assume asymmetry established in §11.3, as Chapter 11 explicitly states.
 - **Chapter 10 → Chapter 8 §8.1.** §10.2 opens by taking Chapter 8's "the reusable unit is one interface" as given and encoding it as a base class plus a flag.
-- **Chapter 7 → Chapters 5 and 6.** §7.4 computes over artifacts the other two define: plan rows, closure metrics, waiver kinds. Alone it is a checklist; after them it is auditable.
-- **Chapter 16 → Chapter 14.** §16.2 is assumption and constraint duality as a flow, and §16.4's question 4 prices §14.4's abstraction bill.
+- **Chapter 7 → Chapters 5 and 6.** §7.4 computes over artifacts the other two define: plan rows, closure metrics, waiver kinds. The checklist becomes auditable after the definitions in those chapters have been established.
+- **Chapter 16 → Chapter 14.** §16.2 presents assumption and constraint duality as a flow; §16.4's question 4 evaluates the cost of §14.4's abstraction.
 - **Chapter 20 §20.5 → Chapter 7 §7.6 and Chapter 3.** It reuses the five questions and Chapter 3's activation–propagation–checking chain as its classifier.
 - **Chapter 24 §24.3 → Chapter 4 §4.4.** Chapter 4 defines the maturity stages; §24.3 takes them as given and asks a narrower question about the conversations they change.
 
 ## The chapters no path here reaches
 
-Naming them is more honest than routing everyone through everything.
+**Chapter 17, *Acceleration and Emulation*** centers on one triage distinction (§17.1): the number of runs versus the length of one run. A wider farm answers the first and does nothing for the second, because cycle *n* of a boot depends on cycle *n*−1. It is relevant when run length is the problem.
 
-**Chapter 17, *Acceleration and Emulation*** turns on one triage question (§17.1): *is my problem the number of runs, or the length of one run?* A wider farm answers the first and does nothing for the second, because cycle *n* of a boot depends on cycle *n*−1. Read it when the answer is length.
+**Chapter 25, *AI and ML in Verification*** addresses proposed tools that generate properties, testbenches, or plan rows. §25.4 names the four decision points a human must occupy and the damage of leaving each unowned.
 
-**Chapter 25, *AI and ML in Verification*** is for the day somebody proposes a tool that generates artifacts — properties, testbenches, plan rows. §25.4 names the four decision points a human must occupy and the damage of leaving each unowned.
-
-**Chapter 26, *The Road Ahead*** is an argument rather than an instruction. Read it last or not at all; it changes nothing you do tomorrow, which is exactly why it is not in the three-chapter set.
+**Chapter 26, *The Road Ahead*** is an argument rather than an instruction. It can be read last or omitted; it has no immediate operational effect, which excludes it from the three-chapter set.
