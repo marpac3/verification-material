@@ -1,10 +1,11 @@
 # Hardware Verification: A Holistic Guide
 
 Manuale in inglese sulla verifica funzionale dell'hardware, con 26 capitoli,
-quattro appendici e indice analitico. Questa revisione aggiunge l'apparato
-didattico W3: 139 esercizi con soluzioni ragionate, 24 cronogrammi, sei nuovi
-diagrammi strutturali, esempi SystemVerilog e un glossario di 421 voci con
-equivalenti italiani.
+quattro appendici, indice analitico e 139 esercizi con soluzioni. Il corso comprende
+ora sette lezioni da 90 minuti, con slide essenziali, handout completi e note del
+docente separate: 21 PDF, oltre alle versioni HTML.
+
+[Apri i materiali delle sette lezioni](slides/README.md).
 
 [Leggi o scarica il PDF](build/hardware_verification_guide.pdf).
 
@@ -15,8 +16,8 @@ equivalenti italiani.
 - `meta/glossary.md`: sorgente dell'Appendice A.
 - `meta/index_terms.md`: termini e alias dell'indice analitico.
 - `meta/book_manifest.txt`: ordine completo dei file del libro.
-- `slides/`: sette deck della versione precedente del corso; la revisione W4
-  delle lezioni è una fase successiva e non è inclusa in questa consegna W3.
+- `slides/`: sette lezioni, sette handout e sette note del docente; i deck
+  storici restano come sorgenti del materiale di studio.
 - `tools/`: generazione del libro e controlli disponibili nella distribuzione.
 
 ## Ricostruire il libro
@@ -48,7 +49,9 @@ bibliografici identificano le fonti senza includerle.
 I controlli automatici coprono struttura, citazioni, invarianti, glossario,
 rimandi, frammenti e generazione dell'indice. Gli esercizi sono stati risolti
 separatamente e confrontati con l'Appendice D. Il materiale conserva limiti e
-assunzioni espliciti; le review editoriali W4 e W5 restano fasi successive.
+assunzioni espliciti. Lezione 1 approvata dall’autore; revisione finale del corso
+e lettura dei capitoli 22, 19, 15 e 23 restano disponibili come revisione editoriale.
+Il rilascio GitHub non aggiorna gli eventuali artifact ospitati su Claude.
 
 ## Licenza
 

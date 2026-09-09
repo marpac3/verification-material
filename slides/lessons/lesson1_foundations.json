@@ -1,0 +1,501 @@
+{
+  "number": 1,
+  "slug": "foundations",
+  "title": "Foundations",
+  "chapters": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "handout_source": "slides/part1_foundations.html",
+  "assigned_exercise": "3.4",
+  "slides": [
+    {
+      "title": "Foundations of hardware verification",
+      "thesis": "A passing test is evidence with a defined scope.",
+      "minutes": 2,
+      "sources": [
+        "ch01:1.1",
+        "ch03:3.3"
+      ],
+      "bullets": [],
+      "notes": [
+        "Introduce the course through the question: what does a passing test entitle us to claim? Ask learners to keep one recent verification decision in mind. The lesson ends by revisiting that decision with an explicit checker and closure criterion.",
+        "Distinguish functional verification before fabrication from validation on real hardware and manufacturing test of physical defects. This is the book’s terminology; other literature uses validation more broadly."
+      ],
+      "flow": [
+        "Requirement",
+        "Observation",
+        "Claim"
+      ],
+      "kind": "curriculum"
+    },
+    {
+      "title": "Learning outcomes",
+      "thesis": "Make a verification claim that another engineer can audit.",
+      "minutes": 3,
+      "sources": [
+        "ch01:1.1",
+        "ch02:2.1",
+        "ch03:3.3",
+        "ch04:4.5"
+      ],
+      "bullets": [
+        "Distinguish verification, validation and manufacturing test.",
+        "Identify shared assumptions between design and checker.",
+        "Select an oracle and state its limits.",
+        "Demand evidence for a stage exit."
+      ],
+      "notes": [
+        "Ask each learner to select the outcome that is least explicit in their current work. These are observable outcomes: a definition, a dependency analysis, a checker choice and an evidence request.",
+        "Revisit the list at the end rather than asking whether the audience understood. A learner should be able to demonstrate each outcome on the reference DMA."
+      ],
+      "flow": null,
+      "kind": "curriculum"
+    },
+    {
+      "title": "Route through the lesson",
+      "thesis": "Four questions connect the foundations.",
+      "minutes": 2,
+      "sources": [
+        "ch01:1.1",
+        "ch02:2.1",
+        "ch03:3.1",
+        "ch04:4.1"
+      ],
+      "bullets": [
+        "Why do escapes survive?",
+        "Where can independent checking fail?",
+        "What can a test actually establish?",
+        "When is a block ready for its next use?"
+      ],
+      "notes": [
+        "The course allocation is ninety minutes: introduction, four discussion blocks, an exercise and closure. These timings are teaching allocations, not measured engineering durations.",
+        "Explain that the detailed handout retains the wider examples. The projection intentionally selects a short argument, so an omitted slide is not an omitted study topic."
+      ],
+      "flow": null,
+      "kind": "curriculum"
+    },
+    {
+      "title": "Scope before method",
+      "thesis": "Different checks answer different questions.",
+      "minutes": 4,
+      "sources": [
+        "ch01:1.1"
+      ],
+      "bullets": [],
+      "notes": [
+        "Ask for a concrete example of each task. Checking an RTL model against the specification is functional verification. Checking the implementation on real hardware is validation in this book. Identifying a physical defect in a manufactured die is manufacturing test.",
+        "Avoid presenting these as isolated organizations. Their evidence feeds later decisions, but their reference objects and failure mechanisms differ."
+      ],
+      "flow": [
+        "Model versus specification",
+        "Real hardware behavior",
+        "Manufactured die defects"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "A bug escape crosses a boundary",
+      "thesis": "Block correctness does not automatically compose.",
+      "minutes": 5,
+      "sources": [
+        "ch01:1.1",
+        "ch01:1.4"
+      ],
+      "bullets": [
+        "Correct blocks can interact incorrectly.",
+        "Arbitration, ordering and back-pressure emerge during integration."
+      ],
+      "notes": [
+        "Use the reference SoC: a neural accelerator streams weights while a DMA fills the next buffer. Each block can pass alone while the shared interconnect introduces ordering and arbitration behaviors absent from either standalone environment.",
+        "Ask learners which observable event would reveal an integration failure. Require an observation and a checker, not simply more traffic. Preserve the distinction between an escape to integration and an escape to silicon."
+      ],
+      "flow": [
+        "Standalone blocks",
+        "Shared resources",
+        "Integration checks"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "Read the denominator",
+      "thesis": "Survey headlines can measure different outcomes.",
+      "minutes": 5,
+      "sources": [
+        "ch01:1.2",
+        "ch01:1.3"
+      ],
+      "bullets": [
+        "First-silicon success concerns IC/ASIC fabrication.",
+        "FPGA field escapes concern shipped systems.",
+        "Scope and uncertainty belong beside the percentage."
+      ],
+      "notes": [
+        "The book explicitly warns against directly comparing first-silicon success with non-trivial FPGA bugs in production. They are different outcome measures, and the gap between their headline percentages is smaller than the stated survey margin.",
+        "Explain that effort figures also depend on scope: pre-silicon verification, a broader validation definition, time and headcount are different denominators. Ask which scope a learner would request before reusing an effort estimate."
+      ],
+      "flow": null,
+      "kind": "content"
+    },
+    {
+      "title": "Discussion: move verification to the lab?",
+      "thesis": "A cheap reprogramming step does not make an escape cheap.",
+      "minutes": 4,
+      "sources": [
+        "ch01:1.2",
+        "ch01:1.4"
+      ],
+      "bullets": [
+        "An FPGA schedule cuts pre-lab verification.",
+        "Which new behavior still needs model-level checking?",
+        "What observability would the team lose?"
+      ],
+      "notes": [
+        "Give pairs one minute to propose a targeted compromise. The expected answer preserves checks for newly modified behavior while recognizing credible evidence for unmodified verified IP.",
+        "Debrief the difference between reprogramming cost and debugging cost. The chapter’s scenario retains verification of a new camera datapath while reusing established UART and SPI evidence. Do not infer that all reused IP can skip integration checking."
+      ],
+      "flow": null,
+      "kind": "question"
+    },
+    {
+      "title": "Independence starts at interpretation",
+      "thesis": "Separate implementations can share the same wrong assumption.",
+      "minutes": 4,
+      "sources": [
+        "ch02:2.1",
+        "ch03:3.3"
+      ],
+      "bullets": [
+        "A checker copied from the RTL can reproduce its mistake.",
+        "Independent interpretation must reach the comparison."
+      ],
+      "notes": [
+        "Have learners draw the design path and checking path from the specification. Different people or files do not establish independence if both paths inherit the same algorithm or unresolved interpretation.",
+        "Use the DMA stride ambiguity from the chapter: a designer and scoreboard author can agree on when the stride applies and still both be wrong. A passing regression then establishes agreement between those interpretations."
+      ],
+      "flow": [
+        "Specification",
+        "Independent interpretations",
+        "Comparison"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "Find the reconvergence point",
+      "thesis": "Shared machinery can remove the independence a test needs.",
+      "minutes": 5,
+      "sources": [
+        "ch02:2.1"
+      ],
+      "bullets": [
+        "Trace what the design and checker reuse.",
+        "Ask which defect that reuse would hide."
+      ],
+      "notes": [
+        "Draw a fork and a join. The important question is where the checking path reconnects with a design-derived implementation. If the same incorrect transformation feeds both expected and actual values, a clean comparison is predictable.",
+        "Ask for a bounded remedy: review or independently implement the relevant transformation, or use an orthogonal property that does not inherit it. Do not demand total independence of every tool in the organization."
+      ],
+      "flow": null,
+      "kind": "content"
+    },
+    {
+      "title": "Stress the contract",
+      "thesis": "A verifier should expose violations instead of repairing them.",
+      "minutes": 5,
+      "sources": [
+        "ch02:2.2"
+      ],
+      "bullets": [
+        "Exercise legal corner conditions.",
+        "Keep the observer strict.",
+        "Do not normalize a faulty response into an acceptable one."
+      ],
+      "notes": [
+        "Contrast a cooperative client with a verification environment. A real client may retry or compensate; a checker must retain evidence of the initial contract violation.",
+        "Discuss invalid stimulus carefully. The chapter does not permit filtering every invalid case away: some invalid inputs have specified handling that must be checked. Conversely, unconstrained nonsense outside the contract needs a clearly stated purpose."
+      ],
+      "flow": [
+        "Stimulus",
+        "Unmodified observation",
+        "Contract check"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "Discussion: whose expected value?",
+      "thesis": "An agreement can be a common-mode failure.",
+      "minutes": 4,
+      "sources": [
+        "ch02:2.1",
+        "ch03:3.3"
+      ],
+      "bullets": [
+        "The scoreboard uses the designer’s address helper.",
+        "All comparisons pass.",
+        "Which failure could remain invisible?"
+      ],
+      "notes": [
+        "Ask learners to identify the shared dependency before proposing a fix. Expected answer: an incorrect address transformation inside the common helper can appear on both sides of the comparison.",
+        "Accept independent specification interpretation or a relevant orthogonal invariant as remedies, provided learners identify what each would detect. Reject “add more seeds” as a sufficient answer to a shared deterministic error."
+      ],
+      "flow": null,
+      "kind": "question"
+    },
+    {
+      "title": "The space exceeds enumeration",
+      "thesis": "Configuration, internal state and history all matter.",
+      "minutes": 4,
+      "sources": [
+        "ch03:3.1"
+      ],
+      "bullets": [
+        "An abstract model removes detail; it does not prove omitted behavior irrelevant."
+      ],
+      "notes": [
+        "Walk through the chapter’s state-space argument qualitatively. Register settings form only the shallow part: FIFO contents, transaction state, multiple active channels and input histories enlarge the problem.",
+        "Point to the detailed tables in the handout for arithmetic. Do not interpret the count as a count of reachable or equally likely bugs; the chapter separates potential configurations from reachable histories."
+      ],
+      "flow": [
+        "Configuration",
+        "Internal state",
+        "Input history"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "Place checks where failures are observable",
+      "thesis": "Controllability and observability determine useful verification levels.",
+      "minutes": 5,
+      "sources": [
+        "ch03:3.2"
+      ],
+      "bullets": [
+        "A feature must be provoked and its failure seen.",
+        "Moving a check upward can destroy either capability."
+      ],
+      "notes": [
+        "Use the SIMD saturation-flag example. Ask what changes when a direct core-level observation is replaced by a firmware path through a whole SoC. The question is the concrete mechanism that makes the defect hard to trigger or to observe.",
+        "Connect the answer to allocation: the best level is not automatically the highest or lowest level. Select the level at which both the required stimulus and an effective observation exist."
+      ],
+      "flow": null,
+      "kind": "content"
+    },
+    {
+      "title": "Use complementary oracles",
+      "thesis": "Protocol legality does not establish payload correctness.",
+      "minutes": 5,
+      "sources": [
+        "ch03:3.3"
+      ],
+      "bullets": [
+        "Assertions check bounded statements.",
+        "A scoreboard checks predicted outcomes.",
+        "Completeness checks catch missing transactions."
+      ],
+      "notes": [
+        "The DMA property about burst boundaries can establish a protocol condition while legal bursts still carry wrong data. The functional scoreboard compares effects against an independent prediction.",
+        "Ask what an end-of-test leftover means: expected work can remain unmatched even if every received response looked legal. Explain that lack of an assertion failure may also reflect a condition that was never activated."
+      ],
+      "flow": [
+        "Protocol property",
+        "Functional comparison",
+        "End-of-test accounting"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "Discussion: a clean run with no comparisons",
+      "thesis": "Activity and correctness require different evidence.",
+      "minutes": 4,
+      "sources": [
+        "ch03:3.3",
+        "ch03:3.4"
+      ],
+      "bullets": [
+        "The regression reports no failure.",
+        "No output transaction was compared.",
+        "What claim can the report support?"
+      ],
+      "notes": [
+        "Let the audience articulate the narrowest defensible claim. A lack of reported failure says little about functional correctness if the path that would detect incorrect output did not operate.",
+        "Ask for one additional measurement and one checking mechanism. A comparison count can expose inactivity, but a count alone does not prove the comparison semantics are right. The mechanism must be tied to the intended behavior."
+      ],
+      "flow": null,
+      "kind": "question"
+    },
+    {
+      "title": "Plan the evidence before implementation",
+      "thesis": "A test list is not a closure argument.",
+      "minutes": 4,
+      "sources": [
+        "ch04:4.2"
+      ],
+      "bullets": [
+        "Name the feature and its checker.",
+        "Define closure evidence and ownership.",
+        "Review assumptions before building the environment."
+      ],
+      "notes": [
+        "Use a plan row rather than a schedule bar. Ask what evidence would distinguish “test implemented” from “behavior verified”. The row needs a requirement or feature, a checking mechanism and a criterion that can be assessed.",
+        "Planning also interrogates an incomplete specification. Record ambiguity as work requiring resolution rather than burying a chosen interpretation inside a sequence."
+      ],
+      "flow": null,
+      "kind": "content"
+    },
+    {
+      "title": "Bring-up is a checked transaction",
+      "thesis": "Traffic without an active oracle is not verification bring-up.",
+      "minutes": 5,
+      "sources": [
+        "ch04:4.3"
+      ],
+      "bullets": [
+        "Demonstrate stimulus, observation and checking together.",
+        "Then grow regression and coverage maturity."
+      ],
+      "notes": [
+        "Explain the bring-up exit using one complete path through the environment. A waveform showing activity is insufficient if the predictor, observer or comparison path is disconnected.",
+        "As the environment grows, repeat the argument for new features. The lifecycle contains feedback: coverage and bugs change the plan and stimulus rather than simply advancing a fixed sequence of completed tasks."
+      ],
+      "flow": [
+        "Drive",
+        "Observe",
+        "Check"
+      ],
+      "kind": "content"
+    },
+    {
+      "title": "Maturity is demonstrated",
+      "thesis": "Stage labels summarize checkable conditions.",
+      "minutes": 5,
+      "sources": [
+        "ch04:4.4",
+        "ch04:4.5"
+      ],
+      "bullets": [
+        "Implemented stimulus and checkers.",
+        "Coverage and sustained regression evidence.",
+        "Reviewed exclusions and open-bug dispositions."
+      ],
+      "notes": [
+        "Distinguish a block ready for other teams to build on from a block ready for sign-off. The chapter’s maturity criteria deliberately use demonstrations instead of subjective completion percentages.",
+        "For closure, ask who reviewed exclusions and who accepted the disposition of every open bug. A clean recent run does not replace a sustained regression window or an explicit risk acceptance."
+      ],
+      "flow": null,
+      "kind": "content"
+    },
+    {
+      "title": "Discussion: ready for integration?",
+      "thesis": "The consumer needs a defensible entry criterion.",
+      "minutes": 4,
+      "sources": [
+        "ch04:4.4",
+        "ch04:4.5"
+      ],
+      "bullets": [
+        "The block generates traffic but its checker is unfinished.",
+        "Another team wants to build on it.",
+        "Which maturity evidence is missing?"
+      ],
+      "notes": [
+        "Ask learners to answer using a missing demonstration, not a mood or a completion percentage. The block has not established the implemented checking and regression evidence expected of verification maturity.",
+        "Discuss a conditional integration decision as an explicit risk decision with owners and limits. It must not silently redefine the maturity label for one block."
+      ],
+      "flow": null,
+      "kind": "question"
+    },
+    {
+      "title": "Exercise: interpret a DMA pass",
+      "thesis": "State exactly what the oracle established.",
+      "minutes": 6,
+      "sources": [
+        "ch03:3.3"
+      ],
+      "bullets": [
+        "No burst-boundary assertion failed. No other failure was reported.",
+        "Give the two readings of this result.",
+        "Name the additional oracle and its end-of-test check."
+      ],
+      "notes": [
+        "Assign book Exercise 3.4. Allow two minutes individually, two minutes in pairs and two minutes for debrief. The prompt comes directly from the chapter’s partial-oracle example.",
+        "Expected answer: the boundary property may have been satisfied on exercised behavior or may not have been activated. Neither reading establishes data correctness. An independent functional scoreboard checks the predicted effects; its end-of-test accounting detects expected or unmatched transactions left over.",
+        "Assessment: a complete answer separates activation from satisfaction, names the functional comparison and explains the leftover check. More simulation time without an active checking path is not an adequate answer."
+      ],
+      "flow": null,
+      "kind": "exercise"
+    },
+    {
+      "title": "What to change on Monday",
+      "thesis": "Make one existing claim auditable.",
+      "minutes": 2,
+      "sources": [
+        "ch02:2.1",
+        "ch03:3.3",
+        "ch04:4.2"
+      ],
+      "bullets": [
+        "Trace one expected-value dependency.",
+        "Check whether one claimed behavior reaches an active oracle.",
+        "Replace one vague milestone with observable evidence."
+      ],
+      "notes": [
+        "Invite each learner to choose one action that can be demonstrated in their own environment. Keep the scope to an existing claim or plan row; this is not a mandate to rebuild the testbench.",
+        "Ask what artifact they would bring to a review: a dependency diagram, an observed comparison with an injected failure, or a plan row with closure evidence."
+      ],
+      "flow": null,
+      "kind": "curriculum"
+    },
+    {
+      "title": "Scope and next reading",
+      "thesis": "The foundations guide later technique choices.",
+      "minutes": 3,
+      "sources": [
+        "ch03:3.4",
+        "ch04:4.2"
+      ],
+      "bullets": [
+        "Read the Foundations handout and book Chapters 1–4.",
+        "Next: verification planning, coverage and closure.",
+        "This lesson omits tool setup, UVM implementation and formal algorithms."
+      ],
+      "notes": [
+        "Revisit the four learning outcomes using short responses from the room. Ask learners to state one limitation of the oracle they currently rely on most.",
+        "Direct learners to Chapters 1–4 and the retained Foundations handout for detailed examples and citations. Later lessons develop methods; this session established the questions those methods must answer."
+      ],
+      "flow": null,
+      "kind": "curriculum"
+    }
+  ],
+  "handout_sha256": "b3e65141986b5204b8a101fca5c13b43b04fa59815f67d79c0ed8996deaab9ae",
+  "handout_supplemental_sources": {
+    "36": [
+      "ch01:1.2"
+    ]
+  },
+  "handout_numeric_annotations": {
+    "9": {
+      "numbers": [
+        "47"
+      ],
+      "reason": "P17, Figure 5: historical designer-time observation; retained W0 survey comparison (2014), distinct from the current 49 percent R2 value."
+    },
+    "23": {
+      "numbers": [
+        "17",
+        "1000",
+        "26",
+        "31",
+        "4.4"
+      ],
+      "reason": "Historical thought experiment, not a measured hardware result: assume 4.4e17 seconds and 1000 simulations at 1e6 configurations/s; capacity=4.4e26, fraction=4.4e26/2**192=7.01e-32 (order 1e-31). The 192-bit state model is ch03 §3.1. All displayed arithmetic recomputed."
+    },
+    "32": {
+      "numbers": [
+        "2017"
+      ],
+      "reason": "P21 bibliographic publication year (IEEE Design & Test, 2017), already named in the visible source line."
+    }
+  }
+}

@@ -1,0 +1,809 @@
+{
+  "provenance": [
+    {
+      "slide": 1,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "02521ac4f37bf03727b64e70e87411a61ea6e6e394321401f34cb095dc275efc",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 2,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "b83c00259f428ab9d848101362d62c75905b67ae56d0947a4d98fe5c7e80c5f5",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 3,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "fc71ae1d0239b845775fdc7b7224be29ddbf96d6d09f604283104a3d436709b2",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 4,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "bbb7e855c79874faf8458510dc2bc42cd38a52dbade8c60abaff266feb1019bc",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 5,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "316a8c1382ccdbd88ecf636d5da5ccd5a94be9b5690d9443524c2c21c7bd6b25",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 6,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "d67f74dddec05a4344d3fb8fd3d39d0e9812ccf747bf235b05a785f37f6b4e08",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 7,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "e7c90ddd7baa9a04dfe790a0b9b71b9304cae5362d00648d7931153cddfdedfb",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 8,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "e3cc395f0ed0668b145d500f41be7ad9f715d24de22d103217b339df2d6a6f9e",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 9,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "95a4220238132a2b935d64550a853034168e0c18fc66030642b75c3247f57597",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 10,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "8586d5611732e08957c4cfc0c05705b18dfd63203c567b594102fa5238311e37",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 11,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "b5a43d104b6039812ee94f53bf073eff42a968a48f62e1b54866ebcf1cbe7774",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 12,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "fa00b24ddb813424b83946be2df6cff6a227c5365604ee1a8ad844053627316e",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 13,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        }
+      ],
+      "text_sha256": "5e61f367aa35efca4a2fa71656e5e8ec85a29d791aab5354e927aa4988bdf13c",
+      "numeric_annotation": {
+        "numbers": [
+          "2604.15073"
+        ],
+        "reason": "P14 bibliographic arXiv identifier, visible source line."
+      }
+    },
+    {
+      "slide": 14,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "2477a968ff80a5fb2addc0a3342d9f401404a54dbdd8339edec6f81967818f10",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 15,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "f41ca8998fcaa756785a6db474910585434463c1f97ef865022d1fa20c8d74d7",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 16,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "5a22296dc7f6fcdc324028867fdda12b6a8188b2e76bf0aac39b3a75c7b6b55c",
+      "numeric_annotation": {
+        "numbers": [
+          "100",
+          "1000"
+        ],
+        "reason": "ch18 \u00a718.1 spells the same approximate range as a hundred to a thousand times. Retained digits are a notation difference, not an added platform measurement."
+      }
+    },
+    {
+      "slide": 17,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "4b3dbf63126407d130eae9b6ccf8456e48f326cefcb9b116800e4083a2a15203",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 18,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch01",
+          "start": 20,
+          "end": 43,
+          "sha256": "f5912c40dbf5305806d70253cf8eef3f25d11736e506281eab29d98d7aff9b98"
+        }
+      ],
+      "text_sha256": "65105d9d46ca063213e648c1e77852acd54b3dbf2159d16976b0c9735f326dbb",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 19,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "e7a10b7711bdf68cfba8ed821364fbce434142e8bbc7bd946ff8cdb6a42b0de4",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 20,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "76dfaaf99e37280bf8366f7d164f47f936a2908d315228366f27115bfeee07a2",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 21,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "9402f8e7436005cb75f69e619c6cde9104a6ceb5ba56f8d816bea35eef3015c8",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 22,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "2ff6a4f4699dd2ff7ae8455e3c5f34b91feee6e8da111b1aa5db75575d6f14a2",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 23,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        }
+      ],
+      "text_sha256": "7e61fbf715e3cf513aaa4d36bf22e9fe8ef14a93d7fe946fe82176d56706d5f8",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 24,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "3f10c93ba88382e1517a396065e673149f8d356df1404e4619249a14412ceeec",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 25,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "18907b63c7727b631e5ea1e0fd43e0487f4a3603af7bfbfadb6b8107e6da6e4e",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 26,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "a20a7fcf9adebda20b45f25d6a54aedecc2cf1d60800df71e62c69b04a752e33",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 27,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "1d9bfc0f37144ca9f5cb75175ae0015aac68143a9cfb281a2139d36179c13f7d",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 28,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "b92ff4b49c8ff50bbefc658e20cf44bc60dffc1b7e1a4b50dc19cc84c923c9d1",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 29,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "a16138737582ff47a48acb9bda363d35e30b01ad82e1fde6acc3bb5f0ef7626f",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 30,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "0bce700a1f20acb636cf3959ae5861d185e2e5c1e9e36f8713e789bdbc51aeeb",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 31,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "9104a338f35270af0dbbbf9938ba750def57da45e2eb5b43285985f010ebd15f",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 32,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "07213b009ba9941196b88f6582b7d3ac2fbc3a970e9f0c078ccf50c760d85a25",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 33,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "9c57e85d9bcf579061931439e44e4acb02c4fa9fee19c17365faf0528a8f8c05",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 34,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        }
+      ],
+      "text_sha256": "c06117d243d6e68ec0910bf0414890671ee622c3a7de9c554598e0f8f116698b",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 35,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "9087775ecf89ca7090c6c58f72cae4a7966ca4746e125f46a6475d880eac9769",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 36,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "fe0f3855387f8d31fb93e4134c02c971d408b3514f1216a75741309bf2ae472e",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 37,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "7bac64fe5f536a7cbe0665d6bb754c3f5c7142076754916ee225547ef0db3c8b",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 38,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "be7308b5714ac192db47671a20c15b6f4b9dee1255f6793d0773246c8e5b7744",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 39,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "ded02c2de80770633796f86d2f3c20008d558c860084c7a68089eefd29def44e",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 40,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "99c0cf8c08fc0cc493991741507155c99858498092ed9796ec4a96405c91eaa0",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 41,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "b72ef688c507cace05ea8c20bbc4a5468ae22d0b6e6e2a7d432929bae56e5a69",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 42,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "882c4948aac5ac59d62d57a4480dd499ff9b60b5c50b77f9fd8d32f8a9084c36",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 43,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "7a0e662a2e45487eaaffd129e40e37af74c39416b7dd345a19ed4744abd5e526",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 44,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "8c96b62cb4f4e1776ff8e0fb053df2741186a0de52d5d5028bfcc17026c3f531",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 45,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "d5977ee7cad2f7ee551f4223b0481388544ed0db525a3ed6dcaea904c670f7f1",
+      "numeric_annotation": null
+    },
+    {
+      "slide": 46,
+      "kind": "retained_handout",
+      "sources": [
+        {
+          "chapter": "ch17",
+          "start": 1,
+          "end": 327,
+          "sha256": "55ce41f31701b976e6037fa6401f44d60bd4bcb6d9e4cc0e5e2b5b047a596f02"
+        },
+        {
+          "chapter": "ch18",
+          "start": 1,
+          "end": 351,
+          "sha256": "8022bf906465f2129ee3b68c818478e2439e868179e8c2e8ed74ef5a7edc5973"
+        },
+        {
+          "chapter": "ch19",
+          "start": 1,
+          "end": 434,
+          "sha256": "806c5972ff47dfa2ba2d831f2166d05e7eb420fd84eea99c8537a6b866bfceab"
+        },
+        {
+          "chapter": "ch20",
+          "start": 1,
+          "end": 374,
+          "sha256": "317f32a0521b0b70fedbdd68e3423210be8781daf2f7d220688f50a86399f70f"
+        }
+      ],
+      "text_sha256": "da9a692615bae62f80fcd4ef1f56cf21c68ae2e09ce18aa989cca9da4d83b425",
+      "numeric_annotation": null
+    }
+  ]
+}

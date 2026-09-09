@@ -1,0 +1,469 @@
+{
+  "number": 4,
+  "slug": "static_formal",
+  "title": "Static and formal verification",
+  "chapters": [
+    13,
+    14,
+    15,
+    16
+  ],
+  "handout_source": "slides/part4_static_formal.html",
+  "assigned_exercise": "14.4",
+  "slides": [
+    {
+      "title": "Static and formal verification",
+      "thesis": "Every technique must discharge a named verification claim.",
+      "sources": [
+        "ch13:13.1",
+        "ch14:14.1",
+        "ch15:15.1",
+        "ch16:16.1"
+      ],
+      "bullets": [],
+      "notes": [
+        "Open with a decision the audience must make in this area. Ask which result they currently treat as sufficient evidence and keep that answer for the closing discussion.",
+        "The lesson selects a practical argument from the book. The study handout preserves the detailed examples, citations and worked artifacts."
+      ],
+      "flow": [
+        "Establish the static boundary",
+        "Qualify the proof",
+        "Choose the application"
+      ],
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Learning outcomes",
+      "thesis": "Demonstrate these decisions on a real plan row.",
+      "sources": [
+        "ch13:13.1",
+        "ch14:14.1",
+        "ch15:15.1",
+        "ch16:16.1"
+      ],
+      "bullets": [
+        "Separate structural results from protocol obligations.",
+        "Qualify a proof by assumptions and abstraction.",
+        "Distinguish generated intent from independent checking.",
+        "Combine typed results through a verification plan."
+      ],
+      "notes": [
+        "Read the outcomes as observable tasks. Ask learners to identify which one they can already demonstrate and which one currently depends on undocumented judgment.",
+        "At closure, require a concrete artifact or explanation for an outcome rather than a general expression of confidence."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    },
+    {
+      "title": "Route through the lesson",
+      "thesis": "Four blocks, each ending with a decision.",
+      "sources": [
+        "ch13:13.1",
+        "ch14:14.1",
+        "ch15:15.1",
+        "ch16:16.1"
+      ],
+      "bullets": [
+        "Establish the static boundary",
+        "Qualify the proof",
+        "Choose the application",
+        "Combine evidence without flattening it"
+      ],
+      "notes": [
+        "Allow eighteen minutes for each block: a concept, its engineering consequence, a worked interpretation and a short discussion. Keep the discussion tied to the evidence available in the example.",
+        "Reserve the final eleven minutes for the assigned exercise and application to the learners’ work. The timing is a course design allocation, not an engineering estimate."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Static results have a subject",
+      "thesis": "Structural cleanliness does not establish functional correctness.",
+      "sources": [
+        "ch13:13.1",
+        "ch13:13.2"
+      ],
+      "bullets": [],
+      "notes": [
+        "Use lint to remove avoidable structural ambiguity before spending simulation or proof effort. Ask which failure classes the selected rules actually detect.",
+        "A clean report says nothing about a missing specified feature unless that feature has an independent check. Keep rule configurations and waivers attached to the result."
+      ],
+      "flow": [
+        "Structure",
+        "Rules and waivers",
+        "Remaining behavior"
+      ],
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Synchronizers do not define a protocol",
+      "thesis": "Independent bit crossings do not guarantee a coherent word.",
+      "sources": [
+        "ch13:13.3",
+        "ch13:13.4"
+      ],
+      "bullets": [
+        "Review the crossing structure.",
+        "Then review data stability, capture and handshake behavior."
+      ],
+      "notes": [
+        "Draw a multibit value whose bits can be observed from different source updates. Individually synchronized bits do not make those updates atomic.",
+        "The structural CDC result and the protocol obligation need separate evidence. Ask what guarantees the data is stable during the destination’s capture window."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Reset and unknowns need their own review",
+      "thesis": "A clock-domain inventory does not enumerate reset hazards.",
+      "sources": [
+        "ch13:13.5",
+        "ch13:13.6"
+      ],
+      "bullets": [
+        "Inspect reset assertion and release interactions.",
+        "Separate X optimism from X pessimism."
+      ],
+      "notes": [
+        "Explain why reset interaction can cross boundaries even where clocks are shared. Do not infer RDC closure from a clean CDC report.",
+        "An unknown that disappears optimistically and one propagated pessimistically call for different diagnoses. The simulation configuration is part of the interpretation of the result."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: a clean crossing report",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch13:13.3",
+        "ch13:13.4"
+      ],
+      "bullets": [
+        "A multibit status uses independent synchronizers.",
+        "The structural report is clean.",
+        "What coherent-transfer claim still needs evidence?"
+      ],
+      "notes": [
+        "Expected answer: the receiver must observe a value that corresponds to a permitted source transaction, not an arbitrary mixture of updates.",
+        "Ask for a protocol argument and its checker. Neither the absence of a structural warning nor the name of a synchronization cell supplies that argument."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "A proof verdict is a qualified statement",
+      "thesis": "Property, model and assumptions travel with the result.",
+      "sources": [
+        "ch14:14.1",
+        "ch14:14.2"
+      ],
+      "bullets": [],
+      "notes": [
+        "Have a learner say the complete claim aloud: which property, over which model, under which environment assumptions. A green result without these qualifiers cannot be transferred to a plan row.",
+        "Ask which legal behavior an assumption removes. A restriction introduced only to make convergence easier needs independent review before its proof can support sign-off."
+      ],
+      "flow": [
+        "Property",
+        "Model and assumptions",
+        "Qualified verdict"
+      ],
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "A bounded pass has a boundary",
+      "thesis": "State the depth and justify what lies within it.",
+      "sources": [
+        "ch14:14.3",
+        "ch14:14.6"
+      ],
+      "bullets": [
+        "A counterexample is a concrete failing trace.",
+        "A bounded pass needs a depth argument."
+      ],
+      "notes": [
+        "Contrast finding a failure within a bound with establishing absence of failure beyond it. The latter does not follow automatically.",
+        "The chapter combines latency and scenario analysis, cover witnesses and prior counterexamples. Review completeness of the scenario enumeration as well as its arithmetic."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Abstraction changes the trace set",
+      "thesis": "Know which conclusion survives the reduction.",
+      "sources": [
+        "ch14:14.4"
+      ],
+      "bullets": [
+        "Adding behavior can preserve proofs but introduce false failures.",
+        "Removing behavior can preserve failures but hide real ones."
+      ],
+      "notes": [
+        "Use over-approximation and under-approximation explicitly. Explain why admitting extra traces makes a successful universal proof stronger while a failure may need validation against the concrete design.",
+        "Conversely, restricting traces can make a discovered failure useful without making a pass exhaustive. Record deleted behavior and the plan rows that cover it elsewhere."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: assume away the failure",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch14:14.2",
+        "ch14:14.6"
+      ],
+      "bullets": [
+        "An ordering property proves after adding an assumption.",
+        "No owner can justify that environment restriction.",
+        "Can the row close?"
+      ],
+      "notes": [
+        "Expected answer: the result does not discharge the original unrestricted claim. Review or withdraw the assumption, then obtain evidence for the remaining legal behavior.",
+        "The chapter’s assumption register distinguishes proven premises, simulation checks and accepted arguments. An undocumented convergence aid belongs to none of those categories."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Automation still needs reviewed intent",
+      "thesis": "Generated properties inherit their source description.",
+      "sources": [
+        "ch15:15.1",
+        "ch15:15.2",
+        "ch15:15.3"
+      ],
+      "bullets": [
+        "Connectivity and register checks scale repetitive obligations.",
+        "Review the description that generated the checks."
+      ],
+      "notes": [
+        "A connectivity specification or register description lets the tool generate many mechanical checks. The engineer still decides whether that description captures the intended connection or side effect.",
+        "Generation can eliminate transcription drift while preserving a shared error in the source. Ask which review or independent evidence can expose that shared error."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "An inferred property is not an independent oracle",
+      "thesis": "Mining a design can reproduce its mistake.",
+      "sources": [
+        "ch15:15.5"
+      ],
+      "bullets": [
+        "Label the origin of generated properties.",
+        "Compare design-derived claims with external intent."
+      ],
+      "notes": [
+        "Distinguish elaborating a reviewed specification from discovering patterns in the implementation. Both may produce useful properties, but they have different independence.",
+        "A property that faithfully describes current RTL can hold while the RTL violates its specification. Keep that distinction visible when admitting the property into a closure argument."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Equivalence inherits the reference",
+      "thesis": "Preservation and correctness are different claims.",
+      "sources": [
+        "ch15:15.6"
+      ],
+      "bullets": [
+        "Define the correspondence and transformation boundary.",
+        "Choose sequential reasoning when state alignment changes."
+      ],
+      "notes": [
+        "Use a combinational transformation and a retiming change to expose the difference between matched-state comparison and sequential equivalence.",
+        "A successful comparison supports preservation within the configured model. It cannot independently establish that the reference was correct, nor that excluded modes behave acceptably."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: generated from one source",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch15:15.3",
+        "ch15:15.5"
+      ],
+      "bullets": [
+        "The register RTL and its checks share a description.",
+        "All generated checks pass.",
+        "Which error can both artifacts share?"
+      ],
+      "notes": [
+        "Expected answer: an incorrect or omitted behavior in the source description can be reproduced consistently in both artifacts.",
+        "Ask for the external specification review or independent check that would expose it. A second generated artifact is not automatically a second interpretation of intent."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Allocate engines per claim",
+      "thesis": "A feature name alone does not select a method.",
+      "sources": [
+        "ch16:16.1",
+        "ch16:16.4"
+      ],
+      "bullets": [
+        "Match the oracle, state space and runtime need.",
+        "Keep each result attached to its plan row."
+      ],
+      "notes": [
+        "Take one DMA feature and separate an invariant, a functional transfer and a long software scenario. They can need different engines and evidence boundaries.",
+        "The plan should explain why each engine answers the particular row. Do not choose a method merely because a tool or platform is available."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Check the formal environment in simulation",
+      "thesis": "An assumption is a promise that another boundary must honor.",
+      "sources": [
+        "ch16:16.2"
+      ],
+      "bullets": [
+        "Turn relevant premises into simulation checks.",
+        "Cover important boundary behavior."
+      ],
+      "notes": [
+        "The same expression can restrict a formal environment and monitor the actual integration environment. Explain why these are complementary uses with different verdicts.",
+        "A simulation check observes sampled executions; it does not prove the environment universally. Record that scope when discharging the formal assumption."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Keep coverage evidence typed",
+      "thesis": "Simulation activity and formal coverage have different denominators.",
+      "sources": [
+        "ch16:16.3",
+        "ch16:16.5"
+      ],
+      "bullets": [
+        "Unify the plan, not unrelated percentages.",
+        "Handoff assumptions, exclusions and unresolved traces."
+      ],
+      "notes": [
+        "Ask what an average of a functional bin percentage and a proof-core percentage would mean. There is no shared population to support that aggregate.",
+        "Use the plan row as the common unit. A handoff must retain the exact residual claim and its model restrictions so that the receiving engine does not unknowingly check a weaker problem."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: the blended dashboard",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch16:16.3"
+      ],
+      "bullets": [
+        "A dashboard averages simulation and formal coverage.",
+        "The resulting percentage rises.",
+        "Which closure argument is still missing?"
+      ],
+      "notes": [
+        "Expected answer: the mapping from each typed result to the intended feature claim, with its own denominator and limitations.",
+        "Require the presenter to name what newly became established. A rising arithmetic aggregate cannot answer that question by itself."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Exercise: coverage or mutation sensitivity?",
+      "thesis": "Choose an instrument for the actual question.",
+      "sources": [
+        "ch14:14.6"
+      ],
+      "bullets": [
+        "Proof-core coverage is offered as arbitration-change sensitivity.",
+        "Explain the gap and choose the appropriate instrument.",
+        "Include the chapter’s recommended proof-core scope."
+      ],
+      "notes": [
+        "Assign book Exercise 14.4 in full. Review the four coverage kinds before the learner selects an instrument.",
+        "Expected answer: coverage measures aspects of exploration or the proof’s relation to implementation; none establishes that a property set detects a meaningful design mutation. Mutation analysis addresses that question. Explain the chapter’s selected proof-core scope and its cost and interpretation limits from the reading. Scope proof-core analysis to a handful of highest-value properties: it has the highest computational cost and its vendor-specific metrics are harder to interpret."
+      ],
+      "flow": null,
+      "kind": "exercise",
+      "exercise_id": "14.4",
+      "minutes": 6
+    },
+    {
+      "title": "What to change on Monday",
+      "thesis": "Make one existing verification decision reviewable.",
+      "sources": [
+        "ch13:13.1",
+        "ch14:14.1",
+        "ch15:15.1",
+        "ch16:16.1"
+      ],
+      "bullets": [
+        "Audit an assumption without a discharge owner.",
+        "Find a crossing with no protocol checker.",
+        "Replace one blended metric with per-claim evidence."
+      ],
+      "notes": [
+        "Ask each learner to choose one of these actions in an existing project. Require a small, inspectable deliverable and identify the person who will review it.",
+        "Keep the change connected to the lesson’s evidence limits. A new dashboard, script or model is useful only if it strengthens the claim the plan row is meant to establish."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Scope and next reading",
+      "thesis": "Use the handout for the detailed artifacts and sources.",
+      "sources": [
+        "ch13:13.1",
+        "ch14:14.1",
+        "ch15:15.1",
+        "ch16:16.1"
+      ],
+      "bullets": [
+        "Read the Static and formal verification handout and book Chapters 13–16.",
+        "Tool recipes and complete proof harnesses remain in the handout."
+      ],
+      "notes": [
+        "Revisit the outcomes and ask the room to state a limitation of the strongest result discussed today. A complete answer identifies a model boundary, an assumption, a missing oracle or the scope of the underlying evidence.",
+        "Assign the detailed reading to the relevant chapters. The omitted topics are explicit scope boundaries, not claims that those topics are unimportant."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    }
+  ],
+  "handout_sha256": "a86975efcca18a3a4df94d7913d4eec9874f69c15a9519c067d669e1edc7c8b0",
+  "handout_supplemental_sources": {},
+  "handout_numeric_annotations": {
+    "10": {
+      "numbers": [
+        "58"
+      ],
+      "reason": "D36 slide 58 is a source-page locator for the CDC/RDC tutorial, not a hardware quantity."
+    },
+    "24": {
+      "numbers": [
+        "17",
+        "52"
+      ],
+      "reason": "T2 source-page locators pp.14,16–17,52 for the Bormann account; no additional numerical claim."
+    }
+  }
+}

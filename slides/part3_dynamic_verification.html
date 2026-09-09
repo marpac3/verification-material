@@ -281,7 +281,15 @@
   @media print {
     body { background: #ffffff; }
     .slide {
-      width: 264mm; min-height: 148.5mm; margin: 0;
+      /* A DEFINITE height, not min-height. WeasyPrint 52.5 resolves `bottom`
+         on an absolutely positioned child against the slide's CONTENT height
+         and ignores min-height, so .brand/.pagenum floated with the content
+         and dropped off the page on 126 of 296 pages. A definite height pins
+         the footer to 399.0pt on every page. Keep overflow visible: clipping
+         here would hide lost content instead of reporting it, and the page
+         count / check_text.py gates are what catch a slide that is too tall.
+         See slides/DECK_NOTES.md. */
+      width: 264mm; height: 148.5mm; margin: 0; overflow: visible;
       border: none; padding: 11mm 15mm 13mm;
     }
     .divider { padding-top: 40mm; }

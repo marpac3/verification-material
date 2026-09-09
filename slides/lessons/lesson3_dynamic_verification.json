@@ -1,0 +1,494 @@
+{
+  "number": 3,
+  "slug": "dynamic_verification",
+  "title": "Dynamic verification",
+  "chapters": [
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "handout_source": "slides/part3_dynamic_verification.html",
+  "assigned_exercise": "11.4",
+  "slides": [
+    {
+      "title": "Dynamic verification",
+      "thesis": "Every technique must discharge a named verification claim.",
+      "sources": [
+        "ch08:8.1",
+        "ch09:9.2",
+        "ch11:11.2",
+        "ch12:12.1"
+      ],
+      "bullets": [],
+      "notes": [
+        "Open with a decision the audience must make in this area. Ask which result they currently treat as sufficient evidence and keep that answer for the closing discussion.",
+        "The lesson selects a practical argument from the book. The study handout preserves the detailed examples, citations and worked artifacts."
+      ],
+      "flow": [
+        "Design the checking path",
+        "Generate and reuse",
+        "Read temporal obligations"
+      ],
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Learning outcomes",
+      "thesis": "Demonstrate these decisions on a real plan row.",
+      "sources": [
+        "ch08:8.1",
+        "ch09:9.2",
+        "ch11:11.2",
+        "ch12:12.1"
+      ],
+      "bullets": [
+        "Choose a scoreboard identity without losing an ordering check.",
+        "Separate stimulus legality from distribution.",
+        "Read assertion activation, timing and reset.",
+        "Define a reproducible regression and triage policy."
+      ],
+      "notes": [
+        "Read the outcomes as observable tasks. Ask learners to identify which one they can already demonstrate and which one currently depends on undocumented judgment.",
+        "At closure, require a concrete artifact or explanation for an outcome rather than a general expression of confidence."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    },
+    {
+      "title": "Route through the lesson",
+      "thesis": "Four blocks, each ending with a decision.",
+      "sources": [
+        "ch08:8.1",
+        "ch09:9.2",
+        "ch11:11.2",
+        "ch12:12.1"
+      ],
+      "bullets": [
+        "Design the checking path",
+        "Generate and reuse",
+        "Read temporal obligations",
+        "Operate the regression"
+      ],
+      "notes": [
+        "Allow eighteen minutes for each block: a concept, its engineering consequence, a worked interpretation and a short discussion. Keep the discussion tied to the evidence available in the example.",
+        "Reserve the final eleven minutes for the assigned exercise and application to the learners’ work. The timing is a course design allocation, not an engineering estimate."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Separate environment responsibilities",
+      "thesis": "Observation and measurement must not alter behavior.",
+      "sources": [
+        "ch08:8.1",
+        "ch08:8.2"
+      ],
+      "bullets": [
+        "Keep stimulus, driving and monitoring distinct.",
+        "Keep checking independent of coverage collection."
+      ],
+      "notes": [
+        "Identify the failure mode of each responsibility rather than treating the taxonomy as a framework convention. A monitor that waits on a slow consumer can change the behavior it was meant to observe.",
+        "Use passive observation as the reuse test. The environment must continue to observe correctly when another actor drives the interface."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "The scoreboard key is an engineering decision",
+      "thesis": "Reordering tolerance can erase an ordering check.",
+      "sources": [
+        "ch08:8.3"
+      ],
+      "bullets": [
+        "Choose a key from observable identity.",
+        "Account for independent concurrency sources.",
+        "Retain explicit ordering obligations."
+      ],
+      "notes": [
+        "Contrast an in-order queue with a keyed structure. A content-based lookup may find the right object despite the wrong order, which changes the property being checked.",
+        "Ask learners what identifies concurrent DMA work and whether the identity is observable independently of the generator. At end of test, require unmatched expected work to become a failure rather than disappear."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "A predictor can be wrong",
+      "thesis": "Golden applies to a specification, not to confidence in code.",
+      "sources": [
+        "ch08:8.4"
+      ],
+      "bullets": [
+        "Review the reference model’s origin.",
+        "Compare at a compatible abstraction boundary."
+      ],
+      "notes": [
+        "Distinguish a model that is itself the specification from an independently written transfer function and from an architectural co-simulation reference.",
+        "A disagreement between design and predictor requires specification review. Co-simulation also requires aligned architectural observations and delivery of relevant asynchronous events to both models."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: tolerate reordering?",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch08:8.3"
+      ],
+      "bullets": [
+        "A content-keyed scoreboard passes reordered responses.",
+        "The interface requires ordering within a stream.",
+        "What check has been lost?"
+      ],
+      "notes": [
+        "Expected answer: successful lookup establishes a matching result but does not enforce the required stream order. Keep that ordering obligation explicit in the checker.",
+        "Require the proposed key or auxiliary structure to distinguish independent concurrency from illegal reordering within one ordering domain."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Legality and distribution differ",
+      "thesis": "A solvable model can still exclude the intended scenario.",
+      "sources": [
+        "ch09:9.2",
+        "ch09:9.3"
+      ],
+      "bullets": [
+        "Review the legal set separately from probability.",
+        "Measure the generated distribution."
+      ],
+      "notes": [
+        "Explain why changing weights is not the same as changing legal behavior. A satisfiable over-constraint can silently remove the feature under test while every randomization succeeds.",
+        "An empty block of coverage cells is a reason to inspect the generator and its constraints before concluding that the corner merely needs more runtime."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "A seed is not a complete reproducer",
+      "thesis": "Execution context belongs in the run record.",
+      "sources": [
+        "ch09:9.4",
+        "ch12:12.2"
+      ],
+      "bullets": [
+        "Record source revision, tool build and configuration.",
+        "Preserve random-stability assumptions."
+      ],
+      "notes": [
+        "Ask learners to reproduce a run after a tool or environment change using the same seed. Explain why the seed alone does not identify the same experiment.",
+        "The chapter’s random-stability guidance constrains how new objects, threads and draws are introduced. Record the actual reproducible context rather than relying on a developer’s working directory."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "UVM supplies reusable structure",
+      "thesis": "It does not supply the plan, checker or coverage intent.",
+      "sources": [
+        "ch10:10.2",
+        "ch10:10.6",
+        "ch10:10.9"
+      ],
+      "bullets": [
+        "The interface agent is the reuse boundary.",
+        "A register mirror is not a functional scoreboard."
+      ],
+      "notes": [
+        "Explain the active/passive switch using block-to-system reuse. A framework makes this structural change mechanical only if the monitor and checker were designed independently of the local driver.",
+        "The register model tracks register behavior described by its source; it does not validate all functional consequences of register programming. Generation from a machine-readable description also leaves that description’s correctness to review."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: the framework is complete",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch10:10.9"
+      ],
+      "bullets": [
+        "The UVM topology, sequences and register layer run.",
+        "The feature has no pass/fail criterion.",
+        "What is still missing?"
+      ],
+      "notes": [
+        "Expected answer: verification intent and the checking evidence that would discharge it. Framework completeness does not create a verification plan.",
+        "Ask for one concrete feature row and the observation that would falsify it. The answer should identify actual behavior, not a missing framework class."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "An assertion is a sampled statement",
+      "thesis": "Clocking and reset define what is evaluated.",
+      "sources": [
+        "ch11:11.2"
+      ],
+      "bullets": [
+        "Identify the sampling event.",
+        "Separate same-tick and future obligations.",
+        "State how reset discards attempts."
+      ],
+      "notes": [
+        "Work from a specification sentence to a timing obligation. Concurrent assertions use sampled values, so a waveform interpretation must identify the sampling instant rather than reading continuous time casually.",
+        "Explain disable iff as cancellation of in-flight attempts, not merely another implication antecedent. Keep the exact reset behavior in the source property visible during review."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Stable can look backward",
+      "thesis": "A plausible operator can express the wrong time relation.",
+      "sources": [
+        "ch11:11.1",
+        "ch11:11.5"
+      ],
+      "bullets": [
+        "A fresh request may legally introduce a new value.",
+        "The hold obligation concerns the following sampled tick."
+      ],
+      "notes": [
+        "Use the chapter’s backward-stable and forward-obligation pair. A same-tick use of stable compares with the preceding sample, potentially rejecting a valid fresh offer.",
+        "Also inspect withdrawal: if the antecedent disappears before the check, the wrong formulation can stop observing exactly when the hold obligation matters. The timing diagram is evidence about the operator’s semantics, not a substitute for intent review."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Cover the antecedent",
+      "thesis": "A clean implication can be unexercised.",
+      "sources": [
+        "ch11:11.3",
+        "ch11:11.7"
+      ],
+      "bullets": [
+        "Distinguish satisfaction from vacuity.",
+        "Use a witness for the condition that starts the check."
+      ],
+      "notes": [
+        "Ask for the trace that activates an implication. A property that never encounters its antecedent can report no failure without evaluating the intended obligation.",
+        "The same property text carries different intent under assert, assume and cover. In formal, assumptions remove traces instead of independently demonstrating that the environment satisfies them."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: all assertions pass",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch11:11.7"
+      ],
+      "bullets": [
+        "The traffic never stalls.",
+        "A hold-while-stalled property never fails.",
+        "Which witness should the review demand?"
+      ],
+      "notes": [
+        "Expected answer: a cover or equivalent witness of the antecedent that starts the hold obligation, together with evidence of the consequent evaluation.",
+        "Reject a bare assertion pass count as evidence that stalled behavior was exercised. The aim is to expose inactive checking, not to improve the appearance of the report."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Tiers are admission policies",
+      "thesis": "Runtime budgets belong to suite design.",
+      "sources": [
+        "ch12:12.1",
+        "ch12:12.3"
+      ],
+      "bullets": [
+        "Place fast static checks before costly runs.",
+        "Give each tier a purpose and entry rule."
+      ],
+      "notes": [
+        "Have learners distinguish a fast commit gate from a broad nightly exploration tier. The same test may serve different decisions, but the admission rule and runtime budget must be stated.",
+        "A gate too slow for its intended cadence invites bypass. The remedy is a justified tier design, not silently dropping the expensive failure class from verification."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Triage before deep debugging",
+      "thesis": "Failure signatures must preserve useful distinctions.",
+      "sources": [
+        "ch12:12.4"
+      ],
+      "bullets": [
+        "Reduce duplicate failures.",
+        "Separate design, environment and infrastructure causes.",
+        "Keep a reproducible representative."
+      ],
+      "notes": [
+        "An over-generic signature merges distinct defects; an over-specific signature turns one defect into many apparent failures. Ask what observations make a signature stable and discriminating.",
+        "Measure rediscovery as well as new discovery. The objective is to reduce repeated debug effort while retaining the evidence needed to reproduce each underlying failure."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "A ranked suite does not explore new behavior",
+      "thesis": "Selection needs an independent exploration budget.",
+      "sources": [
+        "ch12:12.5",
+        "ch12:12.6"
+      ],
+      "bullets": [
+        "Investigate flakes instead of training teams to ignore them.",
+        "Keep unranked exploration alongside selection."
+      ],
+      "notes": [
+        "Explain what a clean rerun of a flaky test does and does not establish. It does not erase the original failing observation; an explicit investigation must identify the relevant uncertainty.",
+        "Regression ranking exploits past observations. Preserve a tier that explores beyond that history, especially after design changes or new coverage requirements."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: rerun until green",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch12:12.5"
+      ],
+      "bullets": [
+        "An intermittent failure passes on rerun.",
+        "The dashboard replaces the original result.",
+        "What evidence was discarded?"
+      ],
+      "notes": [
+        "Expected answer: the initial failure and the conditions under which it occurred. Retain the run context and classify the flake; do not redefine success as eventually obtaining a clean sample.",
+        "Ask whether the suspected cause is design behavior, environment nondeterminism or infrastructure. The diagnosis determines the investigation, and none is established by a clean rerun alone."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Exercise: choose the revealing antecedent",
+      "thesis": "Equivalent formulas can expose different vacuity.",
+      "sources": [
+        "ch11:11.7",
+        "ch11:11.6"
+      ],
+      "bullets": [
+        "Compare ok implies not err with err implies not ok.",
+        "Assume err is rare and deliberately constructed.",
+        "Choose a formulation and the necessary activation witness."
+      ],
+      "notes": [
+        "Assign book Exercise 11.4 in full. The slide summarizes the task; the handout reading must include both vacuity conditions and the stronger witness required for an ordinary-traffic antecedent.",
+        "Expected answer: the first passes vacuously when ok is false, the second when err is false. Prefer the deliberately constructed err antecedent and cover it. For an ordinary-traffic antecedent, cover the interesting timing circumstance as well; the chapter uses c_full_bypass, which isolates the full-FIFO bypass condition as that stronger witness."
+      ],
+      "flow": null,
+      "kind": "exercise",
+      "exercise_id": "11.4",
+      "minutes": 6
+    },
+    {
+      "title": "What to change on Monday",
+      "thesis": "Make one existing verification decision reviewable.",
+      "sources": [
+        "ch08:8.1",
+        "ch09:9.2",
+        "ch11:11.2",
+        "ch12:12.1"
+      ],
+      "bullets": [
+        "Audit one scoreboard key.",
+        "Reproduce a run from its recorded manifest.",
+        "Find an assertion without an activation witness."
+      ],
+      "notes": [
+        "Ask each learner to choose one of these actions in an existing project. Require a small, inspectable deliverable and identify the person who will review it.",
+        "Keep the change connected to the lesson’s evidence limits. A new dashboard, script or model is useful only if it strengthens the claim the plan row is meant to establish."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Scope and next reading",
+      "thesis": "Use the handout for the detailed artifacts and sources.",
+      "sources": [
+        "ch08:8.1",
+        "ch09:9.2",
+        "ch11:11.2",
+        "ch12:12.1"
+      ],
+      "bullets": [
+        "Read the Dynamic verification handout and book Chapters 8–12.",
+        "Detailed UVM APIs and complete environment implementation remain in the handout."
+      ],
+      "notes": [
+        "Revisit the outcomes and ask the room to state a limitation of the strongest result discussed today. A complete answer identifies a model boundary, an assumption, a missing oracle or the scope of the underlying evidence.",
+        "Assign the detailed reading to the relevant chapters. The omitted topics are explicit scope boundaries, not claims that those topics are unimportant."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    }
+  ],
+  "handout_sha256": "55d450a953a60c39567a830de7c39acbe846545445092dcb545ace8e485e5d4c",
+  "handout_supplemental_sources": {
+    "40": [
+      "ch25:25.2"
+    ],
+    "43": [
+      "ch07:7.2"
+    ]
+  },
+  "handout_numeric_annotations": {
+    "17": {
+      "numbers": [
+        "56"
+      ],
+      "reason": "P10 bibliographic journal volume 56(5), not a result quantity."
+    },
+    "18": {
+      "numbers": [
+        "2001"
+      ],
+      "reason": "P18 bibliographic conference year TOOLS 2001."
+    },
+    "21": {
+      "numbers": [
+        "255"
+      ],
+      "reason": "Authored coverage-bin label immediately below the maximum 256 in the chapter’s descriptor example; 255=256-1. This is a selected boundary bin, not a measurement."
+    },
+    "42": {
+      "numbers": [
+        "50"
+      ],
+      "reason": "11:50 is a narrative clock time in the retained scenario. The chapter preserves the numerical failure accounting; it does not claim an empirical observation at that time."
+    },
+    "47": {
+      "numbers": [
+        "2207.00445",
+        "2405.17481"
+      ],
+      "reason": "Bibliographic arXiv identifiers of the cited studies, retained in the visible sources."
+    }
+  }
+}

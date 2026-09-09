@@ -1,0 +1,488 @@
+{
+  "number": 7,
+  "slug": "practice_ml_future",
+  "title": "Engineering practice and automation",
+  "chapters": [
+    24,
+    25,
+    26
+  ],
+  "handout_source": "slides/part7_human_and_machine.html",
+  "assigned_exercise": "25.2",
+  "slides": [
+    {
+      "title": "Engineering practice and automation",
+      "thesis": "Every technique must discharge a named verification claim.",
+      "sources": [
+        "ch24:24.1",
+        "ch25:25.1",
+        "ch25:25.4",
+        "ch26:26.1"
+      ],
+      "bullets": [],
+      "notes": [
+        "Open with a decision the audience must make in this area. Ask which result they currently treat as sufficient evidence and keep that answer for the closing discussion.",
+        "The lesson selects a practical argument from the book. The study handout preserves the detailed examples, citations and worked artifacts."
+      ],
+      "flow": [
+        "Make responsibilities observable",
+        "Read machine-learning evidence",
+        "Keep accountable human gates"
+      ],
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Learning outcomes",
+      "thesis": "Demonstrate these decisions on a real plan row.",
+      "sources": [
+        "ch24:24.1",
+        "ch25:25.1",
+        "ch25:25.4",
+        "ch26:26.1"
+      ],
+      "bullets": [
+        "Assign ownership across verification handoffs.",
+        "Interpret an ML result by task and denominator.",
+        "Admit generated checkers through accountable review.",
+        "Choose an improvement from the local verification bottleneck."
+      ],
+      "notes": [
+        "Read the outcomes as observable tasks. Ask learners to identify which one they can already demonstrate and which one currently depends on undocumented judgment.",
+        "At closure, require a concrete artifact or explanation for an outcome rather than a general expression of confidence."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    },
+    {
+      "title": "Route through the lesson",
+      "thesis": "Four blocks, each ending with a decision.",
+      "sources": [
+        "ch24:24.1",
+        "ch25:25.1",
+        "ch25:25.4",
+        "ch26:26.1"
+      ],
+      "bullets": [
+        "Make responsibilities observable",
+        "Read machine-learning evidence",
+        "Keep accountable human gates",
+        "Choose the next improvement"
+      ],
+      "notes": [
+        "Allow eighteen minutes for each block: a concept, its engineering consequence, a worked interpretation and a short discussion. Keep the discussion tied to the evidence available in the example.",
+        "Reserve the final eleven minutes for the assigned exercise and application to the learners’ work. The timing is a course design allocation, not an engineering estimate."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "An artifact owner is not the whole outcome",
+      "thesis": "Integration seams need explicit responsibility.",
+      "sources": [
+        "ch24:24.1"
+      ],
+      "bullets": [
+        "Name who resolves cross-team discrepancies.",
+        "Keep the expected evidence visible at handoff."
+      ],
+      "notes": [
+        "Use a checker and model owned by different teams. Both can be delivered while their disagreement remains unresolved.",
+        "Assign responsibility for the outcome, including the interface between artifacts. The owner should be able to say which evidence permits the receiving team to proceed."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Reviews answer different questions",
+      "thesis": "Plan, code and closure reviews need different inputs.",
+      "sources": [
+        "ch24:24.2"
+      ],
+      "bullets": [],
+      "notes": [
+        "Ask which review detects a missing requirement, which challenges a checker implementation and which accepts residual risk. Treating them as one generic approval loses those distinctions.",
+        "Bring the artifact that makes each question answerable. A coverage dashboard does not replace the specification at a plan review, and a code review does not authorize a waiver."
+      ],
+      "flow": [
+        "Intent review",
+        "Implementation review",
+        "Closure review"
+      ],
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Reproduction is an onboarding milestone",
+      "thesis": "A newcomer should establish evidence before explaining architecture.",
+      "sources": [
+        "ch24:24.3",
+        "ch24:24.4"
+      ],
+      "bullets": [
+        "Start from a known failure and its reproducer.",
+        "Produce a useful bug report and trace the ownership path."
+      ],
+      "notes": [
+        "A guided defect teaches the actual run environment, observations and team interfaces. Ask the newcomer to reproduce it without depending on an undocumented working directory.",
+        "Judge onboarding by a small useful artifact rather than vocabulary recall. The exercise also exposes missing process documentation in the team."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: every deliverable has an owner",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch24:24.1"
+      ],
+      "bullets": [
+        "The model and checker were both delivered.",
+        "Their disagreement blocks integration.",
+        "Which responsibility was left unnamed?"
+      ],
+      "notes": [
+        "Expected answer: responsibility for resolving the combined verification outcome at the seam, including authority to settle intent.",
+        "Ask learners to define the evidence and escalation path that make the handoff complete. Merely adding another status meeting does not resolve ownership."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Evaluate the proposed operational use",
+      "thesis": "A measured task outcome is more useful than generic accuracy.",
+      "sources": [
+        "ch25:25.1"
+      ],
+      "bullets": [
+        "Use held-back data and a relevant comparison.",
+        "Re-measure when the design or failure population changes."
+      ],
+      "notes": [
+        "Use the chapter’s triage-classifier proposal. Agreement with the human triage decisions measures the task the classifier is being proposed to assist, within that held-back population.",
+        "A changed design or failure distribution can invalidate the estimate. Keep an owner, monitoring cadence and retraining cost with the deployment decision."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "A benchmark needs its denominator",
+      "thesis": "Artifact class and acceptance criterion determine the meaning.",
+      "sources": [
+        "ch25:25.2"
+      ],
+      "bullets": [
+        "Record filtering and excluded cases.",
+        "Compare like tasks before comparing headline results."
+      ],
+      "notes": [
+        "The chapter compares studies producing different artifacts under different criteria. Ask what was counted as successful, what humans filtered, and what target set remained.",
+        "A result on one protocol or design does not establish a trend across workflows. Describe the reported experiment precisely before drawing a transfer claim for the local project."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "A generated checker can become a bad oracle",
+      "thesis": "A proof against current RTL does not establish intended behavior.",
+      "sources": [
+        "ch25:25.3"
+      ],
+      "bullets": [
+        "Inspect timing direction and activation.",
+        "Challenge both design and generated interpretation."
+      ],
+      "notes": [
+        "A syntactically valid property may express the wrong temporal relation or never activate. A proof against the current design can confirm consistency while preserving the original intent error.",
+        "Ask what independent observation would reject the plausible but wrong property. Mechanical checking reduces the candidate set; it does not remove the need to inspect the intended claim."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: most generated properties prove",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch25:25.2",
+        "ch25:25.3"
+      ],
+      "bullets": [
+        "Generated properties pass against the current RTL.",
+        "No one has checked them against intent.",
+        "What has the reported result established?"
+      ],
+      "notes": [
+        "Expected answer: consistency with that design under the proof environment, for the properties and candidates included in the measurement.",
+        "It has not established that the properties express the intended behavior or cover all required plan rows. Ask which acceptance work is still owed."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Filter mechanically before intent review",
+      "thesis": "Human attention should reach candidates with a clear provenance.",
+      "sources": [
+        "ch25:25.4"
+      ],
+      "bullets": [],
+      "notes": [
+        "Use parsing, elaboration, signal resolution and available semantic checks to remove mechanical failures before asking a reviewer to assess intent.",
+        "The reviewer still decides whether the surviving property expresses the requirement and is admitted into the plan. A tool pass must not silently perform that admission."
+      ],
+      "flow": [
+        "Mechanical checks",
+        "Intent review",
+        "Recorded admission"
+      ],
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Correlated errors defeat casual sampling",
+      "thesis": "A shared generation mistake can affect an entire batch.",
+      "sources": [
+        "ch25:25.4"
+      ],
+      "bullets": [
+        "Inspect systematic translation risks.",
+        "Do not infer batch correctness from a few plausible examples."
+      ],
+      "notes": [
+        "Explain why repeated use of the same flawed template or interpretation creates dependent errors. A small informal sample does not establish the reliability of the unreviewed remainder.",
+        "Choose review and validation according to the artifact’s role as an oracle. The chapter keeps acceptance authority with the people responsible for the verification claim."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Preserve the accepted artifact, not just the model name",
+      "thesis": "Provenance must support reconstruction of the decision.",
+      "sources": [
+        "ch25:25.5"
+      ],
+      "bullets": [
+        "Retain relevant inputs, generated text and accepted revision.",
+        "Record reviewer, rationale and applicable restrictions."
+      ],
+      "notes": [
+        "A model identifier does not identify the prompt context, retrieved specification, generation or human edits that produced the checker in use.",
+        "Keep the actual accepted artifact and the evidence supporting admission. Apply the project’s data-handling rules to the inputs and outputs before using the workflow."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: approval of a sampled batch",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch25:25.4",
+        "ch25:25.5"
+      ],
+      "bullets": [
+        "A reviewer checks a few generated properties.",
+        "All share the same translation template.",
+        "What uncertainty remains about the batch?"
+      ],
+      "notes": [
+        "Expected answer: a systematic error in the shared template or interpretation can affect many unreviewed properties. The sample’s plausibility does not establish their intent correctness.",
+        "Ask for a validation action targeted at that shared failure mode and a traceable acceptance decision for the artifacts actually admitted."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "The bottleneck depends on the project level",
+      "thesis": "A block and a software workload can need different improvements.",
+      "sources": [
+        "ch26:26.1"
+      ],
+      "bullets": [
+        "Separate knowing what to check from execution capacity.",
+        "Measure the local constraint before investing."
+      ],
+      "notes": [
+        "Contrast a block regression that already fits overnight with a system workload that cannot reach its useful software state in time. More execution capacity addresses only one of those immediate constraints.",
+        "The chapter’s claim is conditional on level and workload. Do not turn it into a universal prediction about every verification team."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Earlier and later evidence are complementary",
+      "thesis": "Moving a check does not erase its original scope obligations.",
+      "sources": [
+        "ch26:26.2"
+      ],
+      "bullets": [
+        "Use early models with explicit fidelity limits.",
+        "Retain deep block checking alongside system execution."
+      ],
+      "notes": [
+        "Earlier models expose integration or software problems before RTL is ready; later platforms exercise behaviors that need long execution or physical observations.",
+        "Neither movement justifies dropping a plan row without replacement evidence for the same claim. Review the handoff of model assumptions and residual behavior."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Automation moves work without removing judgment",
+      "thesis": "Partial oracles and model boundaries remain engineering problems.",
+      "sources": [
+        "ch26:26.3",
+        "ch26:26.4"
+      ],
+      "bullets": [
+        "Improve the weakest evidence-producing step.",
+        "Keep interpretation, review and ownership explicit."
+      ],
+      "notes": [
+        "Separate contingent tool capacity from durable limitations such as incomplete specifications and partial observation. Better automation can change the cost of a task without deciding what correctness should mean.",
+        "Ask learners to name a proposed improvement and the claim it strengthens. This keeps future-looking discussion tied to an inspectable engineering outcome."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: cut regression after a new proof",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch26:26.2"
+      ],
+      "bullets": [
+        "A new formal result motivates removing simulation work.",
+        "Its model covers only part of the old claim.",
+        "What evidence is required before the cut?"
+      ],
+      "notes": [
+        "Expected answer: show that the retained and replacement evidence jointly discharge the original plan row, including behavior outside the proof model.",
+        "A proof’s strength does not make it transferable to an unrelated boundary. Preserve the residual simulation obligation or explicitly revise the claim with a reviewed risk decision."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Exercise: compare two automation proposals",
+      "thesis": "Distinguish task evidence from design consistency.",
+      "sources": [
+        "ch25:25.1",
+        "ch25:25.3"
+      ],
+      "bullets": [
+        "One classifier is measured against held-back human triage.",
+        "Generated properties instead prove against current RTL.",
+        "Explain which result measures its proposed use and what remains unknown."
+      ],
+      "notes": [
+        "Assign book Exercise 25.2 in full. Use the chapter’s stated held-back comparison without treating its illustrative result as a prediction for another project.",
+        "Expected answer: the classifier measurement evaluates the proposed operational task against independent human triage on held-back history. Passing proofs show consistency with the modeled RTL and assumptions; they do not establish that generated properties express the intended specification."
+      ],
+      "flow": null,
+      "kind": "exercise",
+      "exercise_id": "25.2",
+      "minutes": 6
+    },
+    {
+      "title": "What to change on Monday",
+      "thesis": "Make one existing verification decision reviewable.",
+      "sources": [
+        "ch24:24.1",
+        "ch25:25.1",
+        "ch25:25.4",
+        "ch26:26.1"
+      ],
+      "bullets": [
+        "Repair one unowned integration handoff.",
+        "Audit provenance for an accepted generated checker.",
+        "Measure the bottleneck before selecting an automation project."
+      ],
+      "notes": [
+        "Ask each learner to choose one of these actions in an existing project. Require a small, inspectable deliverable and identify the person who will review it.",
+        "Keep the change connected to the lesson’s evidence limits. A new dashboard, script or model is useful only if it strengthens the claim the plan row is meant to establish."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Scope and next reading",
+      "thesis": "Use the handout for the detailed artifacts and sources.",
+      "sources": [
+        "ch24:24.1",
+        "ch25:25.1",
+        "ch25:25.4",
+        "ch26:26.1"
+      ],
+      "bullets": [
+        "Read the Engineering practice and automation handout and book Chapters 24–26.",
+        "Model training recipes and predictions about future product performance are outside this lesson."
+      ],
+      "notes": [
+        "Revisit the outcomes and ask the room to state a limitation of the strongest result discussed today. A complete answer identifies a model boundary, an assumption, a missing oracle or the scope of the underlying evidence.",
+        "Assign the detailed reading to the relevant chapters. The omitted topics are explicit scope boundaries, not claims that those topics are unimportant."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    }
+  ],
+  "handout_sha256": "6c47bdbb84ae04d20b8f2917855989fe44e56e76f962ca9d5d977c9a818ddc38",
+  "handout_supplemental_sources": {
+    "7": [
+      "ch01:1.2"
+    ],
+    "38": [
+      "ch01:1.2"
+    ],
+    "43": [
+      "ch01:1.2"
+    ]
+  },
+  "handout_numeric_annotations": {
+    "3": {
+      "numbers": [
+        "37"
+      ],
+      "reason": "Internal handout pointer to slide 37, where the historical argument is qualified; verified target title The historical read."
+    },
+    "6": {
+      "numbers": [
+        "44"
+      ],
+      "reason": "Internal handout pointer to slide 44, which applies the falsifiability question to sign-off; verified target title The discipline."
+    },
+    "28": {
+      "numbers": [
+        "2510.15906"
+      ],
+      "reason": "P22 bibliographic arXiv identifier in the source line."
+    },
+    "29": {
+      "numbers": [
+        "2510.15906"
+      ],
+      "reason": "P22 bibliographic arXiv identifier in the source line."
+    },
+    "43": {
+      "numbers": [
+        "58"
+      ],
+      "reason": "D36 tutorial slide 58 is a bibliographic source locator."
+    }
+  }
+}
