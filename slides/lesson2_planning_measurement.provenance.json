@@ -1,0 +1,417 @@
+{
+  "manifest": "slides/lessons/lesson2_planning_measurement.json",
+  "number": 2,
+  "minutes": 90,
+  "projection_slides": 22,
+  "retained_handout_slides": 32,
+  "legacy_source_sha256": "5242d1c37cf093d1cb0765dfee573017b7b958045e9a6446e9a30437088bd25d",
+  "provenance": [
+    {
+      "slide": 1,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 13,
+          "end": 65,
+          "sha256": "9dd97bef916f1606a33a01a353ee723cd67474046e25d0131ba29851e3f137cf"
+        },
+        {
+          "chapter": "ch06",
+          "start": 10,
+          "end": 36,
+          "sha256": "4d1f9cceba6eeb845374e18f975f4a9fd144559af45a7aa6fe94214309729d40"
+        },
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        },
+        {
+          "chapter": "ch07",
+          "start": 9,
+          "end": 20,
+          "sha256": "5579a7642d65b2a96631b878a7e44d59eeacc2950bbeadd906d4aa4aaa68cb90"
+        }
+      ]
+    },
+    {
+      "slide": 2,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 13,
+          "end": 65,
+          "sha256": "9dd97bef916f1606a33a01a353ee723cd67474046e25d0131ba29851e3f137cf"
+        },
+        {
+          "chapter": "ch06",
+          "start": 10,
+          "end": 36,
+          "sha256": "4d1f9cceba6eeb845374e18f975f4a9fd144559af45a7aa6fe94214309729d40"
+        },
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        },
+        {
+          "chapter": "ch07",
+          "start": 9,
+          "end": 20,
+          "sha256": "5579a7642d65b2a96631b878a7e44d59eeacc2950bbeadd906d4aa4aaa68cb90"
+        }
+      ]
+    },
+    {
+      "slide": 3,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 13,
+          "end": 65,
+          "sha256": "9dd97bef916f1606a33a01a353ee723cd67474046e25d0131ba29851e3f137cf"
+        },
+        {
+          "chapter": "ch06",
+          "start": 10,
+          "end": 36,
+          "sha256": "4d1f9cceba6eeb845374e18f975f4a9fd144559af45a7aa6fe94214309729d40"
+        },
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        },
+        {
+          "chapter": "ch07",
+          "start": 9,
+          "end": 20,
+          "sha256": "5579a7642d65b2a96631b878a7e44d59eeacc2950bbeadd906d4aa4aaa68cb90"
+        }
+      ]
+    },
+    {
+      "slide": 4,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 13,
+          "end": 65,
+          "sha256": "9dd97bef916f1606a33a01a353ee723cd67474046e25d0131ba29851e3f137cf"
+        }
+      ]
+    },
+    {
+      "slide": 5,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 66,
+          "end": 152,
+          "sha256": "8271d512807e95cc6c620b71b08f4fbe8f26082c550212772aac00de12a263b6"
+        }
+      ]
+    },
+    {
+      "slide": 6,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 153,
+          "end": 162,
+          "sha256": "fafd26b3e596742287270bb0e3b1a41691a667d5d5ef85d58b73477aefee301d"
+        },
+        {
+          "chapter": "ch05",
+          "start": 163,
+          "end": 180,
+          "sha256": "17dea0da4dec3dd86e0aa46083a808129ab168e0b1cb89362c21955a4347f48f"
+        }
+      ]
+    },
+    {
+      "slide": 7,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 66,
+          "end": 152,
+          "sha256": "8271d512807e95cc6c620b71b08f4fbe8f26082c550212772aac00de12a263b6"
+        }
+      ]
+    },
+    {
+      "slide": 8,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 10,
+          "end": 36,
+          "sha256": "4d1f9cceba6eeb845374e18f975f4a9fd144559af45a7aa6fe94214309729d40"
+        },
+        {
+          "chapter": "ch06",
+          "start": 37,
+          "end": 72,
+          "sha256": "1cdfcea9b2c99a36356d1cbaf4caad3b706ccd18d14ef293da2eb895efd6538d"
+        }
+      ]
+    },
+    {
+      "slide": 9,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 73,
+          "end": 91,
+          "sha256": "024498de13ffd5829491eebbbb627de22a008f2922f42aceab232749ad5b7c31"
+        },
+        {
+          "chapter": "ch06",
+          "start": 109,
+          "end": 223,
+          "sha256": "9acfbba951a158e73da596c884f6d2f963f2af858db7694ac3408075114fbe0e"
+        }
+      ]
+    },
+    {
+      "slide": 10,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 92,
+          "end": 108,
+          "sha256": "19dd319e9908ca57e9e82cf414a5449bff606788f7d6c4130d5680dd4d0c3eaf"
+        }
+      ]
+    },
+    {
+      "slide": 11,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 109,
+          "end": 223,
+          "sha256": "9acfbba951a158e73da596c884f6d2f963f2af858db7694ac3408075114fbe0e"
+        },
+        {
+          "chapter": "ch06",
+          "start": 224,
+          "end": 330,
+          "sha256": "1c92361fe90002073a1c18b8d540eac14bbe775205e70a753aac5476688a854d"
+        }
+      ]
+    },
+    {
+      "slide": 12,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        }
+      ]
+    },
+    {
+      "slide": 13,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 450,
+          "end": 541,
+          "sha256": "3f176a6854e17c5de23ce49a2a2f6aafd26f655bc6d99f411e773f8179dcbb65"
+        }
+      ]
+    },
+    {
+      "slide": 14,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 181,
+          "end": 206,
+          "sha256": "925377193e859a5788fdbdc42b1558d601acecaf5a53915d7d95789f6546130e"
+        },
+        {
+          "chapter": "ch05",
+          "start": 207,
+          "end": 278,
+          "sha256": "686be14b72bab31e132cfaf297c323d20a3fb3f3ecf3d3038b7661c20000da44"
+        }
+      ]
+    },
+    {
+      "slide": 15,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        },
+        {
+          "chapter": "ch06",
+          "start": 450,
+          "end": 541,
+          "sha256": "3f176a6854e17c5de23ce49a2a2f6aafd26f655bc6d99f411e773f8179dcbb65"
+        }
+      ]
+    },
+    {
+      "slide": 16,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch07",
+          "start": 9,
+          "end": 20,
+          "sha256": "5579a7642d65b2a96631b878a7e44d59eeacc2950bbeadd906d4aa4aaa68cb90"
+        },
+        {
+          "chapter": "ch07",
+          "start": 21,
+          "end": 38,
+          "sha256": "9cc53ff0bcf0cdfbde4f332f1cddffc2afa187f75c2295751e99c4b1c6457c25"
+        }
+      ]
+    },
+    {
+      "slide": 17,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch07",
+          "start": 39,
+          "end": 67,
+          "sha256": "ec7aa8d28294a7cde691105f93c42b51ae919c79390c90201df6883cd824b506"
+        }
+      ]
+    },
+    {
+      "slide": 18,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch07",
+          "start": 68,
+          "end": 116,
+          "sha256": "c1cd292734a425095cab4c1871b5ed84135f41cf07011f07b080f9924157b9a0"
+        }
+      ]
+    },
+    {
+      "slide": 19,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch07",
+          "start": 39,
+          "end": 67,
+          "sha256": "ec7aa8d28294a7cde691105f93c42b51ae919c79390c90201df6883cd824b506"
+        },
+        {
+          "chapter": "ch07",
+          "start": 145,
+          "end": 225,
+          "sha256": "520e25065b770ecc0f4e1d1bdefb63701bb40d7bdc1baef2428fd3ec540031a7"
+        }
+      ]
+    },
+    {
+      "slide": 20,
+      "kind": "exercise",
+      "sources": [
+        {
+          "chapter": "ch06",
+          "start": 92,
+          "end": 108,
+          "sha256": "19dd319e9908ca57e9e82cf414a5449bff606788f7d6c4130d5680dd4d0c3eaf"
+        }
+      ]
+    },
+    {
+      "slide": 21,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 13,
+          "end": 65,
+          "sha256": "9dd97bef916f1606a33a01a353ee723cd67474046e25d0131ba29851e3f137cf"
+        },
+        {
+          "chapter": "ch06",
+          "start": 10,
+          "end": 36,
+          "sha256": "4d1f9cceba6eeb845374e18f975f4a9fd144559af45a7aa6fe94214309729d40"
+        },
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        },
+        {
+          "chapter": "ch07",
+          "start": 9,
+          "end": 20,
+          "sha256": "5579a7642d65b2a96631b878a7e44d59eeacc2950bbeadd906d4aa4aaa68cb90"
+        }
+      ]
+    },
+    {
+      "slide": 22,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch05",
+          "start": 13,
+          "end": 65,
+          "sha256": "9dd97bef916f1606a33a01a353ee723cd67474046e25d0131ba29851e3f137cf"
+        },
+        {
+          "chapter": "ch06",
+          "start": 10,
+          "end": 36,
+          "sha256": "4d1f9cceba6eeb845374e18f975f4a9fd144559af45a7aa6fe94214309729d40"
+        },
+        {
+          "chapter": "ch06",
+          "start": 389,
+          "end": 449,
+          "sha256": "41f8eb55db722ee668f1487689571130ed6527c3a40aca19b09163d06046916e"
+        },
+        {
+          "chapter": "ch07",
+          "start": 9,
+          "end": 20,
+          "sha256": "5579a7642d65b2a96631b878a7e44d59eeacc2950bbeadd906d4aa4aaa68cb90"
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "lesson": "slides/lesson2_planning_measurement.html",
+    "handout": "slides/handout2_planning_measurement.html",
+    "notes": "slides/notes2_planning_measurement.html"
+  }
+}

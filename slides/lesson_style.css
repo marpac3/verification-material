@@ -1,0 +1,23 @@
+@page { size: 338.6667mm 190.5mm; margin: 0; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #172b45; background: #edf1f5; font-family: 'DejaVu Sans', sans-serif; }
+.slide { position: relative; width: 1280px; height: 720px; padding: 52px 72px 62px; background: #fff; page-break-after: always; overflow: visible; }
+.slide:last-child { page-break-after: auto; }
+.kicker { color: #285a82; font-size: 16px; margin: 0 0 12px; letter-spacing: 1px; }
+h1, h2 { font-size: 42px; line-height: 1.15; margin: 0 0 16px; letter-spacing: -1px; }
+.thesis { color: #285a82; font-size: 26px; line-height: 1.4; margin: 0 0 24px; }
+.content { font-size: 28px; line-height: 1.45; }
+.content p { margin: 12px 0; }
+.content li { margin: 10px 0; }
+.content ul { padding-left: 30px; margin: 10px 0; }
+.flow { width: 100%; table-layout: fixed; margin: 26px 0; border-spacing: 12px; }
+.flow td { padding: 18px; border-top: 5px solid #285a82; background: #edf3f8; color: #172b45; vertical-align: top; font-size: 26px; }
+.flow td.arrow { width: 7%; padding: 18px 0; border: 0; background: white; text-align: center; }
+.question .content { border-left: 6px solid #9b4b20; padding: 8px 24px; background: #fff5ea; }
+.brand, .pagenum { position: absolute; bottom: 14px; font-size: 12px; line-height: normal; color: #38516a; }
+.brand { left: 30px; } .pagenum { right: 30px; }
+.notes { display: none; }
+.nav { padding: 20px; font-size: 18px; }
+.nav a { color: #285a82; margin-right: 20px; }
+@media screen { .slide { margin: 24px auto; box-shadow: 0 5px 24px #b7c3cf; } }
+@media print { .nav { display: none; } .slide { margin: 0; } }

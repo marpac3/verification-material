@@ -141,3 +141,29 @@ of tests.
 Where a quantity in an example can be derived from that example's published
 parameters, the derivation is given. Where it cannot, its source is cited. A
 number with neither is a defect, and finding one is worth reporting.
+
+## Exercises and solutions
+
+Each chapter ends with exercises in calculation, engineering judgement and reading
+an artifact. Their identifiers combine the chapter and exercise numbers. The
+statements use the example systems defined above; any trace or log supplied in an
+exercise is constructed input for that exercise. Appendix D gives the reasoning
+and the relevant section, including the assumptions needed for a calculation.
+An answer that depends on an unstated premise should identify that premise.
+
+## Timing diagrams
+
+Timing diagrams place sampled signal values and property evaluation on the same
+cycle axis. Lettered payloads distinguish values without assigning an address or
+a key. The caption identifies the obligation and the trace that illustrates it;
+a diagram is a worked example, not a simulation result or a proof of the property.
+Reset behavior and registered checker outputs are read according to the sampling
+rules stated alongside the property.
+
+## Glossary and analytical index
+
+Appendix A retains the English definitions and adds Italian equivalents for
+terminology. The translation column does not change the meaning of a definition.
+The analytical index at the end of the book points to printed page numbers and
+uses cross-references for aliases. Its entries help locate a discussion; the
+chapter and glossary establish the term's meaning.

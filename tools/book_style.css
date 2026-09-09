@@ -562,6 +562,16 @@ figure.diagram figcaption {
   text-align: center;
 }
 
+/* A tall flowchart must leave room for its generated caption on the same PDF
+   page.  This only constrains print output; screen readers retain full size. */
+@media print {
+  figure.diagram img.diagram-img {
+    max-height: 170mm;
+    width: auto;
+    object-fit: contain;
+  }
+}
+
 .diagram-missing {
   font-family: "Liberation Sans", "DejaVu Sans", "FreeSans", sans-serif;
   font-size: 0.85em;

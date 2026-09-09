@@ -1,0 +1,479 @@
+{
+  "number": 2,
+  "slug": "planning_measurement",
+  "title": "Planning and measurement",
+  "chapters": [
+    5,
+    6,
+    7
+  ],
+  "handout_source": "slides/part2_planning_measurement.html",
+  "assigned_exercise": "6.3",
+  "slides": [
+    {
+      "title": "Planning and measurement",
+      "thesis": "Every technique must discharge a named verification claim.",
+      "sources": [
+        "ch05:5.1",
+        "ch06:6.1",
+        "ch06:6.8",
+        "ch07:7.1"
+      ],
+      "bullets": [],
+      "notes": [
+        "Open with a decision the audience must make in this area. Ask which result they currently treat as sufficient evidence and keep that answer for the closing discussion.",
+        "The lesson selects a practical argument from the book. The study handout preserves the detailed examples, citations and worked artifacts."
+      ],
+      "flow": [
+        "Plan the claim",
+        "Model what is sampled",
+        "Close holes honestly"
+      ],
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Learning outcomes",
+      "thesis": "Demonstrate these decisions on a real plan row.",
+      "sources": [
+        "ch05:5.1",
+        "ch06:6.1",
+        "ch06:6.8",
+        "ch07:7.1"
+      ],
+      "bullets": [
+        "Write a plan row with one closure criterion.",
+        "Design sampling around the event of interest.",
+        "Classify a hole with a reviewable reason.",
+        "Explain a readiness decision using correlated evidence."
+      ],
+      "notes": [
+        "Read the outcomes as observable tasks. Ask learners to identify which one they can already demonstrate and which one currently depends on undocumented judgment.",
+        "At closure, require a concrete artifact or explanation for an outcome rather than a general expression of confidence."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    },
+    {
+      "title": "Route through the lesson",
+      "thesis": "Four blocks, each ending with a decision.",
+      "sources": [
+        "ch05:5.1",
+        "ch06:6.1",
+        "ch06:6.8",
+        "ch07:7.1"
+      ],
+      "bullets": [
+        "Plan the claim",
+        "Model what is sampled",
+        "Close holes honestly",
+        "Read the evidence together"
+      ],
+      "notes": [
+        "Allow eighteen minutes for each block: a concept, its engineering consequence, a worked interpretation and a short discussion. Keep the discussion tied to the evidence available in the example.",
+        "Reserve the final eleven minutes for the assigned exercise and application to the learners’ work. The timing is a course design allocation, not an engineering estimate."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Extract behavior, not headings",
+      "thesis": "Omissions in the plan become omissions in verification.",
+      "sources": [
+        "ch05:5.1"
+      ],
+      "bullets": [
+        "Read interfaces, functions and architecture.",
+        "Record forbidden and out-of-scope behavior."
+      ],
+      "notes": [
+        "Walk a DMA description from register interface to transfer behavior and then to architectural interactions. A section heading is not yet an independently checkable feature.",
+        "Ask what the designer knows about corner cases that the prose does not say. Keep the must-not-happen list explicit; a happy-path feature list can be complete in appearance and still omit the escape."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "A row needs one closure argument",
+      "thesis": "Separate claims that require different evidence.",
+      "sources": [
+        "ch05:5.2"
+      ],
+      "bullets": [],
+      "notes": [
+        "Use a protocol property and a functional transfer result to illustrate why one feature description can need separate rows. The checker and closure metric must match the kind of wrong behavior.",
+        "Require the criterion before choosing the method. A test name or the phrase fully verified does not specify what will be observed or what discharges the row."
+      ],
+      "flow": [
+        "Feature and attributes",
+        "Pass/fail criterion",
+        "Method and closure"
+      ],
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Keep traceability executable",
+      "thesis": "Stable identifiers connect intent to results.",
+      "sources": [
+        "ch05:5.3",
+        "ch05:5.4"
+      ],
+      "bullets": [
+        "Link specification, feature, tests and coverage.",
+        "Make missing links visible in review."
+      ],
+      "notes": [
+        "Trace one permanent feature ID into the regression selection and back from its result. The direction matters: the report must identify which claim was checked, not merely which executable ran.",
+        "Invite design, systems, test and outside peers to challenge correctness, precision and completeness. Explain that a tool can preserve links but cannot detect an important feature nobody entered."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: one row, two verdicts",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch05:5.2"
+      ],
+      "bullets": [
+        "A row claims legal bursts and correct copied data.",
+        "Its only criterion is an assertion result.",
+        "How should the plan change?"
+      ],
+      "notes": [
+        "Expected answer: separate the protocol-legality claim from the data-correctness claim, assigning the appropriate property and functional comparison.",
+        "The distinction is evidence, not bureaucracy. A single passing protocol result cannot discharge a different data claim merely because both concern the DMA."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Coverage families have different subjects",
+      "thesis": "A full structural report can miss absent functionality.",
+      "sources": [
+        "ch06:6.1",
+        "ch06:6.2"
+      ],
+      "bullets": [],
+      "notes": [
+        "Ask where each model comes from. Code coverage is derived from implementation structure; functional coverage is authored from intended behavior; assertion activity describes whether checkers were exercised.",
+        "An omitted implementation cannot contribute code to cover. Use that observation to explain why structural completeness and specification completeness are different review targets."
+      ],
+      "flow": [
+        "Implementation",
+        "Specification",
+        "Checker activity"
+      ],
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Bins belong at behavior boundaries",
+      "thesis": "Convenient partitions can merge cases that behave differently.",
+      "sources": [
+        "ch06:6.3",
+        "ch06:6.5"
+      ],
+      "bullets": [
+        "Choose attributes from the specification.",
+        "Shape crosses to justified combinations.",
+        "Sample attributes when they describe the same event."
+      ],
+      "notes": [
+        "Use the accelerator example: width, precision and contention matter because they select different behavior. Equal-sized automatic bins need not respect those boundaries.",
+        "Ask when the attributes become jointly valid. A correct list of attributes sampled at unrelated times produces a misleading model even when its report looks complete."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Sampling is not checking",
+      "thesis": "A filled bin needs an active correctness oracle.",
+      "sources": [
+        "ch06:6.4"
+      ],
+      "bullets": [
+        "Coverage records that a modeled situation occurred.",
+        "A checker determines whether its behavior was acceptable."
+      ],
+      "notes": [
+        "Present a campaign optimized for bin hits. Ask what connects each hit to a mechanism that would reject a wrong result. The optimization target can be satisfied while that mechanism is disconnected.",
+        "Require coverage-model review to include the observing checkers. Do not replace this review with a comparison count: activity is necessary evidence, not a proof of checker correctness."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: contention at the wrong instant",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch06:6.5",
+        "ch06:6.6"
+      ],
+      "bullets": [
+        "Contention is sampled only when a job retires.",
+        "The defect requires contention during streaming.",
+        "What must the model remember?"
+      ],
+      "notes": [
+        "Expected answer: latch or otherwise preserve whether contention occurred during the relevant streaming window, then sample attributes together at a defined completion event.",
+        "Explain why the same report can be produced by a good and bad sampling model. The semantic error lives in the relation between the recorded attributes and the event of interest."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "A coverage hole is a diagnosis",
+      "thesis": "Different causes require different actions.",
+      "sources": [
+        "ch06:6.8"
+      ],
+      "bullets": [
+        "Check stimulus reachability and model intent.",
+        "Distinguish unexercised behavior from impossible behavior."
+      ],
+      "notes": [
+        "Follow a hole through classification before proposing more seeds. A model mistake, a generator restriction and a rare reachable case require different fixes.",
+        "Keep formal unreachability claims tied to their assumptions. A constraint in the stimulus library is not automatically a restriction of the design’s legal behavior."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "An exclusion is a reviewable artifact",
+      "thesis": "The report must retain the reason a hole was removed.",
+      "sources": [
+        "ch06:6.9"
+      ],
+      "bullets": [
+        "Classify the exclusion.",
+        "Record reason, owner and relevant version.",
+        "Review it when the design or plan changes."
+      ],
+      "notes": [
+        "Distinguish structural restrictions, specification restrictions and accepted risk. Each carries a different justification and authority.",
+        "Ask which change would invalidate the reason. A waiver copied from a previous configuration is an assumption that needs re-examination, not permanent evidence."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Risk determines depth",
+      "thesis": "Good observability makes checking affordable; it does not remove risk.",
+      "sources": [
+        "ch05:5.5",
+        "ch05:5.6"
+      ],
+      "bullets": [
+        "Consider consequence, novelty and specification quality.",
+        "Agree priority and cut lines before the schedule crisis."
+      ],
+      "notes": [
+        "Contrast the new DMA stride path with generated, well-specified register behavior. The chapter spends verification effort according to escape consequence and likelihood.",
+        "When a specification is incomplete, record zones and explicit defects. A local interpretation embedded in code must not become an unreviewed requirement merely because implementation has begun."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: unreachable or just ungenerated?",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch06:6.8",
+        "ch06:6.9"
+      ],
+      "bullets": [
+        "A legal bin has never been hit.",
+        "The sequence library does not generate it.",
+        "Is a structural exclusion justified?"
+      ],
+      "notes": [
+        "Expected answer: no. The observation establishes a stimulus limitation, not structural impossibility. Either expand stimulus or record a separately justified risk decision.",
+        "Ask what would justify unreachability: a specification restriction or a proof under reviewed assumptions. Have learners state the difference in the exclusion’s reason field."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "A dashboard is a set of instruments",
+      "thesis": "No single curve determines readiness.",
+      "sources": [
+        "ch07:7.1",
+        "ch07:7.2"
+      ],
+      "bullets": [
+        "Read per-feature status with coverage trends.",
+        "Correlate bug curves, regression health and debug effort."
+      ],
+      "notes": [
+        "Treat the plan as the organizing measure and use the other instruments to challenge its interpretation. A dashboard should trigger a decision, not simply decorate a status report.",
+        "Ask whether the same apparent improvement could be caused by reduced stimulus, disabled checking or a changing denominator. State the companion measurement that would discriminate."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "A flat bug curve is ambiguous",
+      "thesis": "Clean behavior and stimulus starvation can look alike.",
+      "sources": [
+        "ch07:7.3"
+      ],
+      "bullets": [
+        "Check freshness and breadth of stimulus.",
+        "Inspect checker integrity and where recent bugs were found."
+      ],
+      "notes": [
+        "Offer two explanations for flat discovery and ask the room to distinguish them using available data. The chapter requires fresh-stimulus and coverage information rather than inferring quality from the curve alone.",
+        "A late severe bug in an unmodeled region changes the model and the plan. Demonstrate stability again under the expanded instrumentation; the old flat curve did not watch that region."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Sign-off is an evidence decision",
+      "thesis": "Conditional release must name the accepted gap.",
+      "sources": [
+        "ch07:7.4"
+      ],
+      "bullets": [
+        "Discharge plan rows and review exclusions.",
+        "Record reproducible baselines and bug dispositions.",
+        "A conditional decision needs an owner and expiry."
+      ],
+      "notes": [
+        "Use the chapter’s three possible outcomes: signed off, conditional or held. Ask learners to distinguish a conditional decision from an informal promise to fix something later.",
+        "The waiver names the hole, reason, risk argument, owner and expiry. The record must permit someone outside the meeting to reconstruct what was accepted."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: a late severe bug",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch07:7.3",
+        "ch07:7.6"
+      ],
+      "bullets": [
+        "Discovery had been flat.",
+        "A new checker finds a severe unmodeled failure.",
+        "Which earlier conclusion must be revisited?"
+      ],
+      "notes": [
+        "Expected answer: the old stability evidence did not observe the newly discovered region. Update the plan, coverage and checking as necessary, then establish the required evidence under the changed instrumentation.",
+        "Do not treat fixing the immediate RTL defect as completing the escape analysis. The process that allowed the missing observation must also produce an upstream change."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Exercise: coverage without comparisons",
+      "thesis": "Decide what the report can establish.",
+      "sources": [
+        "ch06:6.4"
+      ],
+      "bullets": [
+        "The modeled space is fully hit.",
+        "No output comparison was performed.",
+        "State the missing evidence and a defensible closure decision."
+      ],
+      "notes": [
+        "Use book Exercise 6.3. Give learners time individually, then compare answers in pairs before the debrief.",
+        "Expected answer: the report measures sampling across an authored model, not correctness or completeness of that model. Closure needs a reviewed full model, current exclusions and stability under refinement, together with active checking of behavior. Reject an unconditional closure based on bin hits alone."
+      ],
+      "flow": null,
+      "kind": "exercise",
+      "exercise_id": "6.3",
+      "minutes": 6
+    },
+    {
+      "title": "What to change on Monday",
+      "thesis": "Make one existing verification decision reviewable.",
+      "sources": [
+        "ch05:5.1",
+        "ch06:6.1",
+        "ch06:6.8",
+        "ch07:7.1"
+      ],
+      "bullets": [
+        "Review one row with mixed closure criteria.",
+        "Trace a coverage hit to its checker.",
+        "Challenge one exclusion or dashboard inference."
+      ],
+      "notes": [
+        "Ask each learner to choose one of these actions in an existing project. Require a small, inspectable deliverable and identify the person who will review it.",
+        "Keep the change connected to the lesson’s evidence limits. A new dashboard, script or model is useful only if it strengthens the claim the plan row is meant to establish."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Scope and next reading",
+      "thesis": "Use the handout for the detailed artifacts and sources.",
+      "sources": [
+        "ch05:5.1",
+        "ch06:6.1",
+        "ch06:6.8",
+        "ch07:7.1"
+      ],
+      "bullets": [
+        "Read the Planning and measurement handout and book Chapters 5–7.",
+        "Tool configuration and full coverage syntax are outside this lesson."
+      ],
+      "notes": [
+        "Revisit the outcomes and ask the room to state a limitation of the strongest result discussed today. A complete answer identifies a model boundary, an assumption, a missing oracle or the scope of the underlying evidence.",
+        "Assign the detailed reading to the relevant chapters. The omitted topics are explicit scope boundaries, not claims that those topics are unimportant."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    }
+  ],
+  "handout_sha256": "5242d1c37cf093d1cb0765dfee573017b7b958045e9a6446e9a30437088bd25d",
+  "handout_supplemental_sources": {
+    "27": [
+      "ch14:14.6"
+    ]
+  },
+  "handout_numeric_annotations": {
+    "17": {
+      "numbers": [
+        "2020",
+        "3600",
+        "9000"
+      ],
+      "reason": "D6 slides Verification progress and Functional coverage challenges: TRL-5 in 2020; 120 instructions, 3600 lines and ~9000 additional lines for 300 extension instructions. Compared with the retained local source text."
+    },
+    "21": {
+      "numbers": [
+        "2003",
+        "2205.08524"
+      ],
+      "reason": "P16 publication year DAC 2003 and P4 arXiv identifier 2205.08524; bibliographic locators in visible sources, not numerical performance claims."
+    },
+    "26": {
+      "numbers": [
+        "16"
+      ],
+      "reason": "Illustrative plot window labelled weeks 1 through 16; identical synthetic curves support the ambiguity argument of ch07 §7.3. These are not empirical bug-history measurements."
+    }
+  }
+}

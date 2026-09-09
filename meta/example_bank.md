@@ -267,10 +267,11 @@ reset 0 with `has_reset` = 1, `is_rand` = 0 and not individually accessible. The
 either and the mirror's predictions stop meaning anything. The `rand` qualifier on
 the declaration is habit, not a claim: randomization is off twice over. `is_rand`
 is passed as 0, and — the part that actually settles it — for a predefined access
-policy outside the writable set, which `"W1C"` is, the library **ignores**
+policy outside the six the class reference lists (`"RW"`, `"WRC"`, `"WRS"`,
+`"WO"`, `"W1"`, `"WO1"` — and `"W1C"` is not among them) the library **ignores**
 `is_rand` and turns the field's `rand_mode()` off regardless of what was passed
-[cit:S4]. So a reader who flipped only the argument would not have re-enabled
-anything.
+[cit:S4]. Authority: S4, `uvm_reg_field::configure`, printed page 608. So a
+reader who flipped only the argument would not have re-enabled anything.
 
 *Corrected 2026-08-27.* This paragraph previously read "randomization is off
 because `is_rand` is passed as 0 — and `"W1C"` … would ignore a 1 there anyway",
@@ -279,6 +280,16 @@ operative and the argument inert, not the reverse. The earlier wording had been
 escalated as a chapter-versus-bank conflict with a recommendation to correct
 ch10 *to* the bank; reading S4 showed the bank was the wrong side, so ch10:222
 now names both mechanisms and this row was fixed to match. Do not re-invert it.
+
+*Corrected 2026-09-02.* The clause above said "for a predefined access policy
+outside the writable set, which `"W1C"` is". That is the wrong test: S4 does not
+speak of a writable set, it **enumerates** the six predefined policies for which
+`is_rand` is honoured — `"RW"`, `"WRC"`, `"WRS"`, `"WO"`, `"W1"`, `"WO1"` — and
+ignores it for every other one. `"W1C"` is writable *and* not on that list, so
+the old wording reached the right verdict by the wrong rule, and any policy that
+is writable but unlisted would have been mis-described. Aligned to ch10 §10.6 (the
+`configure` paragraph), which was corrected first; bank and chapter now state the
+same clause.
 
 ```systemverilog
 class uart_status_reg extends uvm_reg;
@@ -328,6 +339,7 @@ propagate; do not quietly write a different number in a chapter.
 | Reachable cells of `cg_2d_4kb` | **66** | 72 − 6, under the generator's `c_solver_budget` |
 | `cg_legalizer_stress` cross size (ch02) | **36** | 2 × 3 × 3 × 2 — the deliberately narrower mindset-stage variant, NOT a competing count of the same model |
 | reference SoC ADC reference voltage | **1.8 V** | 12-bit converter, so 1 LSB = 1.8 / 4096 ≈ **439 µV**. Verified against every chapter before adopting: ch19 says both power domains run at one nominal voltage without naming it, so nothing conflicts. Any tolerance stated in LSBs must be convertible to volts through this. *(ch21's PLL plan-row parameters — 100 ppm, 1024 cycles, 20 µs — are illustrative and chapter-local: do NOT canonicalise them unless a later chapter recurs them.)* |
+| RTL simulation slowdown against silicon | **a band — tens of thousands to a billion** | **Quote the band, never re-derive a single number, and never quote one end as *the* ratio.** Three in-band figures, each with its own scope and its own authority; they do not compete and must not be averaged, combined or presented as a trend. **High end — about a billion:** P21, taken against the target clock of a full application-class system (ch01 §1.4, ch17 §17.1, ch26 §26.1 — all three qualify the scope instead of stating a bare ratio: ch01 and ch26 with "at full application-class scale", ch17 with "against the target clock of a full application-class system"). **Middle — roughly a million:** T2, a simulation model against the finished chip (ch03 §3.1, "Worked example"). **Low end — a few tens of thousands:** this book's own measurement, the reference SoC's boot-equivalent gate — a couple of million cycles inside the eleven-minute nightly mean (ch17 §17.1). Where a chapter lands in the band depends on design size, on how much of the system is instantiated and on how much instrumentation was compiled in, so a chapter stating any of the three MUST say which scale it means. The declaration itself lives in ch17 §17.1 ("this book declares one: from tens of thousands at the low end to a billion at the high end") — quote that sentence, do not paraphrase the ends. |
 | flagship cycles in a 40-minute run | **1.4–3.6 × 10¹²** | 2,400 s × the DVFS band 0.6–1.5 GHz. Deliberately robust: *every* operating point lands on order 10¹², which is what licenses ch20's "of order 10¹²" without pinning the DVFS point. Any chapter quoting a cycle count for a wall-clock duration must show the clock it used — this figure was underivable until the clock rates were added to the flagship's clocking row above |
 | Crossbar manager ports | **5** | core-I, core-D, DMA ch0, DMA ch1, debug = indices 0-4 |
 | Crossbar subordinate ports | **4** | SRAM, boot ROM, APB bridge, neural accelerator = indices 0-3 |

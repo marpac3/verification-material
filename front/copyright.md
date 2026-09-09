@@ -1,17 +1,17 @@
 # Hardware Verification: A Holistic Guide
 
-Marco Paci · ChipsIT
+Marco Paci · Fondazione Chips-IT
 
-First internal edition, August 2026.
+First edition, September 2026.
 
-© 2026 ChipsIT. All rights reserved.
+© 2026 Fondazione Chips-IT. Some rights reserved — see **Licence**, below.
 
 <hr class="cp-rule" />
 
-**Purpose of this edition.** This edition is prepared for internal use: as a
-reference for engineers doing verification work, and as teaching material for
-engineers moving into verification from design. It is not a vendor document and
-recommends no commercial tool.
+**Purpose of this edition.** This edition serves two uses: a reference for
+engineers doing verification work, and teaching material for engineers moving
+into verification from design. It is not a vendor document and recommends no
+commercial tool.
 
 **Sources.** Every numbered reference in this book resolves to a document held in
 full text, and every claim carrying a reference was checked against the page
@@ -70,6 +70,20 @@ closed source corpus, an independent review pass for each chapter, page-level
 verification of citations, and mechanical gates on numbers, code, hedges and
 cross-references — is described in the preface, together with its known ceiling,
 so that a reader who wants to judge the method can.
+
+**Licence.** This book is licensed under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA
+4.0), whose legal code is at
+<https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode> and travels with
+the book as the file `LICENSE`. You may copy, redistribute, quote at length and
+adapt it for non-commercial purposes, provided you credit *Marco Paci /
+Fondazione Chips-IT, Hardware Verification: A Holistic Guide, first edition, September
+2026*, indicate any changes, link to the licence, and place any adaptation
+under the same terms. The licence covers this book and nothing else: the
+documents it cites are not part of it and are not relicensed by it — the
+primary sources are held outside it and remain subject to their publishers'
+terms, and the quotations from standards described above rest on the statutory
+right of quotation rather than on this licence.
 
 **Errors.** Corrections are welcome and will be recorded. An error found in a
 book of this size is a contribution to it, not an embarrassment to it.

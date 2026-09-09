@@ -12,7 +12,7 @@
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
-# Apparato editoriale — solo i sei file necessari alla build, tutti verificati
+# Apparato editoriale — solo i file necessari alla build, tutti verificati
 # ---------------------------------------------------------------------------
 # Esclusi in blocco, poi riammessi uno per uno: se domani nasce un file nuovo
 # in meta/ resta fuori per default. La logica giusta è "chiuso salvo eccezioni",
@@ -24,6 +24,8 @@ meta/*
 !meta/outline_master.md
 !meta/references.md
 !meta/style_guide.md
+!meta/book_manifest.txt
+!meta/index_terms.md
 
 # ---------------------------------------------------------------------------
 # Output di build — rigenerabile, non va in storia

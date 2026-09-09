@@ -1,0 +1,475 @@
+{
+  "number": 5,
+  "slug": "system_silicon",
+  "title": "System execution and silicon",
+  "chapters": [
+    17,
+    18,
+    19,
+    20
+  ],
+  "handout_source": "slides/part5_beyond_rtl.html",
+  "assigned_exercise": "18.2",
+  "slides": [
+    {
+      "title": "System execution and silicon",
+      "thesis": "Every technique must discharge a named verification claim.",
+      "sources": [
+        "ch17:17.1",
+        "ch18:18.1",
+        "ch19:19.1",
+        "ch20:20.1"
+      ],
+      "bullets": [],
+      "notes": [
+        "Open with a decision the audience must make in this area. Ask which result they currently treat as sufficient evidence and keep that answer for the closing discussion.",
+        "The lesson selects a practical argument from the book. The study handout preserves the detailed examples, citations and worked artifacts."
+      ],
+      "flow": [
+        "Choose where to run",
+        "Interpret software evidence",
+        "Use implementation-level simulation"
+      ],
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Learning outcomes",
+      "thesis": "Demonstrate these decisions on a real plan row.",
+      "sources": [
+        "ch17:17.1",
+        "ch18:18.1",
+        "ch19:19.1",
+        "ch20:20.1"
+      ],
+      "bullets": [
+        "Choose an execution platform with a usable oracle.",
+        "Resolve model disagreements without default authority.",
+        "Interpret GLS and power-aware results within their scope.",
+        "Turn a silicon escape into upstream evidence."
+      ],
+      "notes": [
+        "Read the outcomes as observable tasks. Ask learners to identify which one they can already demonstrate and which one currently depends on undocumented judgment.",
+        "At closure, require a concrete artifact or explanation for an outcome rather than a general expression of confidence."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    },
+    {
+      "title": "Route through the lesson",
+      "thesis": "Four blocks, each ending with a decision.",
+      "sources": [
+        "ch17:17.1",
+        "ch18:18.1",
+        "ch19:19.1",
+        "ch20:20.1"
+      ],
+      "bullets": [
+        "Choose where to run",
+        "Interpret software evidence",
+        "Use implementation-level simulation",
+        "Bring silicon evidence upstream"
+      ],
+      "notes": [
+        "Allow eighteen minutes for each block: a concept, its engineering consequence, a worked interpretation and a short discussion. Keep the discussion tied to the evidence available in the example.",
+        "Reserve the final eleven minutes for the assigned exercise and application to the learners’ work. The timing is a course design allocation, not an engineering estimate."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "More cycles answer only some questions",
+      "thesis": "Select the platform from the scenario and its oracle.",
+      "sources": [
+        "ch17:17.1",
+        "ch17:17.2"
+      ],
+      "bullets": [
+        "Distinguish many short runs from one long execution.",
+        "Budget observability as well as speed."
+      ],
+      "notes": [
+        "Contrast broad seed exploration with firmware that must execute deeply before reaching its interesting state. Faster cycles do not replace scenario breadth or an effective checker.",
+        "Ask what failure evidence the chosen platform can retain. Platform selection made without a debug plan can move the bottleneck from execution to diagnosis."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "The host boundary can dominate",
+      "thesis": "Transaction batching matters when work crosses platforms.",
+      "sources": [
+        "ch17:17.3",
+        "ch17:17.4"
+      ],
+      "bullets": [],
+      "notes": [
+        "Walk one transaction from host-side software through a transactor to the hardware execution platform. Frequent fine-grained interaction can consume the benefit of fast hardware cycles.",
+        "Choose a boundary that preserves the verification intent and amortizes communication. Record any behavior moved into the transactor that now needs its own validation."
+      ],
+      "flow": [
+        "Host test",
+        "Transaction boundary",
+        "Hardware execution"
+      ],
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Capacity is a shared project resource",
+      "thesis": "Image preparation and debug access belong in the schedule.",
+      "sources": [
+        "ch17:17.5"
+      ],
+      "bullets": [
+        "Include compile, queue and turnaround time.",
+        "Allocate platform capacity by verification value."
+      ],
+      "notes": [
+        "Have learners distinguish raw cycle rate from usable throughput for a team. Build time, image availability and access contention can dominate the time to a useful answer.",
+        "A platform resource policy should identify the runs that need it and the evidence they return. A simulator workload is not automatically a good emulation workload."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: accelerate the wrong workload",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch17:17.1",
+        "ch17:17.4"
+      ],
+      "bullets": [
+        "A fast platform spends most time waiting for host calls.",
+        "The scenario itself needs few cycles.",
+        "What boundary or platform decision should be revisited?"
+      ],
+      "notes": [
+        "Expected answer: inspect the transaction partition and communication granularity, and reconsider whether this scenario benefits from that platform at all.",
+        "Do not prescribe batching blindly: verify that a changed boundary preserves the observations and timing behavior the test is meant to check."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Prototypes trade visibility for execution",
+      "thesis": "A long run needs a reproducible failure record.",
+      "sources": [
+        "ch18:18.1"
+      ],
+      "bullets": [
+        "Plan observability before the failure arrives.",
+        "Keep software, image and configuration together."
+      ],
+      "notes": [
+        "Ask which internal observation would distinguish the likely hypotheses after a software-visible failure. On a prototype, that observation may need to be planned before the run.",
+        "Preserve the complete context of the experiment. A software log without the corresponding hardware image and setup can leave a long failure impossible to reproduce."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "A virtual model has an abstraction boundary",
+      "thesis": "Fast software progress does not validate omitted timing.",
+      "sources": [
+        "ch18:18.2"
+      ],
+      "bullets": [
+        "Use the model for the behavior it represents.",
+        "Resolve disagreements against agreed intent."
+      ],
+      "notes": [
+        "A virtual model can be useful for software bring-up while omitting timing and implementation details relevant to hardware verification. State that scope before interpreting a passing software run.",
+        "When model and RTL disagree, neither wins by being called the reference. Return to the specification and identify whether hardware, software expectations or the specification need correction."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "A hybrid boundary is part of the model",
+      "thesis": "Timing-dependent behavior can invalidate an attractive partition.",
+      "sources": [
+        "ch18:18.3",
+        "ch18:18.4"
+      ],
+      "bullets": [
+        "Review synchronization and interaction frequency.",
+        "Retain system checking beyond one driver trajectory."
+      ],
+      "notes": [
+        "Consider a host virtual platform coupled to RTL. A partition that crosses a tight timing dependency may be expensive or semantically inappropriate even when both halves work independently.",
+        "A successful firmware driver follows one programmed trajectory. It does not replace verification of the full legal peripheral behavior or the interactions that trajectory never exercises."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: who owns the mismatch?",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch18:18.2",
+        "ch18:18.5"
+      ],
+      "bullets": [
+        "A virtual peripheral and RTL disagree.",
+        "Each team declares its artifact authoritative.",
+        "What decision should triage produce?"
+      ],
+      "notes": [
+        "Expected answer: resolve the intended behavior and classify a hardware defect, software/model-side defect or specification gap, rather than choosing an artifact by organizational ownership.",
+        "For a specification gap, identify the authority that must settle intent. Neither implementation team can close that gap by silently selecting its own interpretation."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "GLS samples implementation behavior",
+      "thesis": "Static timing analysis remains the timing authority.",
+      "sources": [
+        "ch19:19.1",
+        "ch19:19.2",
+        "ch19:19.3"
+      ],
+      "bullets": [
+        "Select runs for implementation-specific risks.",
+        "Keep timing annotation and configuration reproducible."
+      ],
+      "notes": [
+        "Explain the complementary questions: static timing evaluates timing paths under its constraints; gate-level simulation exercises selected functional scenarios with implementation semantics.",
+        "A passing sample does not cover every constrained path. Use risk to select GLS runs instead of treating the RTL regression list as an automatic implementation-level campaign."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Unknowns can make a checker silent",
+      "thesis": "Inspect the comparison semantics before accepting a clean run.",
+      "sources": [
+        "ch19:19.2"
+      ],
+      "bullets": [
+        "An unknown comparison can bypass a failure branch.",
+        "Check initialization, models and the observer."
+      ],
+      "notes": [
+        "Use the chapter’s diagnostic distinction between an actual design problem, a modeling issue and an observer that does not reject unknown data. A result can appear clean because the checker evaluated an unknown condition.",
+        "Do not repair the waveform first and assume the verification is sound. Confirm that the checking policy would expose the unacceptable unknown in the relevant observation window."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Power intent adds temporal obligations",
+      "thesis": "Isolation and restoration must protect the observation boundary.",
+      "sources": [
+        "ch19:19.4",
+        "ch19:19.5"
+      ],
+      "bullets": [
+        "Check corruption, isolation and state restoration.",
+        "Exercise the selected power transitions."
+      ],
+      "notes": [
+        "Walk shutdown and wake-up in event order. Isolation must protect receivers before corruption reaches them and remain effective until restored behavior is safe to observe.",
+        "The simulator’s treatment of power states and corruption is part of the model. An optimistic state mapping can make the trace look valid while omitting the failure mechanism."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: clean output during power-off",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch19:19.4"
+      ],
+      "bullets": [
+        "A powered-down block remains readable in the model.",
+        "Its outputs stay legal throughout shutdown.",
+        "What modeling premise must be challenged?"
+      ],
+      "notes": [
+        "Expected answer: whether the selected power-aware setup actually models corruption, isolation and restoration for the relevant states.",
+        "A clean trace is meaningful only if the model admits the failure being checked. Ask for an observation showing that the intended corruption and protection mechanisms were active."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Trace storage fixes a tradeoff",
+      "thesis": "More observed signals leave fewer cycles in a fixed buffer.",
+      "sources": [
+        "ch20:20.1",
+        "ch20:20.2"
+      ],
+      "bullets": [],
+      "notes": [
+        "Keep the argument qualitative before opening the chapter’s trace-depth calculation. The finite buffer is a physical resource chosen before the failure is known.",
+        "Select signals that separate likely hypotheses, and plan triggers that place the interesting interval inside the retained window. Wider tracing without that plan can shorten useful history."
+      ],
+      "flow": [
+        "Signal selection",
+        "Fixed trace storage",
+        "Retained history"
+      ],
+      "kind": "content",
+      "minutes": 4
+    },
+    {
+      "title": "Bring-up is an evidence ladder",
+      "thesis": "A failed step is interpretable only after its prerequisites hold.",
+      "sources": [
+        "ch20:20.3"
+      ],
+      "bullets": [
+        "Establish clocks, reset and access first.",
+        "Advance through checks with explicit dependencies."
+      ],
+      "notes": [
+        "Ask why a failed memory test cannot immediately be assigned to the memory subsystem if basic access or initialization is still unverified.",
+        "Each bring-up stage should establish premises for the next. Preserve the first failing observation and the configuration rather than proceeding until some later application happens to run."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "An escape owes an upstream change",
+      "thesis": "A workaround alone leaves the verification gap open.",
+      "sources": [
+        "ch20:20.4",
+        "ch20:20.5",
+        "ch20:20.6"
+      ],
+      "bullets": [
+        "Localize by configuration and time.",
+        "Create a pre-silicon reproducer where feasible.",
+        "Update the plan, model or checker that missed it."
+      ],
+      "notes": [
+        "Separate immediate containment from explaining the escape. Configuration bisection can reduce the hypothesis space before expensive temporal localization.",
+        "A hardware or firmware workaround needs its own verification. Then identify which earlier observation would have found the problem and make that lesson durable in the verification flow."
+      ],
+      "flow": null,
+      "kind": "content",
+      "minutes": 5
+    },
+    {
+      "title": "Discussion: a successful workaround",
+      "thesis": "Name the evidence that would settle the decision.",
+      "sources": [
+        "ch20:20.5",
+        "ch20:20.6"
+      ],
+      "bullets": [
+        "Firmware avoids the failing operating mode.",
+        "The product now survives the customer scenario.",
+        "Which verification work remains?"
+      ],
+      "notes": [
+        "Expected answer: validate the workaround’s scope and side effects, retain the original failure, and repair the upstream verification gap.",
+        "Containment can be necessary without demonstrating root cause or preventing recurrence. Ask for the concrete plan row, test or checker change that closes the learning loop."
+      ],
+      "flow": null,
+      "kind": "question",
+      "minutes": 4
+    },
+    {
+      "title": "Exercise: resolve a model disagreement",
+      "thesis": "Choose evidence before choosing an owner.",
+      "sources": [
+        "ch18:18.2",
+        "ch18:18.5"
+      ],
+      "bullets": [
+        "A virtual peripheral and RTL disagree on a register side effect.",
+        "State the possible triage outcomes.",
+        "Explain what a shared description fixes and what it cannot fix."
+      ],
+      "notes": [
+        "Assign book Exercise 18.2 in full. The answer must include the specification-gap outcome and the limitation of common-source generation.",
+        "Expected answer: disagreement alone does not identify the wrong artifact. Resolve hardware, software/model expectations or a specification gap. Generating consistent artifacts from one description prevents drift, but cannot expose a shared error in that description."
+      ],
+      "flow": null,
+      "kind": "exercise",
+      "exercise_id": "18.2",
+      "minutes": 6
+    },
+    {
+      "title": "What to change on Monday",
+      "thesis": "Make one existing verification decision reviewable.",
+      "sources": [
+        "ch17:17.1",
+        "ch18:18.1",
+        "ch19:19.1",
+        "ch20:20.1"
+      ],
+      "bullets": [
+        "Record the boundary of one virtual model.",
+        "Audit an unknown-sensitive checker.",
+        "Trace a workaround to its upstream verification change."
+      ],
+      "notes": [
+        "Ask each learner to choose one of these actions in an existing project. Require a small, inspectable deliverable and identify the person who will review it.",
+        "Keep the change connected to the lesson’s evidence limits. A new dashboard, script or model is useful only if it strengthens the claim the plan row is meant to establish."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 2
+    },
+    {
+      "title": "Scope and next reading",
+      "thesis": "Use the handout for the detailed artifacts and sources.",
+      "sources": [
+        "ch17:17.1",
+        "ch18:18.1",
+        "ch19:19.1",
+        "ch20:20.1"
+      ],
+      "bullets": [
+        "Read the System execution and silicon handout and book Chapters 17–20.",
+        "Platform setup recipes and full power-intent syntax remain in the handout."
+      ],
+      "notes": [
+        "Revisit the outcomes and ask the room to state a limitation of the strongest result discussed today. A complete answer identifies a model boundary, an assumption, a missing oracle or the scope of the underlying evidence.",
+        "Assign the detailed reading to the relevant chapters. The omitted topics are explicit scope boundaries, not claims that those topics are unimportant."
+      ],
+      "flow": null,
+      "kind": "curriculum",
+      "minutes": 3
+    }
+  ],
+  "handout_sha256": "0b271b6087244433248d53d65857125e1a8d09fb77a972d7e01ee2a7b79461e3",
+  "handout_supplemental_sources": {
+    "18": [
+      "ch01:1.2"
+    ]
+  },
+  "handout_numeric_annotations": {
+    "13": {
+      "numbers": [
+        "2604.15073"
+      ],
+      "reason": "P14 bibliographic arXiv identifier, visible source line."
+    },
+    "16": {
+      "numbers": [
+        "100",
+        "1000"
+      ],
+      "reason": "ch18 §18.1 spells the same approximate range as a hundred to a thousand times. Retained digits are a notation difference, not an added platform measurement."
+    }
+  }
+}

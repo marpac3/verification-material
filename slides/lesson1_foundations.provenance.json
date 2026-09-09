@@ -1,0 +1,387 @@
+{
+  "manifest": "slides/lessons/lesson1_foundations.json",
+  "number": 1,
+  "minutes": 90,
+  "projection_slides": 22,
+  "retained_handout_slides": 37,
+  "legacy_source_sha256": "b3e65141986b5204b8a101fca5c13b43b04fa59815f67d79c0ed8996deaab9ae",
+  "provenance": [
+    {
+      "slide": 1,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 11,
+          "end": 19,
+          "sha256": "ef2d85b8e9e4ba29d4d8b5303844da7bce926650d40dc8e20e35c2090de22585"
+        },
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        }
+      ]
+    },
+    {
+      "slide": 2,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 11,
+          "end": 19,
+          "sha256": "ef2d85b8e9e4ba29d4d8b5303844da7bce926650d40dc8e20e35c2090de22585"
+        },
+        {
+          "chapter": "ch02",
+          "start": 11,
+          "end": 57,
+          "sha256": "6208e51080c4b4799d3541566c1a3bc4eb53276541f662b4bca1b83f42f1af5e"
+        },
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        },
+        {
+          "chapter": "ch04",
+          "start": 168,
+          "end": 199,
+          "sha256": "6f3e96f9f4aed30313810b6ada39e033480a5d7fd4049cf912c40343aed1368c"
+        }
+      ]
+    },
+    {
+      "slide": 3,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 11,
+          "end": 19,
+          "sha256": "ef2d85b8e9e4ba29d4d8b5303844da7bce926650d40dc8e20e35c2090de22585"
+        },
+        {
+          "chapter": "ch02",
+          "start": 11,
+          "end": 57,
+          "sha256": "6208e51080c4b4799d3541566c1a3bc4eb53276541f662b4bca1b83f42f1af5e"
+        },
+        {
+          "chapter": "ch03",
+          "start": 9,
+          "end": 67,
+          "sha256": "d45ef7e9ccc9ff4e7a1d7463fd5e844cda5a4e5ee11bf671b055f40d1aadf4ce"
+        },
+        {
+          "chapter": "ch04",
+          "start": 11,
+          "end": 48,
+          "sha256": "3aa86305154ac5a26e9ba0d494f714ccc1e809a657a82a718890ad37ca17aa69"
+        }
+      ]
+    },
+    {
+      "slide": 4,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 11,
+          "end": 19,
+          "sha256": "ef2d85b8e9e4ba29d4d8b5303844da7bce926650d40dc8e20e35c2090de22585"
+        }
+      ]
+    },
+    {
+      "slide": 5,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 11,
+          "end": 19,
+          "sha256": "ef2d85b8e9e4ba29d4d8b5303844da7bce926650d40dc8e20e35c2090de22585"
+        },
+        {
+          "chapter": "ch01",
+          "start": 60,
+          "end": 122,
+          "sha256": "59df120c926bb39fe7673fa102062070e347b3a45a52b85914b7e10e31ebdbca"
+        }
+      ]
+    },
+    {
+      "slide": 6,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 20,
+          "end": 43,
+          "sha256": "f5912c40dbf5305806d70253cf8eef3f25d11736e506281eab29d98d7aff9b98"
+        },
+        {
+          "chapter": "ch01",
+          "start": 44,
+          "end": 59,
+          "sha256": "66260d3a94f5192c961e2e7847a086dd05f837086be4095c78945d3e5c1d7c24"
+        }
+      ]
+    },
+    {
+      "slide": 7,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch01",
+          "start": 20,
+          "end": 43,
+          "sha256": "f5912c40dbf5305806d70253cf8eef3f25d11736e506281eab29d98d7aff9b98"
+        },
+        {
+          "chapter": "ch01",
+          "start": 60,
+          "end": 122,
+          "sha256": "59df120c926bb39fe7673fa102062070e347b3a45a52b85914b7e10e31ebdbca"
+        }
+      ]
+    },
+    {
+      "slide": 8,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch02",
+          "start": 11,
+          "end": 57,
+          "sha256": "6208e51080c4b4799d3541566c1a3bc4eb53276541f662b4bca1b83f42f1af5e"
+        },
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        }
+      ]
+    },
+    {
+      "slide": 9,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch02",
+          "start": 11,
+          "end": 57,
+          "sha256": "6208e51080c4b4799d3541566c1a3bc4eb53276541f662b4bca1b83f42f1af5e"
+        }
+      ]
+    },
+    {
+      "slide": 10,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch02",
+          "start": 58,
+          "end": 134,
+          "sha256": "8c440f8f366c4b46690754fdef625339a9d46ee1a613043800832992cb522c78"
+        }
+      ]
+    },
+    {
+      "slide": 11,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch02",
+          "start": 11,
+          "end": 57,
+          "sha256": "6208e51080c4b4799d3541566c1a3bc4eb53276541f662b4bca1b83f42f1af5e"
+        },
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        }
+      ]
+    },
+    {
+      "slide": 12,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch03",
+          "start": 9,
+          "end": 67,
+          "sha256": "d45ef7e9ccc9ff4e7a1d7463fd5e844cda5a4e5ee11bf671b055f40d1aadf4ce"
+        }
+      ]
+    },
+    {
+      "slide": 13,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch03",
+          "start": 68,
+          "end": 96,
+          "sha256": "9db81e6ac3fb99a5fffcef2f61f34778a4e2551012976c49ced42e059eb0f079"
+        }
+      ]
+    },
+    {
+      "slide": 14,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        }
+      ]
+    },
+    {
+      "slide": 15,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        },
+        {
+          "chapter": "ch03",
+          "start": 147,
+          "end": 213,
+          "sha256": "625abc4ae4eed2fbaa6f8cb0c39c17a892422ddea4f1391d461b27bbc54980b9"
+        }
+      ]
+    },
+    {
+      "slide": 16,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch04",
+          "start": 49,
+          "end": 88,
+          "sha256": "8ab14c7d54440fe28b2d9e557d548c7a4006ea79ca1e9908205d77abe9005042"
+        }
+      ]
+    },
+    {
+      "slide": 17,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch04",
+          "start": 89,
+          "end": 132,
+          "sha256": "8b8ca3ef137791550583c2c062cdcc9ce46dc33fcb162135b21bf4f06dcda1b4"
+        }
+      ]
+    },
+    {
+      "slide": 18,
+      "kind": "content",
+      "sources": [
+        {
+          "chapter": "ch04",
+          "start": 133,
+          "end": 167,
+          "sha256": "ff548d99db3f3b1dc390bdc85997722fbc717a9f93c2d1ea0c128ebaad74c257"
+        },
+        {
+          "chapter": "ch04",
+          "start": 168,
+          "end": 199,
+          "sha256": "6f3e96f9f4aed30313810b6ada39e033480a5d7fd4049cf912c40343aed1368c"
+        }
+      ]
+    },
+    {
+      "slide": 19,
+      "kind": "question",
+      "sources": [
+        {
+          "chapter": "ch04",
+          "start": 133,
+          "end": 167,
+          "sha256": "ff548d99db3f3b1dc390bdc85997722fbc717a9f93c2d1ea0c128ebaad74c257"
+        },
+        {
+          "chapter": "ch04",
+          "start": 168,
+          "end": 199,
+          "sha256": "6f3e96f9f4aed30313810b6ada39e033480a5d7fd4049cf912c40343aed1368c"
+        }
+      ]
+    },
+    {
+      "slide": 20,
+      "kind": "exercise",
+      "sources": [
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        }
+      ]
+    },
+    {
+      "slide": 21,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch02",
+          "start": 11,
+          "end": 57,
+          "sha256": "6208e51080c4b4799d3541566c1a3bc4eb53276541f662b4bca1b83f42f1af5e"
+        },
+        {
+          "chapter": "ch03",
+          "start": 97,
+          "end": 146,
+          "sha256": "76d1e640422a3d8e462be0b42407139231740488d6b4dae0442211dc2096d0f6"
+        },
+        {
+          "chapter": "ch04",
+          "start": 49,
+          "end": 88,
+          "sha256": "8ab14c7d54440fe28b2d9e557d548c7a4006ea79ca1e9908205d77abe9005042"
+        }
+      ]
+    },
+    {
+      "slide": 22,
+      "kind": "curriculum",
+      "sources": [
+        {
+          "chapter": "ch03",
+          "start": 147,
+          "end": 213,
+          "sha256": "625abc4ae4eed2fbaa6f8cb0c39c17a892422ddea4f1391d461b27bbc54980b9"
+        },
+        {
+          "chapter": "ch04",
+          "start": 49,
+          "end": 88,
+          "sha256": "8ab14c7d54440fe28b2d9e557d548c7a4006ea79ca1e9908205d77abe9005042"
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "lesson": "slides/lesson1_foundations.html",
+    "handout": "slides/handout1_foundations.html",
+    "notes": "slides/notes1_foundations.html"
+  }
+}

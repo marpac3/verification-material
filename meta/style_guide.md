@@ -14,6 +14,78 @@ against the approved bilingual glossary.)
 > replaces the register and the skeleton. Any agent reading this must use revision 2 and
 > must re-stat this file before concluding a review.
 
+> **Contract revision 4 — 2026-09-03 (W2, voice and slimming).** Revision 2 fixed the
+> register and revision 3 the gates. The author read chapters 1-5 of the result and still
+> recognised a generated text: prolixity, one paragraph shape repeated, closing beats, lists
+> of three adjectives, concepts either over-explained or waved at as obvious in order to land
+> a close. Revision 4 turns that judgement into per-chapter quotas, measured by
+> `tools/check_register.py` on running prose (fenced code, tables, headings and float
+> captions excluded), and into five rules of composition. The quotas are not taste: each is
+> a count the author can reproduce with one command, and the baseline column is what the
+> book measured on 2026-09-03, before W2 (184,920 prose words over 26 chapters).
+
+| Measure (per chapter, running prose) | Baseline: book total / worst chapter | Quota after W2 |
+|---|---|---|
+| em-dash (—) per 1,000 words | 14.0 / 21.5 (ch04) | ≤ 3 |
+| `honest`, `honestly`, `honesty` used as rhetoric ("passed, honestly", "honest roots", "try it, honestly") | 97 / 12 (ch06) | 0 outside a quotation |
+| the antithesis "X is not Y. It is Z." (a negated copula, then a sentence opening *It is / They are / That is*) | 53 / 5 (ch22, ch26) | ≤ 2 |
+| `nobody`, `no one` | 170 / 15 (ch19) | ≤ 2, never as the last sentence of a paragraph |
+| closing beat: a paragraph of ≥ 3 sentences whose last sentence has ≤ 6 words | 42 / 4 (ch14, ch20) | 0 |
+| coordinated list of ≥ 3 adjectives, or of ≥ 3 abstract nouns, outside a technical enumeration | to be measured by the tool | 0 |
+| tics: `quietly` (41), `load-bearing` (14), `worth naming / stating / noting / saying` (20), `precisely because` (14) | 89 total | 0 |
+| imperative addressed to the reader (*Note, Keep, Read, Name, Take, Suppose, Consider, Remember…*) outside a procedural passage | 150 / 10 (ch03, ch13, ch16) | ≤ 3, and only where the reader performs a step or an arithmetic |
+| staccato: a run of three or more consecutive sentences under ten words in running prose (list items exempt; added 2026-09-04 after the author asked for connectives) | 31 runs / 4 (ch23) | ≤ 1 per chapter, a review item rather than a fatal one: a deliberate anaphoric triplet is allowed once |
+| rhetorical question | 41 / 8 (ch05) | ≤ 2, each answered by the sentence that follows |
+| second person (`you`, `your`) per 1,000 words | 3.7 / 10.1 (ch22) | ≤ 1.5, procedural passages only |
+| chapter length | measured against the editorial baseline | Report chapter-level changes; preserve technical claims, examples, citations and code while removing redundant prose. |
+
+The five rules of composition, each of which the quotas only approximate:
+
+1. **Open on the object.** The first paragraph names the chapter's subject, its perimeter
+   and the quantity at stake. No project clock ("eleven days before tape-out", "at month
+   four"), no scene, no calendar, no question the chapter then answers as if surprised by
+   it. Twenty-one chapters open on a clock or a scene today and are reopened in W2.
+2. **Explained once.** `meta/glossary.md`'s `Introduced` column assigns every term an owner
+   chapter. The owner explains it in full; every other chapter spends one clause and a
+   cross-reference, never a re-explanation and never an allusion to it as obvious used to
+   close a paragraph. Passages the 12-gram scan found repeated across chapters (the MESI
+   walk-through in ch03, ch14 and ch26) stay with the owner and leave the others.
+3. **Cadence.** No run of paragraphs built the same way (thesis, development, beat).
+   Paragraph length varies with what the paragraph carries. A paragraph does not end by
+   restating its first sentence; a section ends when its subject is finished, not on a
+   line meant to be remembered. *(Author, reading the exemplar, 2026-09-04.)* Short
+   sentences separated by full stops are not the target either: where two sentences share
+   a logical relation, one connective carries it (*because*, *so*, *which*, *while*,
+   *since*, *whereas*, *and*), and a subordinate clause is preferred to a sequence of main
+   clauses. What stays forbidden is the filler transition that carries no relation
+   (*moreover*, *it is worth noting*, *note that*): a connective states why two facts
+   stand together, a filler only announces that a sentence follows.
+6. **An example is one computation, stated plainly.** *(Author, 2026-09-04: the Big Bang
+   farm "sembra molto fuori stile".)* A worked figure needs its inputs, one arithmetic step
+   and its result; it does not need a cosmological frame, a farm running since the origin
+   of the universe, or a denominator written out in digits. Where an example piles such
+   devices on a number, the number stays and the devices go; where the devices *are* the
+   example, the example goes and the ledger records what quantity survives elsewhere.
+4. **Length is not paid with variety or with substance.** Numbers, citations, fenced code,
+   cross-references, hedges (G2) and the extended-cast examples (`check_variety`) are
+   invariant under W2. What goes is redundancy, re-derivation another chapter owns,
+   over-explanation of the already-defined, transitions, and the beats.
+5. **Skeleton.** The closing apparatus stays (*In practice*, *Pitfalls*, *Summary*, *Further
+   reading*) because a reference manual wants it predictable. The *Chapter map* becomes one
+   paragraph of prose; *Pitfalls* appears only where at least two real ones exist.
+
+**Author decisions on the exemplar (2026-09-04).** The voice is approved ("mi piace", lexicon
+and style included) with the cadence refinement in rule 3. Interrogative headings become
+assertions throughout. Effect sentences go, and so do over-built examples (rule 6). Unsourced
+generalisations in *Scenario* and *In practice* boxes go. Em-dashes go from headings as well
+as from prose; captions keep theirs. The 26 units run under this contract and pass G.
+
+Before the first W2 unit runs, the contract is proved twice: `check_register.py` is
+negative-controlled (a clean synthetic chapter passes, the same chapter with one seeded
+defect per quota fails, each at the right line), and an editor is given a section carrying
+a hedge to preserve and a number not to touch, with the proposal gated under policy A: the
+gate must block it. A gate that has not been seen to fire is not a gate.
+
 The register is that of a **scientific and editorial manual**: a monograph an engineer
 consults at a desk and a technical publisher would be willing to set. It is not a trade
 book, not a course handout, not a consultant's deck. Four rules follow, and each overrides
@@ -110,7 +182,8 @@ filler transitions.
 2. **Chapter map**: one short paragraph of numbered signposting — "§8.1 defines the
    layered testbench; §8.2 develops the driver–monitor split; §8.5 treats the failure
    modes." Replaces the former "What you will learn" bullet list, which is
-   course-handout apparatus and reads as such.
+   course-handout apparatus and reads as such. *(Revision 4: the map is prose, one
+   paragraph, no bullet list; the bullet form of pass A1 is converted in W2.)*
 3. **Body sections** as per outline_master.md, each with at least one concrete
    example (Scenario box / worked example — formats in example_bank.md).
 4. **In practice** box(es): what teams actually do, including the messy parts —
@@ -118,6 +191,8 @@ filler transitions.
    it is folklore presented as reporting: either cite the corpus source, attribute it to
    the reference SoC as a constructed example, or cut it.
 5. **Pitfalls**: 3-6 numbered common mistakes, each one line of symptom + one of cure.
+   *(Revision 4: the section exists only where at least two real pitfalls exist; a
+   pitfall invented to fill the slot is cut, and the heading with it.)*
 6. **Summary**: 4-7 bullets, heading level `##`. (Renamed from "Key takeaways", which is
    handout vocabulary; the rename also settles the pre-existing `###`/`##` split that
    left the heading at two different levels across the book.)
@@ -992,12 +1067,12 @@ so a threshold on one would be a gate that does not measure what it claims.
 | **G1b** numbers | numeric-literal multiset; no additions under Pass A; removals declared | invented or dropped quantities |
 | **G1c** code | fenced blocks byte-identical, same order | code mangling |
 | **G1d** cross-refs | no additions; removals declared | a false pointer introduced |
-| **G1e** glossary | **per-occurrence subject check inside edited spans.** The count is a tripwire for gross change, not the gate — this guide says elsewhere, of `validation`, that "a count of occurrences proves nothing", and that judgement governs here too | the banned sense of an allowed word |
+| **G1e** glossary | **Mechanical part: a per-term occurrence count, and nothing more.** `check_invariants.py` counts each watched term with a plain case-folded substring count over the prose and compares the two totals: any change in `validation` is fatal under every policy; a change in `verification`, `scoreboard`, `reference model`, `transfer function`, `vacuous`, `waiver`, `irritator` or `sign-off` is reported as a note. It does not look inside an edited span and it cannot see which *sense* a word carries — a paragraph that swaps the banned sense of `validation` for an allowed one, or the reverse, leaves the count unchanged and passes. **The subject check is manual**, performed by reading the edited spans, and this guide says elsewhere, of `validation`, that "a count of occurrences proves nothing" — which is exactly why the count is a tripwire for gross change and the reading is the gate | the banned sense of an allowed word |
 | **G2** hedges | hedge/epistemic multiset; **removals are fatal**, additions are not | **certainty inflation** — the measured, asymmetric defect that G1a–G1e cannot see |
 | **G3** additivity / out-of-span | **Additive passes (B, C): mechanical.** Every diff hunk must be an insertion; a modified line passes only if characters were added and none removed, which is what permits a `[cit:ID]` marker at an offset inside an existing sentence and forbids rewording it. **Pass A: not mechanical** — an approved-span check needs a span list the tool does not hold, so it is enforced by reading the diff against the pre-pass snapshot and declaring the hunk count. | **silent corruption of untouched passages**: the frontier failure mode |
 | **G4** length | words after ÷ words before; growth is the alarm direction | rigour-flavoured padding |
-| **G5** span agreement | independent LOCALISE runs; a span acts only if agreed | over-correction of already-good text |
-| **G6** coverage / anti-copy | every section carries a verdict; a fraction of "untouched" sections is re-inventoried by a fresh agent | **the do-nothing pass** — a byte-identical output passes every other gate perfectly |
+| **G5** span agreement | independent LOCALISE runs; a span acts only if agreed. **Tool: `tools/span_agreement.py` (used in W2 units)** — it takes the two runs' span lists and partitions them into `agreed`, `disputed`, `only_a` and `only_b`; a span acts only if it appears in `agreed`. Two runs agree on a span when they name the same chapter, quote the same `old` bytes verbatim, give the same `reason`, and propose a `new` that matches after collapsing whitespace and dropping one run of trailing sentence punctuation | over-correction of already-good text |
+| **G6** coverage / anti-copy | **Anti-copy half: mechanical. Tool: `tools/check_anticopy.py` — added spans vs cited sources, 12-word shingles; `QUOTE-OK` vs `COPY`.** It word-diffs a pre-pass snapshot against the working tree, widens each added run to its sentence, drops every shingle already present in the snapshot, and reports any run of twelve or more consecutive normalised words shared verbatim with a source the sentence cites; a run inside a quote pair, at most 40 words, whose source is cited in the same sentence is `QUOTE-OK`, anything else is `COPY` and fatal. Negative-controlled twice: a deliberate 18-word run lifted from [cit:P21] into ch01 is reported at the right line, and the same text passes when it was already in the snapshot. Measured boundary: the AXI ordering formula "the interconnect must ensure that it forwards the write data in address order" is 13 words and is **not** verbatim in S17 or S18 — the longest run of it actually printed there is 11 words, so 12 is one word above the longest genuine protocol boilerplate this corpus contains. Two limits it does not hide: an added sentence citing nothing is checked against no source unless `--all-sources` is passed, and a source with no text layer (B5 yields 184 words for 222 pages) is reported as `THIN SOURCE` rather than passed silently. **The coverage half is still a manual tally in the pass report** | **the do-nothing pass** — a byte-identical output passes every other gate perfectly |
 | **G7** deletion budget | largest single contiguous deletion, in words | **passing the register gate by deletion**, which is this pass's form of the preservation trap recorded under Citations |
 | **G8** anchor verification | Pass B only: 100% coverage, per anchor open the page and confirm the quote and that the claim is unchanged | a false anchor; a claim weakened to fit its source |
 
