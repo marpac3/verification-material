@@ -116,6 +116,22 @@ codec, an Ethernet controller and a flash controller — appears where a point
 needs a device the reference SoC does not have. These are introduced where they
 are used.
 
+The DMA engine's parts carry the same names in every chapter. A *transfer
+descriptor* is the record software writes to program one transfer. A *2D row* is
+one line of a two-dimensional transfer, a contiguous run of bytes, and the
+*stride* is the signed address step from the start of one row to the start of
+the next. The *burst splitter* is the DMA stage that splits each transfer into
+bursts that the AXI address rules allow; it sits between the register frontend
+and the AXI backend, and the *4 KB boundary* it must respect is the address line
+that AXI forbids a burst to cross. A *DMA channel* is an independent transfer
+engine inside the DMA, with a state of its own and a share of the AXI backend.
+The design's own code, and the bug report of Chapter 1, keep the burst
+splitter's older name, the midend transfer legalizer, in identifiers such as
+`cg_legalizer_stress` and `midend_txn_done`; the prose never uses it. The radar
+front-end's detector is named by its acronym, CFAR, in every chapter that uses
+it: it is that domain's constant-false-alarm-rate detector, a name the radar
+literature never spells out, and this book follows the literature.
+
 ## Vocabulary
 
 The glossary in Appendix A is binding, not summarising: where it defines a term,
@@ -125,6 +141,16 @@ a design on real hardware — on fabricated silicon, or in the lab on a prototyp
 Everything done on a model, before there is hardware, is **verification**. The
 distinction being drawn is hardware against model, not fabricated against
 programmable.
+
+Each chapter is written to be read on its own. A term the glossary defines is
+recalled, in a clause of its own, the first time a chapter uses it, even when an
+earlier chapter introduced it; the recall paraphrases the glossary row and never
+replaces it. Acronyms the field treats as words (AXI, RTL, UVM, DMA, DUT, FFT,
+ECC) are not expanded. Where one word carries two senses in this book, the
+chapter that uses the second sense says which one it means: *redundancy* is a
+second reading of a specification in Chapter 2 and replicated hardware in
+Chapter 22, *cone of influence* is the logic a proof has to consider in Chapter
+15 and the netlist region a fault can reach in Chapter 22.
 
 ## Quantities
 

@@ -37,7 +37,7 @@ against the approved bilingual glossary.)
 | staccato: a run of three or more consecutive sentences under ten words in running prose (list items exempt; added 2026-09-04 after the author asked for connectives) | 31 runs / 4 (ch23) | ≤ 1 per chapter, a review item rather than a fatal one: a deliberate anaphoric triplet is allowed once |
 | rhetorical question | 41 / 8 (ch05) | ≤ 2, each answered by the sentence that follows |
 | second person (`you`, `your`) per 1,000 words | 3.7 / 10.1 (ch22) | ≤ 1.5, procedural passages only |
-| chapter length | measured against the editorial baseline | Report chapter-level changes; preserve technical claims, examples, citations and code while removing redundant prose. |
+| words, against the W1b-closed baseline | 219,183 after W1 | −15 % to −25 % per chapter (whole-chapter figure, always reported). *Revision 5, 2026-09-06, after U1:* the operative criterion is the weighted working band of `meta/passes/pass_g_voice_slimming.md` §9 D1, measured on the baseline's three masses F/P/U; U1 lands at −8 % to −12 % on the whole chapter and inside the working band on all five chapters |
 
 The five rules of composition, each of which the quotas only approximate:
 
@@ -168,6 +168,67 @@ filler transitions.
 - **A cross-reference is a claim.** "As Chapter 3 showed…" asserts that Chapter 3 showed
   it. Open the chapter and confirm before writing the pointer — a false cross-reference
   is indistinguishable to the reader from a real one, and survives every mechanical check.
+
+> **Contract revision 6 — 2026-09-11 (W6, clarity of sentence and lexicon).** The author read
+> the W3-W5 release and found sentences that keep every proposition and lose the reader, and a
+> lexicon the book takes for granted (`meta/audits/w6_clarity_diagnosis_20260911.md`). Revision 6
+> adds four rules of composition, decides the lexicon of the reference SoC, and adds one gate,
+> `tools/check_clarity.py`. Nothing in revisions 2-5 is withdrawn: the quotas above still hold on
+> the rewritten text and are the brake on prolixity. There is no word target in W6, in either
+> direction: a chapter grows where clarity requires it, the delta is reported, and the only rule
+> on length is the author's ("the right touches": a sentence is rewritten because a reader had to
+> read it twice, a clause is added because a reader could not define the term, and nothing else
+> is touched).
+
+7. **The subject is a named thing.** A sentence does not open with *This* or *That* followed by
+   the verb and nothing that says what *this* is: "This introduces failures" becomes "This shift
+   from tests to rules introduces…". A code identifier does not carry the subject alone; it
+   stands beside its common noun, "the covergroup `cg_2d_4kb`", except where the construct itself
+   is the topic (`dist`, `uvm_agent`). An adjective does not stand for a noun: "Constrained random
+   replaces…" becomes "Constrained-random generation replaces…".
+8. **Explicit relatives, finite tails.** "The boundary the row names is AXI4's" is turned into a
+   sentence with a subject and a verb. What follows a colon is a full clause or a declared list,
+   never the ellipsis an em-dash used to carry.
+9. **One word, one sense, per chapter.** The AXI limit is always *the 4 KB boundary*, the
+   specification's own words; *page*, *frontier* and *frame* leave that sense. *row* takes its
+   qualifier wherever a chapter uses two senses (*plan row*, *2D row*); so do *channel* (*DMA
+   channel*, *AXI write channel*), *solver* (*constraint solver*, *analog solver*), *bound*
+   (*bound into the design*, *the proof bound*), *handle* (*object handle*). *failure* is a
+   failing test; a technique's weakness is a *weakness* or a *failure mode*. Watch-list:
+   row, channel, solver, bound, handle, budget, failure, cover, job.
+10. **The lexicon is explained in the text, in the ways verification books do**
+    (`w6_clarity_diagnosis_20260911.md` §9). *At the owner chapter* the concept comes before the
+    name: "software programs each transfer by writing a small record with source, destination,
+    lengths and strides, the *transfer descriptor*". *In every other chapter* the first use of a
+    non-universal term carries a recall clause in plain words, a repeated one-line description
+    rather than a pointer ("a transfer descriptor, the record that programs one DMA transfer");
+    a pointer, where the full treatment matters, names the section by title. *A contested term*
+    is stipulated once, "in this book X means Y" (as `front/notation.md` does for *validation*).
+    *An abstraction arrives with its instance*: "the accelerator's unit of work is one
+    convolution, programmed through its registers; the book calls it a *convolution job*". One
+    clause per term per chapter, in varied form, and never "see the glossary": the glossary
+    (Appendix A) and the front matter are apparatus, not the explanation.
+
+**Lexicon of the reference SoC (author's decisions, 2026-09-11).** *transfer descriptor* (VMM
+and UVM texts use *descriptor* for a transaction object; the qualifier disambiguates; *descriptor*
+alone after the first use in a chapter); *burst splitter* for the DMA stage between register
+frontend and AXI backend, the specification's word for the operation ("burst splitting", Arm IHI
+0022H.c), replacing *midend legalizer*, *legalize* and *legalization* in prose and in the quoted
+plan rows, while code identifiers (`cg_legalizer_stress`, `midend_txn_done`) keep their names and
+the prose introduces them as the splitter's; *the 4 KB boundary*, explained at first use per
+chapter with both readings of the rule, "every burst must stay inside one 4 KB address region, so
+it never spans two subordinates"; *convolution job* for the accelerator's unit of work, presented
+as such before the short name; *2D row*, *stride*, *DMA channel*, *beat*, *closure metric*,
+*constraint solver*, *plan row*, *canonical bug* each get a glossary row and a recall clause.
+Universal terms exempt from any clause are listed in `meta/glossary_assumed.txt`; common words
+with a technical sense, where the check can only review, in `meta/glossary_review_only.txt`.
+
+**The gate of revision 6** (`tools/check_clarity.py`, negative-controlled in `tools/tests/`):
+one FATAL, a non-universal glossary term used in a chapter that never explains it (no clause, no
+pointer, anywhere in the chapter); everything else is a list the editor and the coordinator read:
+first use unexplained but explained later, sentences opening on *This/That* + verb, code
+identifiers as subject, sentences of 45 words or more, watch-list words used in two senses. The
+quotas of revision 4 may not regress on any rewritten chapter.
 
 ## Chapter structure (mandatory skeleton)
 
