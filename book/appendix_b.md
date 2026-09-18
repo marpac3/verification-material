@@ -65,7 +65,7 @@ This path assumes senior review of the plan and accountability against it at sig
 - **Chapter 16 §16.4** addresses optimism in method selection. Its question 6 addresses nonconvergence, otherwise left until week nine in this scenario.
 - **Chapter 7 §7.4** supplies the sign-off checklist for the plan's last column; reading it during planning exposes fields otherwise left blank.
 
-**Omits the engines themselves.** The reader will specify "formal" without knowing what makes a property converge and "emulation" without understanding the machine queue (§17.5). For a first plan, this path accepts the gap; a second plan requires the engine knowledge addressed by the formal path above.
+**Omits the engines themselves.** The reader will specify "formal" without knowing what makes a property converge and "emulation" without understanding the machine queue (§17.5). For a first plan, this path accepts the gap; a second plan requires the engine knowledge addressed by the path *Formal verification after a decade of simulation* above.
 
 ## Signing off evidence produced by others
 
@@ -93,7 +93,7 @@ This path assumes experience writing test frameworks, running continuous integra
 
 One vocabulary distinction concerns **validation**: the meaning used here excludes the one expressed by "did we build the right thing?". Chapter 20 defines it at §20.1 as checking a design on real hardware rather than on a model; everything before tape-out is *verification*.
 
-**Omits Part IV.** The reader will continue encountering formal verification without a model for it; the formal path is a later step.
+**Omits Part IV.** The reader will continue encountering formal verification without a model for it; the path *Formal verification after a decade of simulation* is a later step.
 
 ## Verification required by a standard
 
