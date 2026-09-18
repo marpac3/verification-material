@@ -6,6 +6,8 @@ becomes Appendix A and constrains the Italian translation.
 | Term | Definition (one line) | Introduced | Italian |
 |---|---|---|---|
 | (test, seed) matrix | What a random regression actually runs — tests as rows, seeds as columns, each cell a run with its own outcome. | ch12 | matrice (test, seed) |
+| 2D row | One line of a two-dimensional DMA transfer: a contiguous run of bytes. Consecutive rows start one stride apart, and each row is split into bursts on its own. | ch01 | riga di un trasferimento 2D |
+| 4 KB boundary | The address line every 4096 bytes that an AXI burst must not cross (Arm IHI 0022H.c §A3.4.1): every burst stays inside one 4 KB address region, so it never spans two subordinates. | ch01 | confine di 4 KB |
 | action (PSS) | Unit of behaviour: atomic when it maps to one operation of the system, compound when it encapsulates a flow of others. | ch09 | action (unità di comportamento in PSS) |
 | activation condition | The part of a flow rule saying when tracking starts, such as the cycle a key is loaded. Without it a rule can forbid the design's intended behavior. | ch23 | condizione di attivazione |
 | active vs passive agent | Active instantiation emulates a device and drives it; passive builds only the monitor and observes — the switch that carries a block environment into a system one. | ch10 | agent attivo e agent passivo |
@@ -38,6 +40,7 @@ becomes Appendix A and constrains the Italian translation.
 | AXI (advanced extensible interface) | The high-throughput AMBA interface: separate address, data and response channels, responses allowed out of order, identifiers separating concurrent streams. | ch01 | AXI (interfaccia AMBA a canali indipendenti) |
 | base failure rate | Rate carried by each failure mode of each element, computed from design and technology data. Architectural metrics combine these rates, so a detected fraction weights them. | ch22 | tasso di guasto di base |
 | batching | Covering many design cycles per host interaction so the link is crossed once per transaction; the speedup ceiling that follows is fixed by the interaction's own cost. | ch17 | batching (raggruppamento delle transazioni) |
+| beat | One data transfer within an AXI burst; a burst of 256 beats moves 256 data words. | ch01 | beat (trasferimento elementare di un burst) |
 | bind | Construct instantiating a checker into a design scope without modifying the design's source. | ch11 | bind |
 | binding constraint | The activity a doubled budget would be spent on. For verification it has migrated over decades toward deciding what to check, and it differs per level rather than globally. | ch26 | vincolo dominante |
 | bins | Counters over value sets — executable equivalence classes. | ch06 | bins (contenitori di conteggio) |
@@ -51,7 +54,9 @@ becomes Appendix A and constrains the Italian translation.
 | bug curve | Bug discoveries (or open/closed counts) plotted over time; the discipline's main convergence instrument. | ch07 | curva dei bug |
 | bug escape | Design flaw surviving verification into a later stage. | ch01 | bug sfuggito alla verifica |
 | bug footprint | Region of the coverage space a bug occupies. | ch06 | impronta del bug |
+| burst splitter | The DMA stage between the register frontend and the AXI backend that splits each transfer into bursts obeying the AXI address rules, the 4 KB boundary above all. Formerly called the midend legalizer; code identifiers keep the old name. | ch01 | divisore di burst |
 | campaign | Purpose-built run on no clock: launched for a stated reason, owned by someone, producing a written result, then stopping. | ch12 | campagna |
+| canonical bug | The book's recurring defect for one block, returned to whenever that block is the example. The DMA's is the main instance: the burst splitter mis-splits a negative-stride 2D row that crosses the 4 KB boundary, and only while the other DMA channel is active. | ch01 | bug canonico |
 | capability tier | One level of a graded adversary list, from unprivileged software up to invasive physical access. Exposing a physical mechanism to software moves a claim between tiers. | ch23 | livello di capacità |
 | CDC (clock-domain crossing) | Signal whose producing and consuming flip-flops run on clocks with no fixed phase relationship, so the sampling instant is unpredictable. | ch13 | CDC (attraversamento di dominio di clock) |
 | CDG | Coverage-directed test generation via feedback from coverage results to stimulus. | ch06 | CDG (generazione dei test guidata dalla copertura) |
@@ -61,6 +66,7 @@ becomes Appendix A and constrains the Italian translation.
 | clock domain | Every flip-flop taking its edge from one clock source, or from clocks derived from it; three clock sources need not give three domains. | ch13 | dominio di clock |
 | clock snooping | Taking a clock from inside the design instead of generating one in the environment. It yields fewer failing tests, a faster bring-up, and hidden clocking bugs. | ch24 | clock snooping (clock prelevato dal design) |
 | clocking block | Declaration fixing the moment interface signals are sampled or driven, so the testbench cannot race the design it watches. | ch08 | clocking block |
+| closure metric | The evidence a plan row names as what closes it: a covergroup at 100 %, a proven property, a passed test, a signed review. | ch05 | metrica di chiusura |
 | coarse-grained checking | What an abstract model of a hardware and software interface supports: the basic function is kept, everything finer is discarded, so only use cases at that granularity are checkable. | ch18 | controllo a grana grossa |
 | common timestamp source | Free-running counter software can read and monitors can sample, finer than the events to be ordered; without one, separate records of a failure cannot be merged. | ch18 | sorgente comune di marca temporale |
 | common-mode error | The same specification misreading encoded in both design and oracle, making a bug structurally invisible. | ch03 | errore di modo comune |
@@ -73,7 +79,9 @@ becomes Appendix A and constrains the Italian translation.
 | connect module | Element a simulator inserts automatically where a continuous port meets a discrete one, chosen from the disciplines and the directions involved. | ch21 | connect module (modulo di conversione) |
 | connectivity checking | Proof that every row of an integration table is implemented: named source to named destination, at the declared latency, under the declared enabling condition. | ch15 | verifica di connettività |
 | constrained-random | Automatic generation of legal-but-unlikely stimulus under constraints. | ch01 | constrained-random (stimolo casuale vincolato) |
+| constraint solver | The engine of a constrained-random generator that finds values satisfying every active constraint; not the analog solver of Chapter 21. | ch09 | risolutore di vincoli |
 | controllability | The ability to steer a design into a given internal condition using only drivable interfaces. | ch03 | controllabilità |
+| convolution job | The neural accelerator's unit of work: one convolution, programmed by software through the accelerator's registers (operand addresses, weight precision, tensor size) and run to completion. | ch01 | job di convoluzione |
 | corner (engine-selection sense) | Several individually rare conditions holding at once; simulation cost follows the product of their probabilities, while a proof engine is indifferent to that rarity. | ch16 | corner (congiunzione di condizioni rare) |
 | correlated errors | One misreading of one recurring pattern, reproduced identically across a generated batch. Sampling estimates nothing about them, so a batch is reviewed whole or rejected whole. | ch25 | errori correlati |
 | correlation expiry trigger | Named event that voids a correlation result: a schematic or specification revision, a new operating condition, a retuned parameter, or a model edited during debug. | ch21 | evento di scadenza della correlazione |
@@ -89,7 +97,6 @@ becomes Appendix A and constrains the Italian translation.
 | covergroup | SystemVerilog container encapsulating a coverage model specification. | ch06 | covergroup |
 | coverpoint | One observed variable/expression partitioned into bins. | ch06 | coverpoint |
 | cross coverage | Cartesian combinations of coverpoints. | ch06 | cross coverage (copertura incrociata) |
-| the crunch | The end-of-project concentration of the hardest verification work against an immovable date. | ch04 | la stretta finale |
 | cutpoint | Signal cut from its fan-in so it may take any value; an over-approximation that keeps proofs valid and can invent failures. | ch14 | cutpoint (segnale liberato) |
 | dangerous-undetected fault | Fault that corrupted an output while the mechanism stayed silent: the class a campaign exists to find, and the one that must be fixed or argued away. | ch22 | guasto pericoloso non rilevato |
 | data coherency (crossing sense) | The requirement that several bits crossing together be observed as a value the source actually drove; separate from resolving metastability on each bit. | ch13 | coerenza dei dati (nell'attraversamento) |
@@ -111,6 +118,7 @@ becomes Appendix A and constrains the Italian translation.
 | disposition | The recorded decision on an open item (fix / waive-as-errata / defer with justification). | ch07 | disposizione (decisione registrata sul punto aperto) |
 | distribution constraint (dist) | Weights over values and ranges that move probability mass without changing the legal set — and silently forbid whatever the list omits. | ch09 | vincolo di distribuzione (dist) |
 | DMA (direct memory access) | Engine moving data between memories on its own, without the processor copying it; the recurring example block of the book. | ch01 | DMA (accesso diretto alla memoria) |
+| DMA channel | One of the two independent transfer engines of the DMA, each with its own descriptor and state, both sharing the AXI backend. Not an AXI channel (write address, write data, response). | ch01 | canale DMA |
 | double assignment | Deliberately giving one feature two plan rows with two metrics, one closed by proof and one by coverage, because the engines fail differently. | ch16 | doppia assegnazione |
 | DPI (direct programming interface) | The SystemVerilog mechanism for calling C from the language and being called back, over a restricted set of argument types. | ch17 | DPI (interfaccia di programmazione diretta) |
 | drain time | Grace period after the last objection drops, so transactions still in flight reach the checkers. | ch10 | drain time (tempo di svuotamento) |
@@ -250,6 +258,7 @@ becomes Appendix A and constrains the Italian translation.
 | peek / poke | Back-door sample or deposit that bypasses a field's behaviour entirely, unlike back-door read and write, which mimic the front door's side effects. | ch10 | peek / poke (lettura e deposito diretti in back-door) |
 | phasing | The standard ordered steps every component runs together — build top-down, connect bottom-up, run concurrently — so independently written environments can be combined. | ch10 | phasing (successione ordinata delle fasi) |
 | PHY (physical layer) | Block driving and receiving the electrical signaling of a link, usually analog, hence modeled rather than simulated at gate level. | ch18 | PHY (blocco di livello fisico) |
+| plan row | One line of the verification plan: a feature, its attributes, a pass/fail criterion, a method and one closure metric. | ch05 | riga del piano di verifica |
 | plausible by construction | The property of an artifact from a system whose objective is a convincing continuation of its input: correctness is a frequent by-product rather than the target. | ch25 | plausibile per costruzione |
 | PLL (phase-locked loop) | Analog block synthesizing an on-chip clock from a reference; in the lab nothing digital runs before it has locked. | ch20 | PLL (anello ad aggancio di fase) |
 | poka-yoke | Mistake-proofing a human process by reducing it to foolproof steps. | ch02 | poka-yoke |
@@ -286,7 +295,7 @@ becomes Appendix A and constrains the Italian translation.
 | reasoning trace | Record linking the intent an agent was given to the action it took, so a reviewer audits the decision rather than only the output. | ch25 | traccia del ragionamento |
 | recipe (post-silicon sense) | The tuned combination of temperature, supply, part, elapsed time and feature set that brings a failure back on demand. Lacking one is not a property of the bug. | ch20 | ricetta (condizioni che riproducono il guasto) |
 | reconvergence model | Verification as reconciliation of a transformation and an independent second path sharing a common origin. | ch02 | modello di riconvergenza |
-| redundancy (verification sense) | Independent second interpretation of the specification by a different person, used as the error-catching mechanism. | ch02 | ridondanza (nel senso della verifica) |
+| redundancy (verification sense) | A second, independent route to the same fact, used as the error-catching mechanism: a second interpretation of the specification by a different person, or a second access path to the same value. | ch02 | ridondanza (nel senso della verifica) |
 | redundant-state invariant | Assertion that two independently maintained representations of one fact agree — where silent corruption is most often caught. | ch11 | invariante fra stati ridondanti |
 | reference model | An independent executable of the specification, taken as golden, run on the same stimulus and compared with the design. | ch03 | modello di riferimento |
 | register app | Check proving RTL against a machine-readable register description: reset values, decode, and each field's read and write behavior for every value written. | ch15 | register app (applicazione sui registri) |
@@ -297,7 +306,7 @@ becomes Appendix A and constrains the Italian translation.
 | reset synchronizer | Structure asserting reset asynchronously and releasing it on a clock edge, so that no flop meets the release inside its recovery window. | ch13 | sincronizzatore di reset |
 | residual fault | A fault that violates the safety goal where a mechanism *is* present, but which falls outside what that mechanism covers. | ch22 | guasto residuo |
 | respin | New fabrication cycle with corrected masks forced by an escape. | ch01 | respin (nuovo giro di fabbricazione) |
-| responder | Agent that answers requests the design initiates; because its reply is under testbench control it is a driver, not a monitor. | ch08 | responder (agente che risponde alle richieste del progetto) |
+| responder | Agent that answers requests that the design initiates; because its reply is under testbench control it is a driver, not a monitor. | ch08 | responder (agente che risponde alle richieste del progetto) |
 | restore-period condition | Predicate a retention strategy requires throughout its restore window. When it lapses the restore fails and the retained value is lost: the canonical wake-race escape. | ch19 | condizione del periodo di ripristino |
 | restrict | Directive constraining formal computation only; simulators ignore it. | ch11 | restrict |
 | retention | Enhanced functionality on selected sequential elements so their values survive the power-down of the primary supply. | ch19 | retention (mantenimento dello stato) |
@@ -361,6 +370,7 @@ becomes Appendix A and constrains the Italian translation.
 | static verification | Analysis of the design description alone, needing no stimulus and no stated expectation, exhaustive over structure and silent about what the design computes. | ch13 | verifica statica |
 | stepping | A fabrication cycle with corrected masks — what Chapter 1 calls a **respin**, in the vocabulary of the lab. The two words denote the same event; *stepping* is how a bring-up team names it. | ch20 | stepping (nuova maschera, nel lessico del laboratorio) |
 | stream key | The tuple naming one ordered stream in a scoreboard: one dimension per independent source of concurrency, and computable from what the observer sees. | ch08 | chiave di flusso |
+| stride | The signed address step from the start of one 2D row to the start of the next; a negative stride walks memory downwards. | ch01 | passo fra le righe (stride) |
 | strobe time | Instant at which two copies of a design are compared during injection. It fixes what a campaign measures, alongside the choice of compared signals. | ch22 | istante di confronto (strobe) |
 | structural pruning | Removing from a fault list every site outside the cone of any observation point: an argument that holds under any stimulus, and cheaper than asking an engine. | ch22 | potatura strutturale |
 | stuck-at fault | The conventional model of a permanent defect: a node held at zero or at one. | ch22 | guasto stuck-at |
@@ -372,6 +382,7 @@ becomes Appendix A and constrains the Italian translation.
 | temporal merge | Combining repeated executions of one process against one unchanged design; with the spatial case, one of the two merges the standard treats as mechanical. | ch16 | merge temporale |
 | test realization | Mapping abstract actions onto target code for one platform: portable describes the model, not the effort. | ch09 | realizzazione del test |
 | test selection | Filtering tests before simulating them, on the hypothesis that dissimilar tests hit dissimilar coverage. | ch12 | selezione dei test |
+| the crunch | The end-of-project concentration of the hardest verification work against an immovable date. | ch04 | la stretta finale |
 | thousandfold test | Asking whether a claim would survive engines a thousand times better. It separates a property of the problem from a limit of the tooling of the day. | ch26 | test del fattore mille |
 | threat model | Versioned document of assets, adversary capabilities and trust boundaries whose rows become checkable claims. A functional specification alone gives no reason to ask its questions. | ch23 | modello delle minacce |
 | tier | An admission policy with a runtime budget attached — what earns a place in a given regression run, not when that run is scheduled. | ch12 | tier (fascia di ammissione con budget di tempo) |
@@ -386,6 +397,7 @@ becomes Appendix A and constrains the Italian translation.
 | transaction level | Abstraction whose unit is a whole operation — injected into the running simulation, terminated later by an observed result — rather than the design's clock cycles. | ch08 | livello di transazione |
 | transactor (bus-functional model) | Component converting between pins and transactions: every physical-level operation of one interface encapsulated in one place, so everything above it speaks transactions. | ch08 | transactor (modello funzionale del bus) |
 | transactor boundary | The cut between untimed host code and timed synthesized logic. Where it falls, rather than the platform's clock rate, decides the throughput actually obtained. | ch17 | confine del transactor |
+| transfer descriptor | The record software writes to program one DMA transfer: source and destination addresses, lengths, strides and channel. VMM and UVM texts use "descriptor" for a transaction object; this book always means the DMA record. | ch01 | descrittore di trasferimento |
 | transfer function | Testbench model reproducing the design's data transformation to predict its output: written by you, not golden, and as capable of misreading the specification as the design is. | ch08 | funzione di trasferimento |
 | triage | Turning failures into facts before debugging any: deduplicate by signature, classify as design bug, testbench bug or environment failure, then assign. | ch12 | triage (classificazione dei fallimenti) |
 | trigger-based debug | Debug built on state machines compiled into the platform that recognize an event sequence and start or stop capture, replacing waveform dumping bounded by a finite buffer. | ch17 | debug a trigger |
