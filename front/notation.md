@@ -127,10 +127,7 @@ that AXI forbids a burst to cross. A *DMA channel* is an independent transfer
 engine inside the DMA, with a state of its own and a share of the AXI backend.
 The design's own code, and the bug report of Chapter 1, keep the burst
 splitter's older name, the midend transfer legalizer, in identifiers such as
-`cg_legalizer_stress` and `midend_txn_done`; the prose never uses it. The radar
-front-end's detector is named by its acronym, CFAR, in every chapter that uses
-it: it is that domain's constant-false-alarm-rate detector, a name the radar
-literature never spells out, and this book follows the literature.
+`cg_legalizer_stress` and `midend_txn_done`; the prose never uses it.
 
 ## Vocabulary
 

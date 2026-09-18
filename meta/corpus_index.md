@@ -145,7 +145,7 @@ enforced by `tools/check_anchors_join.py`.
 | S12 | standards/accellera_cdc_rdc_standard_v1_0_2026.pdf | 120 | Accellera CDC/RDC IP Abstraction Standard v1.0, March 2026 |
 | S13 | standards/accellera_uvm_ms_standard_v1_0_2025.pdf | 53 | Accellera UVM Mixed-Signal Standard v1.0, Feb 2025 |
 | P22 | papers/arxiv_2510_15906_fvdebug_llm_formal_rca.pdf | 28 | FVDebug (NVIDIA): LLM root-cause analysis of formal failures, DVCon US 2026 3rd best paper |
-| P23 | papers/arxiv_2512_23189_agentic_eda_survey.pdf | 9 | Agentic EDA survey, L1-L4 autonomy taxonomy (2026) |
+| P23 | papers/arxiv_2512_23189_agentic_eda_survey.pdf | 9 | Agentic EDA survey, L0-L4 autonomy taxonomy (2026) |
 | P24 | papers/arxiv_2501_09655_llm_for_eda_survey.pdf | 21 | Survey of LLMs for EDA (Jan 2025) |
 | P25 | papers/arxiv_2604_27013_bzl_riscv_vv_in_the_loop.pdf | 7 | BZL V&V-in-the-loop for RISC-V, holistic methodology (2026) |
 
